@@ -7,11 +7,11 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import static group.msg.jpowermonitor.agent.Utils.MATH_CONTEXT;
 
 /**
  * Utility class for all CPU and thread time/power related tasks
@@ -20,6 +20,7 @@ import static group.msg.jpowermonitor.agent.Utils.MATH_CONTEXT;
  */
 @Slf4j
 public class CpuAndThreadUtils {
+    private static final MathContext MATH_CONTEXT = new MathContext(30, RoundingMode.HALF_UP);
 
     @NotNull
     static ThreadMXBean initializeAndGetThreadMxBeanOrFailAndQuitApplication() {

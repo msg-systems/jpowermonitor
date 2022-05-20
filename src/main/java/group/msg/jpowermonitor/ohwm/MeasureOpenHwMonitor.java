@@ -3,6 +3,7 @@ package group.msg.jpowermonitor.ohwm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.JPowerMonitorException;
+import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.config.PathElement;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
@@ -80,7 +81,7 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
         log.trace("Value: {} -> {}", pathElement, elem);
         String[] valueAndUnit = elem.getValue().split("\\s+");// (( "5,4 W" ))
         BigDecimal value = new BigDecimal(valueAndUnit[0].replace(',', '.').trim());
-        String unit = valueAndUnit[1].trim();
+        Unit unit = Unit.fromValue(valueAndUnit[1].trim());
         return new DataPoint(String.join("->", pathElement.getPath()), value, unit, time);
     }
 

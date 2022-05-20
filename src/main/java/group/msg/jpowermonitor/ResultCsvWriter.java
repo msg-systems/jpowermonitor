@@ -89,9 +89,8 @@ public class ResultCsvWriter {
         }
     }
 
-    // TODO remove static again here!
     public static String createCsvEntryForDataPoint(@NotNull DataPoint dp, String namePrefix, String testName) {
-        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), namePrefix + testName, dp.getName(), formatNumber(dp.getValue()), dp.getUnit(), NEW_LINE);
+        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), namePrefix + testName, dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
     }
 
     public void writeToResultCsv(String testName, SensorValue sensorValue) {
@@ -121,9 +120,9 @@ public class ResultCsvWriter {
     }
 
     @NotNull
-    private static String formatNumber(BigDecimal val) {
+    private String formatNumber(BigDecimal val) {
         return DECIMAL_FORMAT.format(val);
-    }// TODO remove static again here!
+    }
 
     private void appendToFile(@NotNull Path path, @NotNull String lineToAppend) {
         try {

@@ -1,5 +1,6 @@
 package group.msg.jpowermonitor.dto;
 
+import group.msg.jpowermonitor.agent.Unit;
 import lombok.Builder;
 import lombok.Value;
 
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 public class SensorValue implements PowerQuestionable {
     String name;
     BigDecimal value;
-    String unit;
+    Unit unit;
     BigDecimal powerInIdleMode;
     LocalDateTime executionTime;
     long durationOfTestInNanoSeconds;

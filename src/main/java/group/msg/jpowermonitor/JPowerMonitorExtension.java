@@ -1,5 +1,6 @@
 package group.msg.jpowermonitor;
 
+import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.PowerQuestionable;
 import group.msg.jpowermonitor.dto.SensorValue;
@@ -190,7 +191,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
 
     private DataPoint calculateAvg(@NotNull List<DataPoint> dataPoints) {
         if (dataPoints.size() == 0) {
-            return new DataPoint("No Datapoints for Average", BigDecimal.ZERO, "", LocalDateTime.now());
+            return new DataPoint("No Datapoints for Average", BigDecimal.ZERO, Unit.NONE, LocalDateTime.now());
         }
         BigDecimal avg = dataPoints.stream()
             .peek(dp -> log.trace("dp: {}", dp))
