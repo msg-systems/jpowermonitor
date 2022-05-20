@@ -14,10 +14,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class CsvMeasurementsReader {
-    
     private static final Charset DEFAULT_ENCODING = StandardCharsets.ISO_8859_1;
     private static final String CSV_DELIMITER = ",";
     private static final Set<String> columnsFromInterest = Set.of("Date", "Time", "\"CPU Package Power [W]\"", "\"Total System Power [W]\"");
@@ -29,8 +29,8 @@ public class CsvMeasurementsReader {
         validateMeasurementsCsvFile(measurementsCsvFilePath);
     }
 
-    public static void main(String[] args) {
-        CsvMeasurementsReader cmr = new CsvMeasurementsReader("C:\\Users\\deinerj\\Documents\\GreenCoding\\hwidefault.CSV");
+    public static void main(String[] args) throws InterruptedException {
+        CsvMeasurementsReader cmr = new CsvMeasurementsReader("hwidefault.CSV"); // relative path
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
@@ -39,12 +39,8 @@ public class CsvMeasurementsReader {
             }
         };
         Timer timer = new Timer();
-        timer.schedule(tt,10000L, 10000L);
-        try {
-            Thread.sleep(31000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        timer.schedule(tt, 10000L, 10000L);
+        TimeUnit.SECONDS.sleep(31);
         tt.cancel();
         timer.cancel();
         timer.purge();
@@ -81,7 +77,7 @@ public class CsvMeasurementsReader {
         String headerLine = reader.readLine();
         log.debug(headerLine);
         String[] headers = headerLine.split(CSV_DELIMITER);
-        columnMapping  = new HashMap<>();
+        columnMapping = new HashMap<>();
         for (int i = 0; i < headers.length; i++) {
             if (columnsFromInterest.contains(headers[i])) {
                 log.info("Found columnFromInterest {} at index {}", headers[i], i);

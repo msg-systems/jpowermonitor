@@ -1,9 +1,11 @@
 package group.msg.jpowermonitor.dto;
 
+import group.msg.jpowermonitor.agent.Unit;
+
 public interface PowerQuestionable {
-    String getUnit();
+    Unit getUnit();
 
     default boolean isPowerSensor() {
-        return "W".equals(getUnit());
+        return Unit.WATT.equals(getUnit());
     }
 }

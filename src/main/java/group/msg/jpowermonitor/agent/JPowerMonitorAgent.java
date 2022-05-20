@@ -9,7 +9,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static group.msg.jpowermonitor.agent.Utils.SEPARATOR;
+import static group.msg.jpowermonitor.agent.ResultsWriter.SEPARATOR;
+
 
 /**
  * Implements java agent to introspect power consumption of any java application.

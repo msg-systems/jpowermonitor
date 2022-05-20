@@ -4,12 +4,13 @@ import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.MethodActivity;
 import group.msg.jpowermonitor.dto.Quantity;
-import group.msg.jpowermonitor.util.DataPointUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ThreadMXBean;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,24 +20,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static group.msg.jpowermonitor.agent.MeasurePower.getCurrentCpuPowerInWatts;
-import static group.msg.jpowermonitor.agent.Utils.MATH_CONTEXT;
-import static group.msg.jpowermonitor.agent.Utils.UNIT_JOULE;
-import static group.msg.jpowermonitor.agent.Utils.UNIT_WATTS;
 
 @Slf4j
 public class PowerStatistics extends TimerTask {
 
     private static final String CLASS_METHOD_SEPARATOR = ".";
-
-    private final AtomicReference<DataPoint> energyConsumptionTotalInJoule = new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, UNIT_JOULE, LocalDateTime.now()));
+    private static final MathContext MATH_CONTEXT = new MathContext(30, RoundingMode.HALF_UP);
+    private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
+        new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now()));
     private final Map<Long, Long> threadsCpuTime = new HashMap<>();
     private final List<Activity> recentEnergyConsumption = Collections.synchronizedList(new LinkedList<>());
-
-
     private final long measurementInterval;
     private final long gatherStatisticsInterval;
     private final BigDecimal activityToEnergyRatio;
@@ -47,7 +45,9 @@ public class PowerStatistics extends TimerTask {
     public PowerStatistics(long measurementInterval, long gatherStatisticsInterval, long pid, ThreadMXBean threadMXBean, Set<String> packageFilter) {
         this.measurementInterval = measurementInterval;
         this.gatherStatisticsInterval = gatherStatisticsInterval;
-        this.activityToEnergyRatio = BigDecimal.valueOf(((double) this.gatherStatisticsInterval) / ((double) this.measurementInterval));
+        this.activityToEnergyRatio = measurementInterval > 0 ?
+            new BigDecimal(this.gatherStatisticsInterval).divide(new BigDecimal(this.measurementInterval), MATH_CONTEXT) :
+            BigDecimal.ZERO;
         this.pid = pid;
         this.threadMXBean = threadMXBean;
         PowerStatistics.packageFilter = packageFilter;
@@ -67,7 +67,7 @@ public class PowerStatistics extends TimerTask {
             duration += gatherStatisticsInterval;
             // Sleep for statisticsInterval, e. g. 10 ms
             try {
-                Thread.sleep(gatherStatisticsInterval);
+                TimeUnit.MILLISECONDS.sleep(gatherStatisticsInterval);
             } catch (InterruptedException ex) {
                 log.error(ex.getLocalizedMessage(), ex);
             }
@@ -77,8 +77,8 @@ public class PowerStatistics extends TimerTask {
         // It's fine to treat power and energy as equal here because power is measured each second (1 joule = 1 watt / second)
         //TODO proper conversion
         DataPoint currentPower = getCurrentCpuPowerInWatts();
-        DataPoint currentEnergy = DataPointUtil.cloneWithNewUnit(currentPower, UNIT_JOULE);
-        energyConsumptionTotalInJoule.getAndAccumulate(currentEnergy, DataPointUtil::add);
+        DataPoint currentEnergy = cloneDataPointWithNewUnit(currentPower, Unit.JOULE);
+        energyConsumptionTotalInJoule.getAndAccumulate(currentEnergy, this::addDataPoint);
 
         // CPU time for each thread
         long totalApplicationCpuTime = CpuAndThreadUtils.getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(threadMXBean, threadsCpuTime, threads);
@@ -132,8 +132,8 @@ public class PowerStatistics extends TimerTask {
             long threadId = entry.getKey();
 
             for (MethodActivity activity : entry.getValue()) {
-                Quantity methodPower = new Quantity(powerPerApplicationThread.get(threadId).multiply(activityToEnergyRatio), UNIT_WATTS);
-                Quantity methodEnergy = new Quantity(methodPower.getValue().multiply(BigDecimal.valueOf(measurementInterval)).divide(BigDecimal.valueOf(1000L), MATH_CONTEXT), UNIT_JOULE);
+                Quantity methodPower = new Quantity(powerPerApplicationThread.get(threadId).multiply(activityToEnergyRatio), Unit.WATT);
+                Quantity methodEnergy = new Quantity(methodPower.getValue().multiply(BigDecimal.valueOf(measurementInterval)).divide(BigDecimal.valueOf(1000L), MATH_CONTEXT), Unit.JOULE);
 
                 if (methodEnergy.getValue().signum() > 0) {
                     activity.setRepresentedQuantity(methodEnergy);
@@ -162,4 +162,52 @@ public class PowerStatistics extends TimerTask {
     public long getPid() {
         return pid;
     }
+
+
+    /**
+     * Checks if two <code>DataPoint</code> instances are addable
+     *
+     * @param dp1 <code>DataPoint</code>
+     * @param dp2 <code>DataPoint</code>
+     * @return <code>true</code>, if addable
+     */
+    public boolean areDataPointsAddable(@NotNull DataPoint dp1, @NotNull DataPoint dp2) {
+        log.trace("dp1 = {}, dp2 = {}", dp1, dp2);
+        if (dp1.getUnit() == null || dp2.getUnit() == null
+            || dp1.getValue() == null || dp2.getValue() == null
+            || !dp1.getUnit().equals(dp2.getUnit())) {
+            log.error("not addable: dp1 = {}, dp2 = {}", dp1, dp2);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Add the values of multiple <code>DataPoint</code> instances - if units match<br>
+     * First <code>DataPoint</code> in <code>dataPoints</code> is reference for unit
+     *
+     * @param dataPoints <code>DataPoint</code> instances to sum up values
+     * @return sum of all given <code>dataPoints</code> with same unit
+     */
+    public DataPoint addDataPoint(@NotNull DataPoint... dataPoints) {
+        if (dataPoints == null || dataPoints.length < 2) {
+            throw new IllegalArgumentException("dataPoints must contain at least two elements!");
+        }
+        DataPoint reference = dataPoints[0];
+        AtomicReference<BigDecimal> sum = new AtomicReference<>(BigDecimal.ZERO);
+        Arrays.stream(dataPoints).filter(dp -> areDataPointsAddable(reference, dp)).forEach(dp -> sum.getAndAccumulate(dp.getValue(), BigDecimal::add));
+        return new DataPoint(reference.getName(), sum.get(), reference.getUnit(), LocalDateTime.now());
+    }
+
+    /**
+     * Clones <code>DataPoint</code> but with new <code>unit</code>
+     *
+     * @param dp   <code>DataPoint</code> to clone
+     * @param unit new unit
+     * @return <code>DataPoint</code> with new <code>unit</code>
+     */
+    public DataPoint cloneDataPointWithNewUnit(@NotNull DataPoint dp, @NotNull Unit unit) {
+        return new DataPoint(dp.getName(), dp.getValue(), unit, dp.getTime());
+    }
+
 }
