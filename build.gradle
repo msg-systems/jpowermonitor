@@ -1,0 +1,45 @@
+plugins {
+    id 'com.adarshr.test-logger' version "$testLoggerPluginVersion"
+    id 'com.github.ben-manes.versions' version "$versionsPluginVersion"
+    id "io.freefair.lombok" version "$lombokPluginVersion"
+    id 'java'
+    id 'maven-publish'
+    id 'java-library'
+    id "com.github.johnrengelman.shadow" version "$shadowPluginVersion"
+}
+
+group = 'group.msg'
+version = rootProject.file('version.txt').text.trim()
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+    implementation(
+        [group: 'org.apache.httpcomponents', name: 'httpclient', version: httpclientVersion],
+        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatatypeJsr310Version],
+        [group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion],
+        [group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion],
+        [group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion],
+        [group: 'org.reflections', name: 'reflections', version: reflectionsVersion],
+    )
+    compileOnly(
+        [group: 'org.jetbrains', name: 'annotations', version: jetbrainsAnnotationsVersion],
+    )
+}
+
+apply from: "gradle/test-config.gradle"
+apply from: "gradle/jar.gradle"
+apply from: "gradle/dependencyUpdates.gradle"
+apply from: "gradle/artifactory.gradle"
+apply from: "gradle/dist.gradle"
+
+// --------------------- shadowJar
+shadowJar {
+    exclude("*.yaml")
+    exclude("logback.xml")
+}

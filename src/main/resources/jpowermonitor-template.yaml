@@ -1,0 +1,47 @@
+!!group.msg.jpowermonitor.config.JPowerMonitorConfig
+# Number of initial calls to open hardware monitor for measuring the power consumption in idle mode (without running any tests)
+initCycles: 10
+# Sampling interval in milliseconds for the initialization period. This is the interval the data source for the sensor values is questioned for new values while measuring idle energy.
+# Should be set longer than the normal sampling interval! Too short intervals also affect the energy consumption!
+samplingIntervalForInitInMs: 1000
+# Calm down after each test for a few milliseconds: otherwise previous tests may interfere results of current test.
+calmDownIntervalInMs: 1000
+# The percentage of samples to discard from the beginning of measurement series: e.g. if 100 samples were taken and this value is set to 8, then the first 8 samples are not considered.
+percentageOfSamplesAtBeginningToDiscard: 20
+# Sampling interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
+# Too short intervals also affect the energy consumption!
+samplingIntervalInMs: 300
+# ------------------------------------------------
+# configuration for accessing open hardware monitor
+openHardwareMonitor:
+  # URL to open hardware monitor (** started in administrator mode **)
+  url: 'http://localhost:8085'
+  # The paths define the path to the leaf node underneath the root 'Sensor' node in Open Hardware Monitor to access and store with every sample.
+  # The more paths defined (no more than about 10), the greater the impact on power consumption, since the values must be extracted from the json data.
+  paths:
+    - { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Package' ], energyInIdleMode: } # if energyInIdleMode is specified, it does not need to be measured before each test.
+    #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Cores' ], energyInIdleMode: 9.5 }
+    #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
+    #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
+# ------------------------------------------------
+# recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
+csvRecording:
+  # if specified, the results for every test are appended to a csv file.
+  # On Windows: the file must not be opened in Excel in parallel!
+  resultCsv: 'energyconsumption.csv'
+  # if specified, all single measurements are recorded/appended in this csv.
+  # On Windows: the file must not be opened in Excel in parallel!
+  measurementCsv: 'measurement.csv'
+# ------------------------------------------------
+# configuration for JavaAgent
+javaAgent:
+  # Filter power and energy for methods starting with this packageFilter names
+  packageFilter: [ 'com.msg', 'de.gillardon' ]
+  # Energy measurement interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
+  # Too short intervals also affect the energy consumption!
+  measurementIntervalInMs: 1000
+  # Gather statistics interval in milliseconds. This is the interval the stacktrace of each active thread is questioned for active methods.
+  # Too short intervals also affect the energy consumption!
+  gatherStatisticsIntervalInMs: 10
+  # Write energy measurement results to CSV files interval in seconds.
+  writeEnergyMeasurementsToCsvIntervalInS: 30

@@ -1,0 +1,46 @@
+javadoc {
+    classpath = configurations.compileClasspath
+    title = "${distName} API Documentation $version"
+    failOnError = true
+    source = sourceSets.main.allJava
+    options.optionFiles = [file("gradle/javadoc.options")]
+}
+task copyJavadocToDist(type: Copy) {
+    includeEmptyDirs = false
+    from javadoc
+    into "${buildDir}/${distName}/doc"
+    dependsOn javadoc
+}
+task copyDocAndConfigFilesToDist(type: Copy) {
+    includeEmptyDirs = false
+    from('src/main/resources') { include '*-template.yaml' }
+    from('.') { include 'README.md' }
+    into "${buildDir}/${distName}"
+}
+task copyLibsToDist(type: Copy) {
+    includeEmptyDirs = false
+    from jar
+    include '**/*.jar'
+    exclude "${project.name}*.jar"
+    from sourceSets.main.runtimeClasspath
+    into "${buildDir}/${distName}/lib"
+    dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist
+}
+task copyMainLibToDist(type: Copy) {
+    includeEmptyDirs = false
+    from jar
+    include "${project.name}*.jar"
+    from sourceSets.main.runtimeClasspath
+    into "${buildDir}/${distName}"
+    dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist
+}
+task dist(type: Zip) {
+    group = 'build'
+    description("Creates the ${distName}.zip with all jars")
+    from("${buildDir}") {
+        include "${distName}/**"
+    }
+    archiveFileName = "${buildDir}/${distName}.zip"
+    dependsOn copyMainLibToDist, copyDocAndConfigFilesToDist, copyJavadocToDist, copyLibsToDist
+}
+

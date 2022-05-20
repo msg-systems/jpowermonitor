@@ -1,0 +1,8 @@
+
+test {
+    useJUnitPlatform()
+}
+testlogger {
+    showStandardStreams true
+    showPassedStandardStreams false
+}

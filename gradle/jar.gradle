@@ -1,0 +1,40 @@
+import java.text.SimpleDateFormat
+
+def gitHash = {
+    Process procHash = 'git rev-parse HEAD'.execute()
+    Process procDirty = 'git status --short'.execute()
+    procDirty.waitFor()
+    procHash.waitFor()
+    return procHash.text.trim() + (procDirty.text.isEmpty() ? "" : " (dirty)")
+}
+
+jar {
+    enabled = true
+    manifest {
+        attributes(
+            'Implementation-Title': rootProject.name,
+            'Implementation-Version': project.version,
+            'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+            'Build-Timestamp': new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+            'Build-Revision': gitHash(),
+            'Compatibility': project.sourceCompatibility,
+            'Built-By': System.getProperty('user.name'),
+            'Premain-Class': getProperty('premain.classname'),
+            'Main-Class' : getProperty('main.classname'),
+            'Can-Redefine-Classes': false,
+            'Can-Set-Native-Method-Prefix': false
+        )
+    }
+    exclude("*.yaml")
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from sourceSets.main.allSource
+}
+

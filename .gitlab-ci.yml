@@ -1,0 +1,44 @@
+# This is the Gradle build system for JVM applications
+# https://gradle.org/
+# https://github.com/gradle/gradle
+image: docker:20-git
+
+# Disable the Gradle daemon for Continuous Integration servers as correctness
+# is usually a priority over speed in CI environments. Using a fresh
+# runtime for each build is more reliable since the runtime is completely
+# isolated from any previous builds.
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+services:
+  - docker:dind
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+  - apk --no-cache add openjdk11 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+  - which java
+  - export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+  - java -version
+  - apk update && apk add bash
+
+build:
+  stage: build
+  script:
+    - bash ./gradlew assemble
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+
+test:
+  stage: test
+  script:
+    - bash ./gradlew check
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle

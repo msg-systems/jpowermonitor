@@ -1,0 +1,29 @@
+measurement cycles:
+- STATISTICS_INTERVAL (ms)
+- MEASUREMENT_INTERVAL (ms)
+	
+STATISTICS_INTERVAL
+	- Summary: gather (method) activity
+	- for all running threads, from top / newest of stacktrace
+		- first element rated as computation time of 1 STATISTICS_INTERVAL / MEASUREMENT_INTERVAL
+		- for prefixed report:
+			- first element which matches at least one prefix rated as computation time of 1 STATISTICS_INTERVAL / MEASUREMENT_INTERVAL
+	- increment METHOD_ACTIVITY accordingly
+			
+MEASUREMENT_INTERVAL
+	- summary
+		- gather power consumption
+		- aggregate method activity and power consumption to energy consumption per method
+	- POWER_TOTAL (W) - get current CPU power per MEASUREMENT_INTERVAL
+		- call e.g. OpenHardwareMonitor for current CPU power usage
+		- assume power was the same for the entirety of MEASUREMENT_INTERVAL
+	- get CPU times
+		- THREAD_TIME (ns) - total CPU time of each running threads -> should time since last measurement?
+		- APPLICATION_TIME (ns) - total CPU time of all running threads -> should be sum of should time since last measurement?
+	- computation -> as separate task?
+		- allocate power usage to threads per MEASUREMENT_INTERVAL
+			- POWER_THREAD (W) = POWER_TOTAL * (THREAD_TIME / APPLICATION_TIME)
+		- determine power usage of each method per MEASUREMENT_INTERVAL
+			- POWER_METHOD (W) = POWER_THREAD * (METHOD_ACTIVITY * STATISTICS_INTERVAL / MEASUREMENT_INTERVAL) -> currently fix ration of 1 / 100
+		- determine energy usage of each method in MEASUREMENT_INTERVAL (currenty assumption: MEASUREMENT_INTERVAL always 1000ms, so W = J)
+			- ENERGY_METHOD (J) = POWER_METHOD * MEASUREMENT_INTERVAL / 1000

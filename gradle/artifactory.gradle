@@ -1,0 +1,30 @@
+if (!project.hasProperty('artifactoryUser') || !project.hasProperty('artifactoryPwd') || !project.hasProperty('artifactoryAPIKey')) {
+    logger.warn("'artifactoryUser' and 'artifactoryPwd' or 'artifactoryAPIKey' are not defined in '~/.gradle/gradle.properties', publishing to artifactory will not work! Please consult the README.md")
+} else {
+    publishing {
+        repositories {
+            maven {
+                credentials {
+                    username project.getProperty('artifactoryUser')
+                    password project.getProperty('artifactoryPwd')
+                }
+                allowInsecureProtocol true
+                url project.version.endsWith('-SNAPSHOT') ?
+                    'http://10.16.58.3:8082/repository/maven-pbx-snapshots' :
+                    'http://10.16.58.3:8082/repository/maven-pbx'
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = project.group
+            artifactId = project.name
+            version = project.version
+            artifact sourcesJar
+            from components.java
+        }
+    }
+}

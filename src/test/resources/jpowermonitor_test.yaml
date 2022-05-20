@@ -1,0 +1,18 @@
+!!group.msg.jpowermonitor.config.JPowerMonitorConfig
+initCycles: 1
+samplingIntervalForInitInMs: 1
+calmDownIntervalInMs: 1
+percentageOfSamplesAtBeginningToDiscard: 1
+samplingIntervalInMs: 1
+openHardwareMonitor:
+  url: 'some.test.url'
+  paths:
+    - { path: [ 'pc', 'cpu', 'path1', 'path2' ], energyInIdleMode: }
+csvRecording:
+  resultCsv: 'output1.csv'
+  measurementCsv: 'output2.csv'
+javaAgent:
+  packageFilter: [ 'com.something', 'com.anything' ]
+  measurementIntervalInMs: 1
+  gatherStatisticsIntervalInMs: 1
+  writeEnergyMeasurementsToCsvIntervalInS: 1
