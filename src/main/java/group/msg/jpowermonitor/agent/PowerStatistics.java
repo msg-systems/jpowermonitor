@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -30,11 +31,10 @@ public class PowerStatistics extends TimerTask {
 
     private static final String CLASS_METHOD_SEPARATOR = ".";
     private static final MathContext MATH_CONTEXT = new MathContext(30, RoundingMode.HALF_UP);
-    private final AtomicReference<DataPoint> energyConsumptionTotalInJoule = new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now()));
+    private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
+        new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now()));
     private final Map<Long, Long> threadsCpuTime = new HashMap<>();
     private final List<Activity> recentEnergyConsumption = Collections.synchronizedList(new LinkedList<>());
-
-
     private final long measurementInterval;
     private final long gatherStatisticsInterval;
     private final BigDecimal activityToEnergyRatio;
@@ -45,7 +45,9 @@ public class PowerStatistics extends TimerTask {
     public PowerStatistics(long measurementInterval, long gatherStatisticsInterval, long pid, ThreadMXBean threadMXBean, Set<String> packageFilter) {
         this.measurementInterval = measurementInterval;
         this.gatherStatisticsInterval = gatherStatisticsInterval;
-        this.activityToEnergyRatio = BigDecimal.valueOf(((double) this.gatherStatisticsInterval) / ((double) this.measurementInterval));
+        this.activityToEnergyRatio = measurementInterval > 0 ?
+            new BigDecimal(this.gatherStatisticsInterval).divide(new BigDecimal(this.measurementInterval), MATH_CONTEXT) :
+            BigDecimal.ZERO;
         this.pid = pid;
         this.threadMXBean = threadMXBean;
         PowerStatistics.packageFilter = packageFilter;
@@ -65,7 +67,7 @@ public class PowerStatistics extends TimerTask {
             duration += gatherStatisticsInterval;
             // Sleep for statisticsInterval, e. g. 10 ms
             try {
-                Thread.sleep(gatherStatisticsInterval);
+                TimeUnit.MILLISECONDS.sleep(gatherStatisticsInterval);
             } catch (InterruptedException ex) {
                 log.error(ex.getLocalizedMessage(), ex);
             }
