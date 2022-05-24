@@ -5,7 +5,7 @@ import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.ohwm.MeasureOpenHwMonitor;
 
 /**
- * Encapsules concrete power measurement method and provides interface to get current cpu power consumption in watts.
+ * Encapsulates concrete power measurement method and provides interface to get current cpu power consumption in watts.
  */
 class MeasurePower {
 
