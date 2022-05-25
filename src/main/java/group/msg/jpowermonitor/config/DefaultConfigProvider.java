@@ -48,7 +48,13 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
                 log.info(
                     "Could not find '{}' in filesystem, falling back to default configuration",
                     source);
-                config = tryReadingFromResources(DEFAULT_CONFIG);
+                config = tryReadingFromFileSystem(getDefaultConfig());
+            }
+            if (config.isEmpty()) {
+                log.info(
+                    "Could not find '{}' in filesystem, falling back to default configuration in resources",
+                    getDefaultConfig());
+                config = tryReadingFromResources(getDefaultConfig());
             }
 
             config.ifPresent(JPowerMonitorConfig::initializeConfiguration);
@@ -100,6 +106,10 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         }
 
         return Optional.empty();
+    }
+
+    protected String getDefaultConfig() {
+        return DEFAULT_CONFIG;
     }
 
 }

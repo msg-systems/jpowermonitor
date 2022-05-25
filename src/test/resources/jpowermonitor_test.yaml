@@ -9,8 +9,8 @@ openHardwareMonitor:
   paths:
     - { path: [ 'pc', 'cpu', 'path1', 'path2' ], energyInIdleMode: }
 csvRecording:
-  resultCsv: 'output1.csv'
-  measurementCsv: 'output2.csv'
+  resultCsv: 'test_energyconsumption.csv'
+  measurementCsv: 'test_measurement.csv'
 javaAgent:
   packageFilter: [ 'com.something', 'com.anything' ]
   measurementIntervalInMs: 1

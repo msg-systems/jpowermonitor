@@ -13,14 +13,14 @@ class DefaultConfigProviderTest {
 
     @Test
     public void readConfig_nullReadsDefaultConfig() {
-        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig(null);
+        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig(null);
         assertNotNull(cfg);
         assertEquals("test_energyconsumption.csv", cfg.getCsvRecording().getResultCsv());
     }
 
     @Test
     public void readConfig_nonExistingResourceReadsDefaultConfig() {
-        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig("iAmNotHere.yaml");
+        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig("iAmNotHere.yaml");
         assertNotNull(cfg);
         assertEquals("test_energyconsumption.csv", cfg.getCsvRecording().getResultCsv());
     }
@@ -43,7 +43,7 @@ class DefaultConfigProviderTest {
 
     @Test
     public void readConfig_tryReadInvalidFile(@TempDir Path dir) {
-        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig(
+        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig(
             dir.toAbsolutePath().toString());
         assertNotNull(cfg);
         assertEquals("test_measurement.csv", cfg.getCsvRecording().getMeasurementCsv());
@@ -69,7 +69,7 @@ class DefaultConfigProviderTest {
 
     @Test
     public void readConfig_invalidResourceFallsBackToDefaul() {
-        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig("invalidConfig.xml");
+        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig("invalidConfig.xml");
         assertNotNull(cfg);
         assertEquals("test_energyconsumption.csv", cfg.getCsvRecording().getResultCsv());
     }
@@ -79,7 +79,7 @@ class DefaultConfigProviderTest {
         Path file = dir.resolve("invalid.txt");
         Files.write(file, List.of("not valid"), StandardCharsets.UTF_8);
 
-        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig(
+        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig(
             file.toAbsolutePath().toString());
         assertNotNull(cfg);
         assertEquals("test_energyconsumption.csv", cfg.getCsvRecording().getResultCsv());
