@@ -1,7 +1,8 @@
 package group.msg.jpowermonitor.agent;
 
 import lombok.Getter;
-import lombok.ToString;
+import java.util.Arrays;
+
 public enum Unit {
     JOULE("J"), WATT("W"), WATTHOURS("Wh"), NONE("");
     @Getter
@@ -10,15 +11,16 @@ public enum Unit {
     Unit(String name) {
         this.name = name;
     }
+    public String toString() {
+        return name;
+    }
 
-    public static Unit fromValue(String val) {
+    public static Unit fromName(String name) {
         try {
-            return valueOf(val);
+            return Arrays.stream(Unit.values()).filter(u -> u.getName().equals(name)).findFirst().orElse(Unit.NONE);
         } catch (Exception e) {
             return Unit.NONE;
         }
     }
-    public String toString() {
-        return name;
-    }
+
 }
