@@ -2,8 +2,6 @@ package group.msg.jpowermonitor.agent;
 
 import lombok.Getter;
 import lombok.ToString;
-
-@ToString(of = {"name"})
 public enum Unit {
     JOULE("J"), WATT("W"), WATTHOURS("Wh"), NONE("");
     @Getter
@@ -19,5 +17,8 @@ public enum Unit {
         } catch (Exception e) {
             return Unit.NONE;
         }
+    }
+    public String toString() {
+        return name;
     }
 }
