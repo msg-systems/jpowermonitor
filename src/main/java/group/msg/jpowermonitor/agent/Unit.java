@@ -1,23 +1,34 @@
 package group.msg.jpowermonitor.agent;
 
 import lombok.Getter;
-import lombok.ToString;
+import java.util.Arrays;
 
-@ToString(of = {"name"})
 public enum Unit {
     JOULE("J"), WATT("W"), WATTHOURS("Wh"), NONE("");
     @Getter
-    private final String name;
+    private final String abbreviation;
 
-    Unit(String name) {
-        this.name = name;
+    Unit(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
+    public String toString() {
+        return abbreviation;
     }
 
-    public static Unit fromValue(String val) {
-        try {
-            return valueOf(val);
-        } catch (Exception e) {
+    public static Unit fromAbbreviation(String abbreviation) {
+        if (abbreviation == null) {
             return Unit.NONE;
         }
+        switch (abbreviation) {
+            case "J":
+                return Unit.JOULE;
+            case "W":
+                return Unit.WATT;
+            case "Wh":
+                return Unit.WATTHOURS;
+            default:
+                return Unit.NONE;
+        }
     }
+
 }

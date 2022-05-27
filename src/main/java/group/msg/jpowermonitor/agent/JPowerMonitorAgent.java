@@ -1,5 +1,6 @@
 package group.msg.jpowermonitor.agent;
 
+import group.msg.jpowermonitor.config.DefaultConfigProvider;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +44,7 @@ public class JPowerMonitorAgent {
         log.info(SEPARATOR);
         ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
         long pid = ProcessHandle.current().pid();
-        JPowerMonitorConfig config = JPowerMonitorConfig.readConfig(args);
+        JPowerMonitorConfig config = new DefaultConfigProvider().readConfig(args);
         Set<String> packageFilter = config.getJavaAgent().getPackageFilter();
         log.info("{}: Start monitoring application with PID {}", Thread.currentThread().getName(), pid);
 
