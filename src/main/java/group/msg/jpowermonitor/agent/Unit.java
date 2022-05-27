@@ -6,18 +6,18 @@ import java.util.Arrays;
 public enum Unit {
     JOULE("J"), WATT("W"), WATTHOURS("Wh"), NONE("");
     @Getter
-    private final String name;
+    private final String abbreviation;
 
-    Unit(String name) {
-        this.name = name;
+    Unit(String abbreviation) {
+        this.abbreviation = abbreviation;
     }
     public String toString() {
-        return name;
+        return abbreviation;
     }
 
-    public static Unit fromName(String name) {
+    public static Unit fromAbbreviation(String abbreviation) {
         try {
-            return Arrays.stream(Unit.values()).filter(u -> u.getName().equals(name)).findFirst().orElse(Unit.NONE);
+            return Arrays.stream(Unit.values()).filter(u -> u.getAbbreviation().equals(abbreviation)).findFirst().orElse(Unit.NONE);
         } catch (Exception e) {
             return Unit.NONE;
         }
