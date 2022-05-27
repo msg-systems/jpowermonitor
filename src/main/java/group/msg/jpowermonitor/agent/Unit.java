@@ -16,10 +16,18 @@ public enum Unit {
     }
 
     public static Unit fromAbbreviation(String abbreviation) {
-        try {
-            return Arrays.stream(Unit.values()).filter(u -> u.getAbbreviation().equals(abbreviation)).findFirst().orElse(Unit.NONE);
-        } catch (Exception e) {
+        if (abbreviation == null) {
             return Unit.NONE;
+        }
+        switch (abbreviation) {
+            case "J":
+                return Unit.JOULE;
+            case "W":
+                return Unit.WATT;
+            case "Wh":
+                return Unit.WATTHOURS;
+            default:
+                return Unit.NONE;
         }
     }
 
