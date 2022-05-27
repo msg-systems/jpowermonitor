@@ -2,11 +2,11 @@
 JUnit Extension and Java Agent for energy consumption measurement.
 
 ### Description
-The power consumption of Java applications should become measurable, and thus visible, with the help of our tool.
-This library includes an extension for measuring unit tests, as well as a Java agent for measuring any Java applications down to method level.
+The power consumption of Java applications should become measurable, and thus visible, with the help of jPowerMonitor.
+This library includes an extension for measuring unit tests, as well as a Java agent for measuring any Java application.
 The Java agent collects the activity of the application to be measured at regular, configurable intervals. The agent takes into account the power consumption provided by the configured measurement tool.
-The CPU usage of the program and the current energy consumption are aggregated and saved in a CSV file.
-The result of the measurement is the power consumption in watt hours or joule.
+The CPU usage of the program and the current power consumption are aggregated to energy consumption per method over runtime and written into a CSV file.
+The result of the measurement is the energy consumption in watt hours or joule.
 
 ### Prerequisites 
 - Tool Open Hardware Monitor is installed: https://openhardwaremonitor.org/downloads/
