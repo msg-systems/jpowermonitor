@@ -15,13 +15,18 @@ import org.yaml.snakeyaml.Yaml;
 /**
  * Default configuration provider preferring file system to resources.
  * <p>
- * This configuration provider uses caching (e.g. reads only once per provider instance) and has two
- * basic modi: If a source is given, it tries to read this source from the filesystem first. If not
- * possible, it tries to read it from the resources. The second modus has no valid source (see
- * {@link #isValidSource(String)}) and simply uses {@link #DEFAULT_CONFIG} with the same approach;
- * So file system first then resource.
- * <p>
- * Generally speaking, it always tries the file system first.
+ * This configuration provider uses caching (e.g. reads only once per provider instance) and reads
+ * the configuration as a YAML file (see <code>resources/jpowermonitor-template.yaml</code> for
+ * example). In order to find a configuration, it uses the following sequence:
+ * <nl>
+ * <li>If a source is given, try reading from the file system.</li>
+ * <li>If file system fails (for any reason), try reading with source from the resources.</li>
+ * <li>If no source is given (or couldn't be read), fall back to using
+ * <code>jpowermonitor.yaml</code> (see {@link #DEFAULT_CONFIG}).</li>
+ * <li>Try finding that default source in the file system.</li>
+ * <li>If that fails, try finding it in the resources.</li>
+ * <li>If nothing was found, throw an exception.</li>
+ * </nl>
  */
 @Slf4j
 public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
@@ -42,15 +47,15 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     public synchronized JPowerMonitorConfig readConfig(String source)
         throws JPowerMonitorException {
         if (cachedConfig == null) {
-            final String actualSource;
             if (isValidSource(source)) {
                 log.info("Reading JPowerMonitor configuration from given source '{}'", source);
-                actualSource = source;
-            } else {
-                log.info("Reading JPowerMonitor configuration from default '{}'", DEFAULT_CONFIG);
-                actualSource = DEFAULT_CONFIG;
+                cachedConfig = acquireConfigFromSource(source);
             }
-            cachedConfig = acquireConfigFromSource(actualSource);
+
+            if (cachedConfig == null) {
+                log.info("Reading JPowerMonitor configuration from default '{}'", DEFAULT_CONFIG);
+                cachedConfig = acquireConfigFromSource(DEFAULT_CONFIG);
+            }
         }
 
         if (cachedConfig == null) {
@@ -67,6 +72,11 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
             log.debug(
                 "Could not read JPowerMonitor configuration from filesystem, trying resources now");
             cfg = tryReadingFromResources(source);
+            cfg.ifPresent(JPowerMonitorConfig::initializeConfiguration);
+        }
+
+        if (cfg.isEmpty() && !DEFAULT_CONFIG.equals(source)) {
+            cfg = tryReadingFromFileSystem(DEFAULT_CONFIG);
             cfg.ifPresent(JPowerMonitorConfig::initializeConfiguration);
         }
 
