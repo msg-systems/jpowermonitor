@@ -13,12 +13,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * Default configuration provider preferring resources over file system.
+ * Default configuration provider preferring file system to resources.
  * <p>
- * This configuration provider uses caching (e.g. reads only once per provider instance) and first
- * tries to read the configuration file from Java resources. If that fails, it tries to read from
- * the file system. If that also fails, it falls back reading the default configuration {@link
- * #DEFAULT_CONFIG} from resources.
+ * This configuration provider uses caching (e.g. reads only once per provider instance) and has two
+ * basic modi: If a source is given, it tries to read this source from the filesystem first. If not
+ * possible, it tries to read it from the resources. The second modus has no valid source (see
+ * {@link #isValidSource(String)}) and simply uses {@link #DEFAULT_CONFIG} with the same approach;
+ * So file system first then resource.
+ * <p>
+ * Generally speaking, it always tries the file system first.
  */
 @Slf4j
 public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
@@ -39,26 +42,15 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     public synchronized JPowerMonitorConfig readConfig(String source)
         throws JPowerMonitorException {
         if (cachedConfig == null) {
-            Optional<JPowerMonitorConfig> config = tryReadingFromResources(source);
-            if (config.isEmpty()) {
-                log.info("Could not find '{}' in resources, trying file system", source);
-                config = tryReadingFromFileSystem(source);
+            final String actualSource;
+            if (isValidSource(source)) {
+                log.info("Reading JPowerMonitor configuration from given source '{}'", source);
+                actualSource = source;
+            } else {
+                log.info("Reading JPowerMonitor configuration from default '{}'", DEFAULT_CONFIG);
+                actualSource = DEFAULT_CONFIG;
             }
-            if (config.isEmpty()) {
-                log.info(
-                    "Could not find '{}' in filesystem, falling back to default configuration",
-                    source);
-                config = tryReadingFromFileSystem(getDefaultConfig());
-            }
-            if (config.isEmpty()) {
-                log.info(
-                    "Could not find '{}' in filesystem, falling back to default configuration in resources",
-                    getDefaultConfig());
-                config = tryReadingFromResources(getDefaultConfig());
-            }
-
-            config.ifPresent(JPowerMonitorConfig::initializeConfiguration);
-            cachedConfig = config.orElse(null);
+            cachedConfig = acquireConfigFromSource(actualSource);
         }
 
         if (cachedConfig == null) {
@@ -67,29 +59,25 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         return cachedConfig;
     }
 
-    private Optional<JPowerMonitorConfig> tryReadingFromResources(String source) {
-        if (source == null || resourceLoader.getResource(source) == null) {
-            return Optional.empty();
+    private JPowerMonitorConfig acquireConfigFromSource(String source) {
+        Optional<JPowerMonitorConfig> cfg = tryReadingFromFileSystem(source);
+        cfg.ifPresent(JPowerMonitorConfig::initializeConfiguration);
+
+        if (cfg.isEmpty()) {
+            log.debug(
+                "Could not read JPowerMonitor configuration from filesystem, trying resources now");
+            cfg = tryReadingFromResources(source);
+            cfg.ifPresent(JPowerMonitorConfig::initializeConfiguration);
         }
 
-        try (InputStream input = resourceLoader.getResourceAsStream(source)) {
-            JPowerMonitorConfig config = new Yaml().load(input);
-            return Optional.of(config);
-        } catch (Exception exc) {
-            log.warn("Cannot read '{}' from resources", source, exc);
-        }
-
-        return Optional.empty();
+        return cfg.orElseThrow(() -> new JPowerMonitorException(
+            String.format("Cannot read JPowerMonitor configuration from source '%s'", source)));
     }
 
     private Optional<JPowerMonitorConfig> tryReadingFromFileSystem(String source) {
-        if (source == null) {
-            return Optional.empty();
-        }
-
         Path potentialConfig = Paths.get(source);
         if (!Files.isRegularFile(potentialConfig)) {
-            log.debug("'{}' is no regular file, we won't read it from filesystem", source);
+            log.warn("'{}' is no regular file, we won't read it from filesystem", source);
             return Optional.empty();
         }
 
@@ -108,8 +96,21 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         return Optional.empty();
     }
 
-    protected String getDefaultConfig() {
-        return DEFAULT_CONFIG;
+    private Optional<JPowerMonitorConfig> tryReadingFromResources(String source) {
+        if (resourceLoader.getResource(source) == null) {
+            log.warn("'{}' is not available as resource", source);
+            return Optional.empty();
+        }
+
+        try (InputStream input = resourceLoader.getResourceAsStream(source)) {
+            JPowerMonitorConfig config = new Yaml().load(input);
+            return Optional.of(config);
+        } catch (Exception exc) {
+            log.warn("Cannot read '{}' from resources", source, exc);
+        }
+
+        return Optional.empty();
     }
+
 
 }
