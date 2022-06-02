@@ -10,48 +10,18 @@ import org.junit.jupiter.api.io.*;
 
 class DefaultConfigProviderTest {
 
+    /*  HINT
+     * Cannot really test the default behaviour for configuration loading: If we put a
+     * "jpowermonitor.yaml" into working dir, it would either break the full measurement tests
+     * (like EndlessLoopTest) or this test here. So without tricking the file system (like changing
+     * the working directory during tests) it's not possible to fulfill all needs.
+     * Thus, here we skip testing the default branch of configuration finding.
+     *  diehla, June 2022
+     */
 
     @Test
-    public void readConfig_nullReadsDefaultConfig() {
-        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig(null);
-        assertNotNull(cfg);
-        assertEquals("test_energyconsumption.csv", cfg.getCsvRecording().getResultCsv());
-    }
-
-    @Test
-    public void readConfig_nonExistingResourceReadsDefaultConfig() {
-        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig("iAmNotHere.yaml");
-        assertNotNull(cfg);
-        assertEquals("test_energyconsumption.csv", cfg.getCsvRecording().getResultCsv());
-    }
-
-    @Test
-    public void readConfig_readExistingResource() {
-        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig("jpowermonitor_test.yaml");
-        assertNotNull(cfg);
-        assertEquals("some.test.url/data.json", cfg.getOpenHardwareMonitor().getUrl());
-    }
-
-    @Test
-    public void readConfig_usesCaching() {
-        JPowerMonitorConfigProvider provider = new DefaultConfigProvider();
-        JPowerMonitorConfig cfg1 = provider.readConfig("jpowermonitor_test.yaml");
-        assertNotNull(cfg1);
-        JPowerMonitorConfig cfg2 = provider.readConfig("something.else");
-        assertSame(cfg1, cfg2);
-    }
-
-    @Test
-    public void readConfig_tryReadInvalidFile(@TempDir Path dir) {
-        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig(
-            dir.toAbsolutePath().toString());
-        assertNotNull(cfg);
-        assertEquals("test_measurement.csv", cfg.getCsvRecording().getMeasurementCsv());
-    }
-
-    @Test
-    public void readConfig_readValidExternalFile(@TempDir Path dir) throws Exception {
-        Path yaml = dir.resolve("myconfig.yaml");
+    public void readConfig_fileSystemOverResource(@TempDir Path dir) throws Exception {
+        Path yaml = dir.resolve("DefaultConfigProviderTest.yaml");
         Files.write(yaml, List.of(
             "!!group.msg.jpowermonitor.config.JPowerMonitorConfig",
             "openHardwareMonitor:",
@@ -68,20 +38,20 @@ class DefaultConfigProviderTest {
     }
 
     @Test
-    public void readConfig_invalidResourceFallsBackToDefaul() {
-        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig("invalidConfig.xml");
+    public void readConfig_fromResourceIfNoFile() {
+        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig(
+            "DefaultConfigProviderTest.yaml");
         assertNotNull(cfg);
         assertEquals("test_energyconsumption.csv", cfg.getCsvRecording().getResultCsv());
     }
 
     @Test
-    public void readConfig_invalidFileFallsBackToDefaul(@TempDir Path dir) throws Exception {
-        Path file = dir.resolve("invalid.txt");
-        Files.write(file, List.of("not valid"), StandardCharsets.UTF_8);
-
-        JPowerMonitorConfig cfg = new TestDefaultConfigProvider().readConfig(
-            file.toAbsolutePath().toString());
-        assertNotNull(cfg);
-        assertEquals("test_energyconsumption.csv", cfg.getCsvRecording().getResultCsv());
+    public void readConfig_usesCaching() {
+        JPowerMonitorConfigProvider provider = new DefaultConfigProvider();
+        JPowerMonitorConfig cfg1 = provider.readConfig("DefaultConfigProviderTest.yaml");
+        assertNotNull(cfg1);
+        JPowerMonitorConfig cfg2 = provider.readConfig("something.else");
+        assertSame(cfg1, cfg2);
     }
+
 }
