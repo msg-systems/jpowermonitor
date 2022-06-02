@@ -1,20 +1,16 @@
 package group.msg.jpowermonitor.agent;
 
 import group.msg.jpowermonitor.ResultCsvWriter;
-import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
+import group.msg.jpowermonitor.dto.MethodActivity;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Write power and energy measurement results to CSV files at application shutdown.
@@ -33,6 +29,7 @@ public class ResultsWriter implements Runnable {
 
     private String energyConsumptionPerMethodFileName;
     private String energyConsumptionPerFilteredMethodFileName;
+    private String measurementsFileName;
 
     /**
      * Constructor
@@ -59,25 +56,15 @@ public class ResultsWriter implements Runnable {
     private void initCsvFileNames() {
         energyConsumptionPerMethodFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_energy_per_method.csv";
         energyConsumptionPerFilteredMethodFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_energy_per_method_filtered.csv";
+        measurementsFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_measurements.csv";
     }
 
     private void writeEnergyConsumptionToCsv() {
-        List<Activity> recentActivity = powerStatistics == null ? null : powerStatistics.getRecentActivity();
-        if (recentActivity == null || recentActivity.isEmpty()) {
+        if (powerStatistics == null) {
             return;
         }
-        createCsvAndWriteToFile(aggregateActivity(recentActivity, false), energyConsumptionPerMethodFileName);
-        createCsvAndWriteToFile(aggregateActivity(recentActivity, true), energyConsumptionPerFilteredMethodFileName);
-    }
-
-    protected static Map<String, DataPoint> aggregateActivity(List<Activity> activitySet, boolean filtered) {
-        return activitySet.stream()
-            .filter(activity -> activity.getIdentifier(filtered) != null)
-            .collect(Collectors.toMap(
-                activity -> activity.getIdentifier(filtered),
-                activity -> new DataPoint(activity.getIdentifier(filtered), activity.getRepresentedQuantity().getValue(), activity.getRepresentedQuantity().getUnit(), LocalDateTime.now()),
-                (current, next) -> new DataPoint(current.getName(), current.getValue().add(next.getValue()), current.getUnit(), current.getTime())
-            ));
+        createCsvAndWriteToFile(powerStatistics.getEnergyConsumption(false), energyConsumptionPerMethodFileName);
+        createCsvAndWriteToFile(powerStatistics.getEnergyConsumption(true), energyConsumptionPerFilteredMethodFileName);
     }
 
     private void logStatistics() {
@@ -106,8 +93,12 @@ public class ResultsWriter implements Runnable {
     }
 
 
-    protected void createCsvAndWriteToFile(Map<String, DataPoint> measurements, String fileName) {
+    public void createCsvAndWriteToFile(Map<String, DataPoint> measurements, String fileName) {
         writeToFile(createCsv(measurements), fileName);
+    }
+
+    public void createCsvAndWriteToFile(Collection<MethodActivity> measurements) {
+        writeToFile(createCsv(measurements), measurementsFileName, true);
     }
 
     protected String createCsv(Map<String, DataPoint> measurements) {
@@ -116,8 +107,18 @@ public class ResultsWriter implements Runnable {
         return csv.toString();
     }
 
+    protected String createCsv(Collection<MethodActivity> measurements) {
+        StringBuilder csv = new StringBuilder();
+        measurements.forEach(activity -> csv.append(ResultCsvWriter.createCsvEntryForMethodActivity(activity)));
+        return csv.toString();
+    }
+
     protected void writeToFile(String csv, String fileName) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, false))) {
+        writeToFile(csv, fileName, false);
+    }
+
+    protected void writeToFile(String csv, String fileName, boolean append) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, append))) {
             bw.write(csv);
         } catch (IOException ex) {
             log.error(ex.getLocalizedMessage(), ex);

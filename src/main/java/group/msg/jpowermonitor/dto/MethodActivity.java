@@ -2,10 +2,13 @@ package group.msg.jpowermonitor.dto;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Data
 public class MethodActivity implements Activity {
+    Long threadId;
+    LocalDateTime time;
     String methodQualifier;
     String filteredMethodQualifier;
     Quantity representedQuantity;
@@ -14,7 +17,7 @@ public class MethodActivity implements Activity {
     public String getIdentifier(boolean asFiltered) {
         return Optional.ofNullable(methodQualifier)
             .filter(qualifier -> !asFiltered)
-            .orElse(filteredMethodQualifier);
+            .orElseGet(() -> Optional.ofNullable(filteredMethodQualifier).orElse(methodQualifier));
     }
 
     @Override

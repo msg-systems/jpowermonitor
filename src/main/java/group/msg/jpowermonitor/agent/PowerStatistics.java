@@ -13,13 +13,16 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -35,6 +38,9 @@ public class PowerStatistics extends TimerTask {
         new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now()));
     private final Map<Long, Long> threadsCpuTime = new HashMap<>();
     private final List<Activity> recentEnergyConsumption = Collections.synchronizedList(new LinkedList<>());
+
+    private final Map<String, DataPoint> energyConsumptionPerMethod = new ConcurrentHashMap<>();
+    private final Map<String, DataPoint> energyConsumptionPerFilteredMethod = new ConcurrentHashMap<>();
     private final long measurementInterval;
     private final long gatherStatisticsInterval;
     private final BigDecimal activityToEnergyRatio;
@@ -58,7 +64,7 @@ public class PowerStatistics extends TimerTask {
         Thread.currentThread().setName(PowerStatistics.class.getSimpleName() + " Thread");
         log.trace("Start new gather statistics and power measurement cycle...");
 
-        Map<Long, List<MethodActivity>> methodActivityPerThread = new HashMap<>();
+        Map<Long, Set<MethodActivity>> methodActivityPerThread = new HashMap<>();
         Set<Thread> threads = Thread.getAllStackTraces().keySet();
 
         int duration = 0;
@@ -86,10 +92,12 @@ public class PowerStatistics extends TimerTask {
 
         // Now we have power for each thread, and stats for methods in each thread
         // We allocated power to each method based on activity
-        allocateEnergyUsageToActivity(methodActivityPerThread, powerPerThread, recentEnergyConsumption);
+        allocateEnergyUsageToActivity(methodActivityPerThread, powerPerThread);
+
+        writeMeasurements(methodActivityPerThread);
     }
 
-    private static void gatherMethodActivityPerThread(Map<Long, List<MethodActivity>> methodActivityPerThread, Set<Thread> threads) {
+    private static void gatherMethodActivityPerThread(Map<Long, Set<MethodActivity>> methodActivityPerThread, Set<Thread> threads) {
         for (Thread thread : threads) {
             // Only consider threads that are currently running (not waiting or blocked)
             if (Thread.State.RUNNABLE == thread.getState()) {
@@ -99,8 +107,10 @@ public class PowerStatistics extends TimerTask {
                 }
 
                 long threadId = thread.getId();
-                methodActivityPerThread.putIfAbsent(threadId, new LinkedList<>());
+                methodActivityPerThread.putIfAbsent(threadId, new HashSet<>());
                 MethodActivity activity = new MethodActivity();
+                activity.setThreadId(threadId);
+                activity.setTime(LocalDateTime.now());
 
                 Arrays.stream(stackTrace)
                     .findFirst()
@@ -127,8 +137,8 @@ public class PowerStatistics extends TimerTask {
             .anyMatch(method::startsWith);
     }
 
-    private void allocateEnergyUsageToActivity(Map<Long, List<MethodActivity>> methodActivityPerThread, Map<Long, BigDecimal> powerPerApplicationThread, List<Activity> energyConsumption) {
-        for (Map.Entry<Long, List<MethodActivity>> entry : methodActivityPerThread.entrySet()) {
+    private void allocateEnergyUsageToActivity(Map<Long, Set<MethodActivity>> methodActivityPerThread, Map<Long, BigDecimal> powerPerApplicationThread) {
+        for (Map.Entry<Long, Set<MethodActivity>> entry : methodActivityPerThread.entrySet()) {
             long threadId = entry.getKey();
 
             for (MethodActivity activity : entry.getValue()) {
@@ -137,11 +147,43 @@ public class PowerStatistics extends TimerTask {
 
                 if (methodEnergy.getValue().signum() > 0) {
                     activity.setRepresentedQuantity(methodEnergy);
-                    energyConsumption.add(activity);
+                    appendEnergyUsage(activity);
+                    appendEnergyUsage(activity);
                 }
             }
         }
     }
+
+    private void appendEnergyUsage(MethodActivity activity) {
+        if (!activity.isFinalized()) {
+            return;
+        }
+        String identifier = activity.getIdentifier(false);
+
+        energyConsumptionPerMethod.merge(
+            identifier,
+            new DataPoint(identifier, activity.getRepresentedQuantity().getValue(), activity.getRepresentedQuantity().getUnit(), activity.getTime()),
+            this::addDataPoint
+        );
+
+        identifier = activity.getIdentifier(true);
+
+        energyConsumptionPerFilteredMethod.merge(
+            identifier,
+            new DataPoint(identifier, activity.getRepresentedQuantity().getValue(), activity.getRepresentedQuantity().getUnit(), activity.getTime()),
+            this::addDataPoint
+        );
+    }
+
+    private void writeMeasurements(Map<Long, Set<MethodActivity>> methodActivityPerThread) {
+        new ResultsWriter(this, false).createCsvAndWriteToFile(
+            methodActivityPerThread.values().stream()
+                .flatMap(Collection::stream)
+                .filter(Activity::isFinalized)
+                .collect(Collectors.toList())
+        );
+    }
+
 
     /**
      * @return total energy consumption of application
@@ -150,10 +192,11 @@ public class PowerStatistics extends TimerTask {
         return energyConsumptionTotalInJoule;
     }
 
-    public List<Activity> getRecentActivity() {
-        return recentEnergyConsumption.stream()
-            .filter(Activity::isFinalized)
-            .collect(Collectors.toList());
+    public Map<String, DataPoint> getEnergyConsumption(boolean asFiltered) {
+        Map<String, DataPoint> energyConsumption = (asFiltered ? energyConsumptionPerFilteredMethod : energyConsumptionPerMethod);
+
+        return energyConsumption.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**

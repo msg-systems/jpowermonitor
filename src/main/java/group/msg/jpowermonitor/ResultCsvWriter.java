@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor;
 
 import group.msg.jpowermonitor.dto.DataPoint;
+import group.msg.jpowermonitor.dto.MethodActivity;
 import group.msg.jpowermonitor.dto.SensorValue;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,7 @@ public class ResultCsvWriter {
     private static DecimalFormat DECIMAL_FORMAT;
     private final Path pathToMeasurementCsv, pathToResultCsv;
     private static ResourceBundle labels;
-    private static String dataPointFormatCsv, sensorValueFormatCsv, powerSensorValueFormatCsv, SEP;
+    private static String dataPointFormatCsv, sensorValueFormatCsv, powerSensorValueFormatCsv, methodActivityFormatCsv, SEP;
 
     public static void setLocaleDependentValues() {
         labels = ResourceBundle.getBundle("csvExport", Locale.getDefault());
@@ -38,6 +39,7 @@ public class ResultCsvWriter {
         dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s%s";
         sensorValueFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s" : "%s,%s,%s,%s,%s,%s";
         powerSensorValueFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s" : "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s";
+        methodActivityFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s,%s%s";
         DECIMAL_FORMAT = new DecimalFormat("###0.#####", DecimalFormatSymbols.getInstance(Locale.getDefault()));
     }
 
@@ -91,6 +93,18 @@ public class ResultCsvWriter {
 
     public static String createCsvEntryForDataPoint(@NotNull DataPoint dp, String namePrefix, String testName) {
         return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), namePrefix + testName, dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
+    }
+
+    public static String createCsvEntryForMethodActivity(@NotNull MethodActivity activity) {
+        return String.format(methodActivityFormatCsv,
+            activity.getThreadId(),
+            DATE_TIME_FORMATTER.format(activity.getTime()),
+            activity.getIdentifier(false),
+            activity.getIdentifier(true),
+            (activity.isFinalized() ? activity.getRepresentedQuantity().getValue() : null),
+            (activity.isFinalized() ? activity.getRepresentedQuantity().getUnit() : null),
+            NEW_LINE
+        );
     }
 
     public void writeToResultCsv(String testName, SensorValue sensorValue) {
