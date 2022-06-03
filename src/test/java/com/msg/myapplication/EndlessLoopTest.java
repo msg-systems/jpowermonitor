@@ -1,6 +1,6 @@
 package com.msg.myapplication;
 
-import group.msg.jpowermonitor.JPowerMonitorExtension;
+import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
 
 import group.msg.jpowermonitor.util.StressCpuExample;
 import lombok.extern.slf4j.Slf4j;
