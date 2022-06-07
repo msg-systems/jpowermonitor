@@ -149,6 +149,7 @@ public class PowerStatistics extends TimerTask {
                     activity.setRepresentedQuantity(methodEnergy);
                     appendEnergyUsage(activity);
                     appendEnergyUsage(activity);
+                    activity.setRepresentedQuantity(methodPower);
                 }
             }
         }
