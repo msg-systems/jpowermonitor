@@ -12,4 +12,8 @@ import java.math.BigDecimal;
 public class Quantity {
     BigDecimal value;
     Unit unit;
+
+    public static Quantity of(BigDecimal value, Unit unit) {
+        return new Quantity(value, unit);
+    }
 }

@@ -138,8 +138,11 @@ public class PowerStatistics extends TimerTask {
             long threadId = entry.getKey();
 
             for (MethodActivity activity : entry.getValue()) {
-                Quantity methodPower = new Quantity(powerPerApplicationThread.get(threadId).multiply(activityToEnergyRatio), Unit.WATT);
-                Quantity methodEnergy = new Quantity(methodPower.getValue().multiply(BigDecimal.valueOf(measurementInterval)).divide(BigDecimal.valueOf(1000L), MATH_CONTEXT), Unit.JOULE);
+                Quantity methodPower = Quantity.of(powerPerApplicationThread.get(threadId).multiply(activityToEnergyRatio), Unit.WATT);
+                Quantity methodEnergy = Quantity.of(
+                    methodPower.getValue().multiply(BigDecimal.valueOf(measurementInterval)).divide(BigDecimal.valueOf(1000L), MATH_CONTEXT),
+                    Unit.JOULE
+                );
 
                 if (methodEnergy.getValue().signum() > 0) {
                     activity.setRepresentedQuantity(methodEnergy);

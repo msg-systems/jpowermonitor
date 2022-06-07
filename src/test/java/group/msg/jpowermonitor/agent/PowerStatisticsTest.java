@@ -97,15 +97,15 @@ class PowerStatisticsTest {
 
         MethodActivity ma1 = new MethodActivity();
         ma1.setMethodQualifier("no.filter.Method");
-        ma1.setRepresentedQuantity(new Quantity(BigDecimal.ZERO, Unit.JOULE));
+        ma1.setRepresentedQuantity(Quantity.of(BigDecimal.ZERO, Unit.JOULE));
 
         MethodActivity ma2 = new MethodActivity();
         ma2.setMethodQualifier("no.filter.method.Either");
-        ma2.setRepresentedQuantity(new Quantity(BigDecimal.ONE, Unit.JOULE));
+        ma2.setRepresentedQuantity(Quantity.of(BigDecimal.ONE, Unit.JOULE));
 
         MethodActivity ma3 = new MethodActivity();
         ma3.setFilteredMethodQualifier("a.filter.method");
-        ma3.setRepresentedQuantity(new Quantity(BigDecimal.TEN, Unit.JOULE));
+        ma3.setRepresentedQuantity(Quantity.of(BigDecimal.TEN, Unit.JOULE));
 
         List<Activity> activities = List.of(ma1, ma2, ma3);
         Map<String, DataPoint> unfiltered = testee.aggregateActivityToDataPoints(activities, false);
