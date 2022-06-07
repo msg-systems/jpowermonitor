@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,10 +36,8 @@ public class PowerStatistics extends TimerTask {
     private static final String CLASS_METHOD_SEPARATOR = ".";
     private static final MathContext MATH_CONTEXT = new MathContext(30, RoundingMode.HALF_UP);
     private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
-        new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now()));
+        new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now(), null));
     private final Map<Long, Long> threadsCpuTime = new HashMap<>();
-    private final List<Activity> recentEnergyConsumption = Collections.synchronizedList(new LinkedList<>());
-
     private final Map<String, DataPoint> energyConsumptionPerMethod = new ConcurrentHashMap<>();
     private final Map<String, DataPoint> energyConsumptionPerFilteredMethod = new ConcurrentHashMap<>();
     private final long measurementInterval;
@@ -159,19 +158,16 @@ public class PowerStatistics extends TimerTask {
         if (!activity.isFinalized()) {
             return;
         }
-        String identifier = activity.getIdentifier(false);
 
         energyConsumptionPerMethod.merge(
-            identifier,
-            new DataPoint(identifier, activity.getRepresentedQuantity().getValue(), activity.getRepresentedQuantity().getUnit(), activity.getTime()),
+            activity.getIdentifier(false),
+            getDataPointFrom(activity, false),
             this::addDataPoint
         );
 
-        identifier = activity.getIdentifier(true);
-
         energyConsumptionPerFilteredMethod.merge(
-            identifier,
-            new DataPoint(identifier, activity.getRepresentedQuantity().getValue(), activity.getRepresentedQuantity().getUnit(), activity.getTime()),
+            activity.getIdentifier(true),
+            getDataPointFrom(activity, true),
             this::addDataPoint
         );
     }
@@ -180,11 +176,9 @@ public class PowerStatistics extends TimerTask {
         new ResultsWriter(this, false).createCsvAndWriteToFile(
             methodActivityPerThread.values().stream()
                 .flatMap(Collection::stream)
-                .filter(Activity::isFinalized)
                 .collect(Collectors.toList())
         );
     }
-
 
     /**
      * @return total energy consumption of application
@@ -207,6 +201,29 @@ public class PowerStatistics extends TimerTask {
         return pid;
     }
 
+    public DataPoint getDataPointFrom(Activity activity, boolean filtered) {
+        log.trace("activity = {}", activity);
+        Optional<Quantity> quantity = Optional.ofNullable(activity.getRepresentedQuantity());
+
+        return new DataPoint(
+            activity.getIdentifier(filtered),
+            quantity.map(Quantity::getValue).orElse(null),
+            quantity.map(Quantity::getUnit).orElse(null),
+            activity.getTime(),
+            activity.getThreadId()
+        );
+    }
+
+    protected Map<String, DataPoint> aggregateActivityToDataPoints(Collection<Activity> activitySet, boolean filtered) {
+        return activitySet.stream()
+            .filter(activity -> activity.getIdentifier(filtered) != null)
+            .filter(Activity::isFinalized)
+            .collect(Collectors.toMap(
+                activity -> activity.getIdentifier(filtered),
+                activity -> getDataPointFrom(activity, filtered),
+                this::addDataPoint
+            ));
+    }
 
     /**
      * Checks if two <code>DataPoint</code> instances are addable
@@ -240,7 +257,7 @@ public class PowerStatistics extends TimerTask {
         DataPoint reference = dataPoints[0];
         AtomicReference<BigDecimal> sum = new AtomicReference<>(BigDecimal.ZERO);
         Arrays.stream(dataPoints).filter(dp -> areDataPointsAddable(reference, dp)).forEach(dp -> sum.getAndAccumulate(dp.getValue(), BigDecimal::add));
-        return new DataPoint(reference.getName(), sum.get(), reference.getUnit(), LocalDateTime.now());
+        return new DataPoint(reference.getName(), sum.get(), reference.getUnit(), LocalDateTime.now(), reference.getThreadId());
     }
 
     /**
@@ -251,7 +268,7 @@ public class PowerStatistics extends TimerTask {
      * @return <code>DataPoint</code> with new <code>unit</code>
      */
     public DataPoint cloneDataPointWithNewUnit(@NotNull DataPoint dp, @NotNull Unit unit) {
-        return new DataPoint(dp.getName(), dp.getValue(), unit, dp.getTime());
+        return new DataPoint(dp.getName(), dp.getValue(), unit, dp.getTime(), dp.getThreadId());
     }
 
 }

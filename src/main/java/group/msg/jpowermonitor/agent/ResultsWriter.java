@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor.agent;
 
 import group.msg.jpowermonitor.ResultCsvWriter;
+import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.MethodActivity;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class ResultsWriter implements Runnable {
 
     private String energyConsumptionPerMethodFileName;
     private String energyConsumptionPerFilteredMethodFileName;
-    private String measurementsFileName;
+    private String powerConsumptionPerMethodFileName;
 
     /**
      * Constructor
@@ -56,7 +57,7 @@ public class ResultsWriter implements Runnable {
     private void initCsvFileNames() {
         energyConsumptionPerMethodFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_energy_per_method.csv";
         energyConsumptionPerFilteredMethodFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_energy_per_method_filtered.csv";
-        measurementsFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_measurements.csv";
+        powerConsumptionPerMethodFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_power_per_method.csv";
     }
 
     private void writeEnergyConsumptionToCsv() {
@@ -97,19 +98,17 @@ public class ResultsWriter implements Runnable {
         writeToFile(createCsv(measurements), fileName);
     }
 
-    public void createCsvAndWriteToFile(Collection<MethodActivity> measurements) {
-        writeToFile(createCsv(measurements), measurementsFileName, true);
+    public void createCsvAndWriteToFile(Collection<Activity> measurements) {
+        writeToFile(
+            createCsv(powerStatistics.aggregateActivityToDataPoints(measurements, false)),
+            powerConsumptionPerMethodFileName,
+            true
+        );
     }
 
     protected String createCsv(Map<String, DataPoint> measurements) {
         StringBuilder csv = new StringBuilder();
         measurements.forEach((method, energy) -> csv.append(ResultCsvWriter.createCsvEntryForDataPoint(energy, method, "")));
-        return csv.toString();
-    }
-
-    protected String createCsv(Collection<MethodActivity> measurements) {
-        StringBuilder csv = new StringBuilder();
-        measurements.forEach(activity -> csv.append(ResultCsvWriter.createCsvEntryForMethodActivity(activity)));
         return csv.toString();
     }
 

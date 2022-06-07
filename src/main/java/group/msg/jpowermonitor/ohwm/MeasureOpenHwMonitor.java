@@ -92,7 +92,7 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
         String[] valueAndUnit = elem.getValue().split("\\s+");// (( "5,4 W" ))
         BigDecimal value = new BigDecimal(valueAndUnit[0].replace(',', '.').trim());
         Unit unit = Unit.fromAbbreviation(valueAndUnit[1].trim());
-        return new DataPoint(String.join("->", pathElement.getPath()), value, unit, time);
+        return new DataPoint(String.join("->", pathElement.getPath()), value, unit, time, null);
     }
 
     @Override
