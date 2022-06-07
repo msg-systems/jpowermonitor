@@ -7,7 +7,7 @@ import java.util.Optional;
 
 @Data
 public class MethodActivity implements Activity {
-    Long threadId;
+    Long processID;
     LocalDateTime time;
     String methodQualifier;
     String filteredMethodQualifier;

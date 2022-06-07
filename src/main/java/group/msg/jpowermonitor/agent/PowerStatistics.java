@@ -14,11 +14,8 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -108,7 +105,7 @@ public class PowerStatistics extends TimerTask {
                 long threadId = thread.getId();
                 methodActivityPerThread.putIfAbsent(threadId, new HashSet<>());
                 MethodActivity activity = new MethodActivity();
-                activity.setThreadId(threadId);
+                activity.setProcessID(threadId);
                 activity.setTime(LocalDateTime.now());
 
                 Arrays.stream(stackTrace)
@@ -201,6 +198,16 @@ public class PowerStatistics extends TimerTask {
         return pid;
     }
 
+    /**
+     * Creates a new {@link DataPoint} equivalent for the {@link Activity} provided.
+     *
+     * @param activity
+     *  {@link Activity} to create a {@link DataPoint} for
+     * @param filtered
+     *  if the {@link Activity}'s identifier should be filtered
+     *
+     * @return new {@link DataPoint}
+     * */
     public DataPoint getDataPointFrom(Activity activity, boolean filtered) {
         log.trace("activity = {}", activity);
         Optional<Quantity> quantity = Optional.ofNullable(activity.getRepresentedQuantity());
@@ -210,12 +217,33 @@ public class PowerStatistics extends TimerTask {
             quantity.map(Quantity::getValue).orElse(null),
             quantity.map(Quantity::getUnit).orElse(null),
             activity.getTime(),
-            activity.getThreadId()
+            activity.getProcessID()
         );
     }
 
-    protected Map<String, DataPoint> aggregateActivityToDataPoints(Collection<Activity> activitySet, boolean filtered) {
-        return activitySet.stream()
+    /**
+     * Transforms a {@link Collection} of {@link Activity}s into a {@link Map} of {@link DataPoint}s
+     * where each entry consists of
+     * <ul>
+     *     <li>
+     *         key - the activity identifier
+     *     </li>
+     *     <li>
+     *         value - a {@link DataPoint} consisting of the sum of all {@link Activity}s
+     *         resp. their {@link Quantity} with the identifier in the collection provided
+     *     </li>
+     * </ul>
+     *
+     * @param activityCollection
+     *  {@link Collection} of {@link Activity}s
+     * @param filtered
+     *  if the filtered identifier should be used instead
+     *
+     * @return
+     *  aggregated {@link Map}
+     * */
+    public Map<String, DataPoint> aggregateActivityToDataPoints(Collection<Activity> activityCollection, boolean filtered) {
+        return activityCollection.stream()
             .filter(activity -> activity.getIdentifier(filtered) != null)
             .filter(Activity::isFinalized)
             .collect(Collectors.toMap(
