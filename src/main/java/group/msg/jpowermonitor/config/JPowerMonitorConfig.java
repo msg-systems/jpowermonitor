@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+
 import lombok.Data;
 
 @Data
@@ -15,10 +16,11 @@ public class JPowerMonitorConfig {
     private Integer initCycles;
     private Integer calmDownIntervalInMs;
     private BigDecimal percentageOfSamplesAtBeginningToDiscard;
+    private String measureMethod;
+    private String hwinfoCsvFile;
     private OpenHardwareMonitor openHardwareMonitor;
     private CsvRecording csvRecording;
     private JavaAgent javaAgent;
-
 
     void initializeConfiguration() {
         if (openHardwareMonitor == null
@@ -49,6 +51,8 @@ public class JPowerMonitorConfig {
         setDefaultIfNotSet(javaAgent, this::setJavaAgent, new JavaAgent());
         setDefaultIfNotSet(javaAgent.getPackageFilter(), javaAgent::setPackageFilter,
             Collections.emptySet());
+        setDefaultIfNotSet(measureMethod, this::setMeasureMethod,
+            "ohwm");
     }
 
     private static <T> void setDefaultIfNotSet(T currentValue, Consumer<T> consumer,

@@ -2,6 +2,8 @@ package group.msg.jpowermonitor.junit;
 
 import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.agent.Unit;
+import group.msg.jpowermonitor.config.DefaultConfigProvider;
+import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.PowerQuestionable;
 import group.msg.jpowermonitor.dto.SensorValue;
@@ -52,8 +54,9 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        measureMethod = new MeasureOpenHwMonitor();
-        measureMethod.init(context.getTestClass().map(c -> c.getSimpleName() + ".yaml").orElse(null));
+        String configFile = context.getTestClass().map(c -> c.getSimpleName() + ".yaml").orElse(null);
+        JPowerMonitorConfig config = new DefaultConfigProvider().readConfig(configFile);
+        measureMethod = MeasureMethodProvider.resolveMeasureMethod(config);
         resultsWriter = new ResultsWriter(measureMethod.getPathToResultCsv(), measureMethod.getPathToMeasurementCsv());
         energyInIdleMode = measureIdleMode();
     }

@@ -33,10 +33,9 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
     HttpClient client;
     JPowerMonitorConfig config;
 
-    @Override
-    public void init(String configFile) throws JPowerMonitorException {
-        config = new DefaultConfigProvider().readConfig(configFile);
-        client = HttpClientBuilder.create().build();
+    public MeasureOpenHwMonitor(JPowerMonitorConfig config) {
+        this.config = config;
+        this.client = HttpClientBuilder.create().build();
     }
 
     @Override

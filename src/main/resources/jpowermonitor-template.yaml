@@ -11,6 +11,10 @@ percentageOfSamplesAtBeginningToDiscard: 20
 # Sampling interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
 # Too short intervals also affect the energy consumption!
 samplingIntervalInMs: 300
+# Which measure method to be used. Possible values: ohwm, hwinfo - defaults to ohwm
+measureMethod: 'hwinfo'
+# absolut path to csvfile to read from
+hwinfoCsvFile: 'C:/greencoding/HWINFO_ohne_footer.CSV'
 # ------------------------------------------------
 # configuration for accessing open hardware monitor
 openHardwareMonitor:

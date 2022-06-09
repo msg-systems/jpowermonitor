@@ -11,12 +11,6 @@ import java.util.Map;
 
 public interface MeasureMethod {
     /**
-     * Method for optional initialization of the MeasureMethod.
-     * @param configFileName the name of the config file to read from classpath, pass null for using the default.
-     */
-    void init(String configFileName);
-
-    /**
      * Measure all data points for the configured paths.
      *
      * @return all data point for the configured paths.

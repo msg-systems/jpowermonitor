@@ -1,6 +1,9 @@
 package group.msg.jpowermonitor.agent;
 
 import group.msg.jpowermonitor.MeasureMethod;
+import group.msg.jpowermonitor.MeasureMethodProvider;
+import group.msg.jpowermonitor.config.DefaultConfigProvider;
+import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.ohwm.MeasureOpenHwMonitor;
 
@@ -15,9 +18,8 @@ class MeasurePower {
     private static final MeasureMethod measureMethod;
 
     static {
-        // Init power measurement with OpenHardwareMonitor (TODO: Factory?)
-        measureMethod = new MeasureOpenHwMonitor();
-        measureMethod.init(null); // use default
+        JPowerMonitorConfig config = new DefaultConfigProvider().readConfig(null);
+        measureMethod = MeasureMethodProvider.resolveMeasureMethod(config);
     }
 
     /**
