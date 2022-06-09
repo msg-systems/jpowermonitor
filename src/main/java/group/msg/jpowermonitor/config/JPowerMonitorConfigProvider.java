@@ -1,6 +1,6 @@
 package group.msg.jpowermonitor.config;
 
-import group.msg.jpowermonitor.JPowerMonitorException;
+import group.msg.jpowermonitor.*;
 
 /**
  * Interface for reading JPowerMonitor configuration.
@@ -21,4 +21,16 @@ public interface JPowerMonitorConfigProvider {
      */
     JPowerMonitorConfig readConfig(String source) throws JPowerMonitorException;
 
+    /**
+     * Checks wether the given source name is a valid configuration source.
+     * <p>
+     * The default implementations assumes any non-empty and non-null string as a valid source.
+     * Other implementations can overwrite this to implement different logic.
+     *
+     * @param source Source name that has to be checked
+     * @return <code>true</code> if the given source is a valid source name
+     */
+    default boolean isValidSource(String source) {
+        return source != null && !source.isEmpty();
+    }
 }
