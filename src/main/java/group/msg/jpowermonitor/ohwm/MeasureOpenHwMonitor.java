@@ -8,6 +8,15 @@ import group.msg.jpowermonitor.config.DefaultConfigProvider;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.config.PathElement;
 import group.msg.jpowermonitor.dto.DataPoint;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
@@ -18,18 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Slf4j
 public class MeasureOpenHwMonitor implements MeasureMethod {
-
     HttpClient client;
     JPowerMonitorConfig config;
 
@@ -38,7 +38,6 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
         config = new DefaultConfigProvider().readConfig(configFile);
         client = HttpClientBuilder.create().build();
     }
-
 
     @Override
     public @NotNull List<DataPoint> measure() throws JPowerMonitorException {
@@ -152,8 +151,7 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
         return findElementInTree(root, path, (String) path[path.length - 1], 0);
     }
 
-    private DataElem findElementInTree(@NonNull DataElem elem, Object[] parentNodes, String name,
-        int level) {
+    private DataElem findElementInTree(@NonNull DataElem elem, Object[] parentNodes, String name, int level) {
         log.trace("looking at element '{}'", elem.getText());
         if (elem.getText().equals(name)) {
             return elem;

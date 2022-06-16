@@ -1,5 +1,6 @@
-package group.msg.jpowermonitor;
+package group.msg.jpowermonitor.junit;
 
+import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.SensorValue;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 @Slf4j
-public class ResultCsvWriter {
+public class ResultsWriter {
     static {
         setLocaleDependentValues();
     }
@@ -41,7 +42,7 @@ public class ResultCsvWriter {
         DECIMAL_FORMAT = new DecimalFormat("###0.#####", DecimalFormatSymbols.getInstance(Locale.getDefault()));
     }
 
-    public ResultCsvWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv) {
+    public ResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv) {
         log.debug("Writing result using locale: {}", Locale.getDefault());
         this.pathToResultCsv = pathToResultCsv;
         this.pathToMeasurementCsv = pathToMeasurementCsv;

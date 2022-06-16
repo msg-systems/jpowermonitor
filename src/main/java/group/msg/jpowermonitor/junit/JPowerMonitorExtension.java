@@ -1,5 +1,6 @@
-package group.msg.jpowermonitor;
+package group.msg.jpowermonitor.junit;
 
+import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.PowerQuestionable;
@@ -45,13 +46,13 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     private long timeBeforeTest;
     private MeasureMethod measureMethod;
     private Map<String, BigDecimal> energyInIdleMode;
-    private ResultCsvWriter resultCsvWriter;
+    private ResultsWriter resultsWriter;
 
     @Override
     public void beforeAll(ExtensionContext context) {
         measureMethod = new MeasureOpenHwMonitor();
         measureMethod.init(context.getTestClass().map(c -> c.getSimpleName() + ".yaml").orElse(null));
-        resultCsvWriter = new ResultCsvWriter(measureMethod.getPathToResultCsv(), measureMethod.getPathToMeasurementCsv());
+        resultsWriter = new ResultsWriter(measureMethod.getPathToResultCsv(), measureMethod.getPathToMeasurementCsv());
         energyInIdleMode = measureIdleMode();
     }
 
@@ -89,8 +90,8 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             SensorValue sensorValue = calculateResult(timeTaken, energyInIdleMode.get(entry.getKey()), average);
             sensorValues.add(sensorValue);
             logSensorValue(testName, sensorValue);
-            resultCsvWriter.writeToMeasurementCsv(testName, dataPointsToConsider);
-            resultCsvWriter.writeToResultCsv(testName, sensorValue);
+            resultsWriter.writeToMeasurementCsv(testName, dataPointsToConsider);
+            resultsWriter.writeToResultCsv(testName, sensorValue);
         }
         setSensorValueIntoAnnotatedFields(context, sensorValues);
     }
@@ -180,7 +181,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             List<DataPoint> dataPoints = entry.getValue();
             List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size()), dataPoints.size());  // cut off the first x% measurements
             DataPoint average = calculateAvg(dataPointsToConsider);
-            resultCsvWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
+            resultsWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
             BigDecimal prev = defaults.putIfAbsent(entry.getKey(), average.isPowerSensor() ? average.getValue() : BigDecimal.ZERO); // add zero, if not a power sensor!
             if (prev == null) { // then the key was not present in the map => log entry.
                 log.info("(measured) {} in idle mode for {} is {}", average.isPowerSensor() ? "energy consumption" : "sensor value", entry.getKey(), average.getValue());
