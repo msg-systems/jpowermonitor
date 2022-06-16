@@ -18,7 +18,7 @@ import org.yaml.snakeyaml.Yaml;
  * This configuration provider uses caching (e.g. reads only once per provider instance) and reads
  * the configuration as a YAML file (see <code>resources/jpowermonitor-template.yaml</code> for
  * example). In order to find a configuration, it uses the following sequence:
- * <nl>
+ * <ul>
  * <li>If a source is given, try reading from the file system.</li>
  * <li>If file system fails (for any reason), try reading with source from the resources.</li>
  * <li>If no source is given (or couldn't be read), fall back to using
@@ -26,7 +26,7 @@ import org.yaml.snakeyaml.Yaml;
  * <li>Try finding that default source in the file system.</li>
  * <li>If that fails, try finding it in the resources.</li>
  * <li>If nothing was found, throw an exception.</li>
- * </nl>
+ * </ul>
  */
 @Slf4j
 public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
