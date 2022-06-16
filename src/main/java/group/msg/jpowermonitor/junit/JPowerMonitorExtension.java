@@ -113,7 +113,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             Set<Field> sensorValueFields =
                 reflections.getFieldsAnnotatedWith(SensorValues.class)
                     .stream()
-                    .filter(field -> testInst.getClass().equals(field.getClass()) && field.getType().isAssignableFrom(List.class))
+                    .filter(field -> field.getType().isAssignableFrom(List.class))
                     .collect(Collectors.toSet());
             for (Field field : sensorValueFields) {
                 try {
