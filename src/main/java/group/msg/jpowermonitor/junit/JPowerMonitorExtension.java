@@ -15,6 +15,10 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -30,8 +34,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static org.reflections.scanners.Scanners.FieldsAnnotated;
 
 /**
  * Implements AfterTestExecutionCallback in order to be able to access results in the @AfterEach method in the test class.
@@ -109,7 +111,10 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         // Get the list of test instances (instances of test classes)
         final List<Object> testInstances = context.getRequiredTestInstances().getAllInstances();
         for (Object testInst : testInstances) {
-            Reflections reflections = new Reflections(testInst.getClass(), FieldsAnnotated);
+            Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setUrls(ClasspathHelper.forClass(testInst.getClass()))
+                .setScanners(Scanners.FieldsAnnotated)
+                .filterInputsBy(new FilterBuilder().add(s -> s.startsWith(testInst.getClass().getName())))); // only look at our current testclass!!
             Set<Field> sensorValueFields =
                 reflections.getFieldsAnnotatedWith(SensorValues.class)
                     .stream()

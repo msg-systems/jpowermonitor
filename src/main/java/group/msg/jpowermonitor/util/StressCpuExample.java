@@ -17,7 +17,7 @@ import java.util.function.Function;
 @Slf4j
 public class StressCpuExample {
 
-    public static final short DEFAULT_SECONDS_TO_RUN = 60;
+    public static final short DEFAULT_SECONDS_TO_RUN = 15;
 
     public static void main(String[] args) {
         CmdLineArgs cmdLineArgs = parseCmdLineArgs(args);
