@@ -1,6 +1,6 @@
 javadoc {
     classpath = configurations.compileClasspath
-    title = "${distName} API Documentation $version"
+    title = "${project.name} API Documentation $version"
     failOnError = true
     source = sourceSets.main.allJava
     options.optionFiles = [file("gradle/javadoc.options")]
@@ -8,14 +8,14 @@ javadoc {
 task copyJavadocToDist(type: Copy) {
     includeEmptyDirs = false
     from javadoc
-    into "${buildDir}/${distName}/doc"
+    into "${buildDir}/${project.name}/doc"
     dependsOn javadoc
 }
 task copyDocAndConfigFilesToDist(type: Copy) {
     includeEmptyDirs = false
     from('src/main/resources') { include '*-template.yaml' }
     from('.') { include 'README.md' }
-    into "${buildDir}/${distName}"
+    into "${buildDir}/${project.name}"
 }
 task copyLibsToDist(type: Copy) {
     includeEmptyDirs = false
@@ -23,7 +23,7 @@ task copyLibsToDist(type: Copy) {
     include '**/*.jar'
     exclude "${project.name}*.jar"
     from sourceSets.main.runtimeClasspath
-    into "${buildDir}/${distName}/lib"
+    into "${buildDir}/${project.name}/lib"
     dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist
 }
 task copyMainLibToDist(type: Copy) {
@@ -31,16 +31,16 @@ task copyMainLibToDist(type: Copy) {
     from jar
     include "${project.name}*.jar"
     from sourceSets.main.runtimeClasspath
-    into "${buildDir}/${distName}"
+    into "${buildDir}/${project.name}"
     dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist
 }
 task dist(type: Zip) {
     group = 'build'
-    description("Creates the ${distName}.zip with all jars")
+    description("Creates the ${project.name}.zip with all jars")
     from("${buildDir}") {
-        include "${distName}/**"
+        include "${project.name}/**"
     }
-    archiveFileName = "${buildDir}/${distName}.zip"
+    archiveFileName = "${buildDir}/${project.name}.zip"
     dependsOn copyMainLibToDist, copyDocAndConfigFilesToDist, copyJavadocToDist, copyLibsToDist
 }
 

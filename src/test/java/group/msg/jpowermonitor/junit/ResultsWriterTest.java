@@ -1,4 +1,4 @@
-package group.msg.jpowermonitor;
+package group.msg.jpowermonitor.junit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class ResultCsvWriterTest {
+class ResultsWriterTest {
     private static final String NEW_LINE = System.getProperty("line.separator");
 
     static Stream<Arguments> l10nTestConstructorValues() {
@@ -41,9 +41,9 @@ class ResultCsvWriterTest {
         Files.deleteIfExists(pathToResultCsv);
         Files.deleteIfExists(pathToMeasurementCsv);
         Locale.setDefault(currentLocale);
-        ResultCsvWriter.setLocaleDependentValues();
+        ResultsWriter.setLocaleDependentValues();
         // Act
-        new ResultCsvWriter(pathToResultCsv, pathToMeasurementCsv);
+        new ResultsWriter(pathToResultCsv, pathToMeasurementCsv);
         // Assert
         Assertions.assertEquals(expContentResultCsv + NEW_LINE, Files.readString(pathToResultCsv, StandardCharsets.UTF_8)); // trim carriage-return
         Assertions.assertEquals(expContentMeasurementCsv + NEW_LINE, Files.readString(pathToMeasurementCsv, StandardCharsets.UTF_8)); // trim carriage-return

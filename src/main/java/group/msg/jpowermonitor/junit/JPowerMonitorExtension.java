@@ -1,5 +1,6 @@
-package group.msg.jpowermonitor;
+package group.msg.jpowermonitor.junit;
 
+import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.PowerQuestionable;
@@ -14,6 +15,10 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -30,8 +35,6 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.reflections.scanners.Scanners.FieldsAnnotated;
-
 /**
  * Implements AfterTestExecutionCallback in order to be able to access results in the @AfterEach method in the test class.
  * AfterEachCallback would be too late, since @AfterEach is called before this callback.
@@ -45,13 +48,13 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     private long timeBeforeTest;
     private MeasureMethod measureMethod;
     private Map<String, BigDecimal> energyInIdleMode;
-    private ResultCsvWriter resultCsvWriter;
+    private ResultsWriter resultsWriter;
 
     @Override
     public void beforeAll(ExtensionContext context) {
         measureMethod = new MeasureOpenHwMonitor();
         measureMethod.init(context.getTestClass().map(c -> c.getSimpleName() + ".yaml").orElse(null));
-        resultCsvWriter = new ResultCsvWriter(measureMethod.getPathToResultCsv(), measureMethod.getPathToMeasurementCsv());
+        resultsWriter = new ResultsWriter(measureMethod.getPathToResultCsv(), measureMethod.getPathToMeasurementCsv());
         energyInIdleMode = measureIdleMode();
     }
 
@@ -89,8 +92,8 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             SensorValue sensorValue = calculateResult(timeTaken, energyInIdleMode.get(entry.getKey()), average);
             sensorValues.add(sensorValue);
             logSensorValue(testName, sensorValue);
-            resultCsvWriter.writeToMeasurementCsv(testName, dataPointsToConsider);
-            resultCsvWriter.writeToResultCsv(testName, sensorValue);
+            resultsWriter.writeToMeasurementCsv(testName, dataPointsToConsider);
+            resultsWriter.writeToResultCsv(testName, sensorValue);
         }
         setSensorValueIntoAnnotatedFields(context, sensorValues);
     }
@@ -108,11 +111,14 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         // Get the list of test instances (instances of test classes)
         final List<Object> testInstances = context.getRequiredTestInstances().getAllInstances();
         for (Object testInst : testInstances) {
-            Reflections reflections = new Reflections(testInst.getClass(), FieldsAnnotated);
+            Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setUrls(ClasspathHelper.forClass(testInst.getClass()))
+                .setScanners(Scanners.FieldsAnnotated)
+                .filterInputsBy(new FilterBuilder().add(s -> s.startsWith(testInst.getClass().getName())))); // only look at our current testclass!!
             Set<Field> sensorValueFields =
                 reflections.getFieldsAnnotatedWith(SensorValues.class)
                     .stream()
-                    .filter(field -> testInst.getClass().equals(field.getClass()) && field.getType().isAssignableFrom(List.class))
+                    .filter(field -> field.getType().isAssignableFrom(List.class))
                     .collect(Collectors.toSet());
             for (Field field : sensorValueFields) {
                 try {
@@ -180,7 +186,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             List<DataPoint> dataPoints = entry.getValue();
             List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size()), dataPoints.size());  // cut off the first x% measurements
             DataPoint average = calculateAvg(dataPointsToConsider);
-            resultCsvWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
+            resultsWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
             BigDecimal prev = defaults.putIfAbsent(entry.getKey(), average.isPowerSensor() ? average.getValue() : BigDecimal.ZERO); // add zero, if not a power sensor!
             if (prev == null) { // then the key was not present in the map => log entry.
                 log.info("(measured) {} in idle mode for {} is {}", average.isPowerSensor() ? "energy consumption" : "sensor value", entry.getKey(), average.getValue());

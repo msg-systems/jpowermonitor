@@ -5,13 +5,21 @@ import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.MethodActivity;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Write power and energy measurement results to CSV files at application shutdown.
@@ -20,6 +28,16 @@ import java.util.function.Consumer;
  */
 @Slf4j
 public class ResultsWriter implements Runnable {
+    private static final String NEW_LINE = System.getProperty("line.separator");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd'T'HH:mm:ss-SSS");
+    private static final DecimalFormat DECIMAL_FORMAT;
+    private static final String dataPointFormatCsv;
+
+    static {
+        dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s%s";
+        DECIMAL_FORMAT = new DecimalFormat("###0.#####", DecimalFormatSymbols.getInstance(Locale.getDefault()));
+    }
+
     private static final double JOULE_TO_WATT_HOURS_FACTOR = 3600.0d;
     private static final double WATT_HOURS_TO_KWH_FACTOR = 1000.0d;
     protected static final String FILE_NAME_PREFIX = JPowerMonitorAgent.class.getSimpleName() + "_";
@@ -61,7 +79,8 @@ public class ResultsWriter implements Runnable {
     }
 
     private void writeEnergyConsumptionToCsv() {
-        if (powerStatistics == null) {
+        List<Activity> recentActivity = powerStatistics == null ? null : powerStatistics.getRecentActivity();
+        if (recentActivity == null || recentActivity.isEmpty()) {
             return;
         }
         createCsvAndWriteToFile(powerStatistics.getEnergyConsumption(false), energyConsumptionPerMethodFileName);
@@ -108,8 +127,12 @@ public class ResultsWriter implements Runnable {
 
     protected String createCsv(Map<String, DataPoint> measurements) {
         StringBuilder csv = new StringBuilder();
-        measurements.forEach((method, energy) -> csv.append(ResultCsvWriter.createCsvEntryForDataPoint(energy, method, "")));
+        measurements.forEach((method, energy) -> csv.append(createCsvEntryForDataPoint(energy, method)));
         return csv.toString();
+    }
+
+    public String createCsvEntryForDataPoint(@NotNull DataPoint dp, String namePrefix) {
+        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), namePrefix, dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
     }
 
     protected void writeToFile(String csv, String fileName) {
