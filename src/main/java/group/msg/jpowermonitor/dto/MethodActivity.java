@@ -1,9 +1,9 @@
 package group.msg.jpowermonitor.dto;
 
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Data
 public class MethodActivity implements Activity {
@@ -14,10 +14,8 @@ public class MethodActivity implements Activity {
     Quantity representedQuantity;
 
     @Override
-    public String getIdentifier(boolean asFiltered) {
-        return Optional.ofNullable(methodQualifier)
-            .filter(qualifier -> !asFiltered)
-            .orElseGet(() -> Optional.ofNullable(filteredMethodQualifier).orElse(methodQualifier));
+    public @NotNull String getIdentifier(boolean asFiltered) {
+        return asFiltered || methodQualifier == null ? filteredMethodQualifier : methodQualifier;
     }
 
     @Override
