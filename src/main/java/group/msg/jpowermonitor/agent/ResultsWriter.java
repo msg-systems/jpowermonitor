@@ -1,6 +1,5 @@
 package group.msg.jpowermonitor.agent;
 
-import group.msg.jpowermonitor.ResultCsvWriter;
 import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.MethodActivity;
@@ -79,10 +78,6 @@ public class ResultsWriter implements Runnable {
     }
 
     private void writeEnergyConsumptionToCsv() {
-        List<Activity> recentActivity = powerStatistics == null ? null : powerStatistics.getRecentActivity();
-        if (recentActivity == null || recentActivity.isEmpty()) {
-            return;
-        }
         createCsvAndWriteToFile(powerStatistics.getEnergyConsumption(false), energyConsumptionPerMethodFileName);
         createCsvAndWriteToFile(powerStatistics.getEnergyConsumption(true), energyConsumptionPerFilteredMethodFileName);
     }
