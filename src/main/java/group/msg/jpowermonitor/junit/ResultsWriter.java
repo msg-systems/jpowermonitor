@@ -37,7 +37,7 @@ public class ResultsWriter {
     public static void setLocaleDependentValues() {
         labels = ResourceBundle.getBundle("csvExport", Locale.getDefault());
         SEP = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? ";" : ",";
-        dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s,%s%s";
+        dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s%s";
         sensorValueFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s" : "%s,%s,%s,%s,%s,%s";
         powerSensorValueFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s" : "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s";
         DECIMAL_FORMAT = new DecimalFormat("###0.#####", DecimalFormatSymbols.getInstance(Locale.getDefault()));
@@ -93,7 +93,6 @@ public class ResultsWriter {
 
     public static String createCsvEntryForDataPoint(@NotNull DataPoint dp, String namePrefix, String testName) {
         return String.format(dataPointFormatCsv,
-            dp.getThreadId(),
             DATE_TIME_FORMATTER.format(dp.getTime()),
             namePrefix + testName,
             dp.getName(),
