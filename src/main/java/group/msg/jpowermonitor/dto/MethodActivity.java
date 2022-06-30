@@ -1,7 +1,6 @@
 package group.msg.jpowermonitor.dto;
 
 import lombok.Data;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +13,7 @@ public class MethodActivity implements Activity {
     Quantity representedQuantity;
 
     @Override
-    public @NotNull String getIdentifier(boolean asFiltered) {
+    public String getIdentifier(boolean asFiltered) {
         return asFiltered || methodQualifier == null ? filteredMethodQualifier : methodQualifier;
     }
 

@@ -36,7 +36,6 @@ public class PowerStatistics extends TimerTask {
         new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now(), null));
     private final Map<Long, Long> threadsCpuTime = new HashMap<>();
     private final Map<String, DataPoint> energyConsumptionPerMethod = new ConcurrentHashMap<>();
-    private final Map<String, DataPoint> energyConsumptionPerFilteredMethod = new ConcurrentHashMap<>();
     private final long measurementInterval;
     private final long gatherStatisticsInterval;
     private final BigDecimal activityToEnergyRatio;
@@ -90,7 +89,7 @@ public class PowerStatistics extends TimerTask {
         // We allocated power to each method based on activity
         allocateEnergyUsageToActivity(methodActivityPerThread, powerPerThread);
 
-        writeMeasurements(methodActivityPerThread);
+        writePowerMeasurementsToCsvFiles(methodActivityPerThread);
     }
 
     private static void gatherMethodActivityPerThread(Map<Long, Set<MethodActivity>> methodActivityPerThread, Set<Thread> threads) {
@@ -163,18 +162,10 @@ public class PowerStatistics extends TimerTask {
             getDataPointFrom(activity, false),
             this::addDataPoint
         );
-
-        if (activity.getIdentifier(true) != null) {
-            energyConsumptionPerFilteredMethod.merge(
-                activity.getIdentifier(true),
-                getDataPointFrom(activity, true),
-                this::addDataPoint
-            );
-        }
     }
 
-    private void writeMeasurements(Map<Long, Set<MethodActivity>> methodActivityPerThread) {
-        new ResultsWriter(this, false).createCsvAndWriteToFile(
+    private void writePowerMeasurementsToCsvFiles(Map<Long, Set<MethodActivity>> methodActivityPerThread) {
+        new ResultsWriter(this, false).createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(
             methodActivityPerThread.values().stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList())
@@ -188,10 +179,9 @@ public class PowerStatistics extends TimerTask {
         return energyConsumptionTotalInJoule;
     }
 
-    public Map<String, DataPoint> getEnergyConsumption(boolean asFiltered) {
-        Map<String, DataPoint> energyConsumption = (asFiltered ? energyConsumptionPerFilteredMethod : energyConsumptionPerMethod);
-
-        return energyConsumption.entrySet().stream()
+    public Map<String, DataPoint> getEnergyConsumptionPerMethod(boolean asFiltered) {
+        return energyConsumptionPerMethod.entrySet().stream()
+            .filter(e -> asFiltered ? isMethodInFilterList(e.getKey()) : e.getKey() != null)
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

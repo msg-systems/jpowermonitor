@@ -1,7 +1,5 @@
 package group.msg.jpowermonitor.dto;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.time.LocalDateTime;
 
 /**
@@ -34,7 +32,6 @@ public interface Activity {
      * @return
      *  identifier of the kind of work measured, e.g. a method name
      * */
-    @NotNull
     String getIdentifier(boolean asFiltered);
 
     /**

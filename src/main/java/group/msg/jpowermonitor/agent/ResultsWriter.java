@@ -2,7 +2,6 @@ package group.msg.jpowermonitor.agent;
 
 import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
-import group.msg.jpowermonitor.dto.MethodActivity;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,14 +10,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Locale;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Write power and energy measurement results to CSV files at application shutdown.
@@ -48,6 +44,7 @@ public class ResultsWriter implements Runnable {
     private String energyConsumptionPerMethodFileName;
     private String energyConsumptionPerFilteredMethodFileName;
     private String powerConsumptionPerMethodFileName;
+    private String powerConsumptionPerFilteredMethodFileName;
 
     /**
      * Constructor
@@ -75,11 +72,12 @@ public class ResultsWriter implements Runnable {
         energyConsumptionPerMethodFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_energy_per_method.csv";
         energyConsumptionPerFilteredMethodFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_energy_per_method_filtered.csv";
         powerConsumptionPerMethodFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_power_per_method.csv";
+        powerConsumptionPerFilteredMethodFileName = FILE_NAME_PREFIX + powerStatistics.getPid() + "_power_per_method_filtered.csv";
     }
 
     private void writeEnergyConsumptionToCsv() {
-        createCsvAndWriteToFile(powerStatistics.getEnergyConsumption(false), energyConsumptionPerMethodFileName);
-        createCsvAndWriteToFile(powerStatistics.getEnergyConsumption(true), energyConsumptionPerFilteredMethodFileName);
+        createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(powerStatistics.getEnergyConsumptionPerMethod(false), energyConsumptionPerMethodFileName);
+        createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(powerStatistics.getEnergyConsumptionPerMethod(true), energyConsumptionPerFilteredMethodFileName);
     }
 
     private void logStatistics() {
@@ -108,16 +106,13 @@ public class ResultsWriter implements Runnable {
     }
 
 
-    public void createCsvAndWriteToFile(Map<String, DataPoint> measurements, String fileName) {
+    public void createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(Map<String, DataPoint> measurements, String fileName) {
         writeToFile(createCsv(measurements), fileName);
     }
 
-    public void createCsvAndWriteToFile(Collection<Activity> measurements) {
-        writeToFile(
-            createCsv(powerStatistics.aggregateActivityToDataPoints(measurements, false)),
-            powerConsumptionPerMethodFileName,
-            true
-        );
+    public void createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(Collection<Activity> measurements) {
+        writeToFile(createCsv(powerStatistics.aggregateActivityToDataPoints(measurements, false)), powerConsumptionPerMethodFileName, true);
+        writeToFile(createCsv(powerStatistics.aggregateActivityToDataPoints(measurements, true)), powerConsumptionPerFilteredMethodFileName,true);
     }
 
     protected String createCsv(Map<String, DataPoint> measurements) {
