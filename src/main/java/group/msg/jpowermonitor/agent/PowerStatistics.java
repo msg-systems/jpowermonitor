@@ -147,7 +147,6 @@ public class PowerStatistics extends TimerTask {
                 if (methodEnergy.getValue().signum() > 0) {
                     activity.setRepresentedQuantity(methodEnergy);
                     appendEnergyUsage(activity);
-                    appendEnergyUsage(activity);
                     activity.setRepresentedQuantity(methodPower);
                 }
             }
@@ -165,11 +164,13 @@ public class PowerStatistics extends TimerTask {
             this::addDataPoint
         );
 
-        energyConsumptionPerFilteredMethod.merge(
-            activity.getIdentifier(true),
-            getDataPointFrom(activity, true),
-            this::addDataPoint
-        );
+        if (activity.getIdentifier(true) != null) {
+            energyConsumptionPerFilteredMethod.merge(
+                activity.getIdentifier(true),
+                getDataPointFrom(activity, true),
+                this::addDataPoint
+            );
+        }
     }
 
     private void writeMeasurements(Map<Long, Set<MethodActivity>> methodActivityPerThread) {
