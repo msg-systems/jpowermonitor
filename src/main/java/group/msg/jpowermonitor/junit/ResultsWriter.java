@@ -2,6 +2,7 @@ package group.msg.jpowermonitor.junit;
 
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.dto.DataPoint;
+import group.msg.jpowermonitor.dto.MethodActivity;
 import group.msg.jpowermonitor.dto.SensorValue;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -91,7 +92,12 @@ public class ResultsWriter {
     }
 
     public static String createCsvEntryForDataPoint(@NotNull DataPoint dp, String namePrefix, String testName) {
-        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), namePrefix + testName, dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
+        return String.format(dataPointFormatCsv,
+            DATE_TIME_FORMATTER.format(dp.getTime()),
+            namePrefix + testName,
+            dp.getName(),
+            DECIMAL_FORMAT.format(dp.getValue()),
+            dp.getUnit(), NEW_LINE);
     }
 
     public void writeToResultCsv(String testName, SensorValue sensorValue) {

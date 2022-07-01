@@ -2,19 +2,19 @@ package group.msg.jpowermonitor.dto;
 
 import lombok.Data;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Data
 public class MethodActivity implements Activity {
+    Long processID;
+    LocalDateTime time;
     String methodQualifier;
     String filteredMethodQualifier;
     Quantity representedQuantity;
 
     @Override
     public String getIdentifier(boolean asFiltered) {
-        return Optional.ofNullable(methodQualifier)
-            .filter(qualifier -> !asFiltered)
-            .orElse(filteredMethodQualifier);
+        return asFiltered || methodQualifier == null ? filteredMethodQualifier : methodQualifier;
     }
 
     @Override
