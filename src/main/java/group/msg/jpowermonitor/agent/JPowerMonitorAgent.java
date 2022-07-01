@@ -37,7 +37,6 @@ public class JPowerMonitorAgent {
      * @param inst java agent params
      */
     public static void premain(String args, Instrumentation inst) {
-        Thread.currentThread().setName(JPowerMonitorAgent.class.getSimpleName() + "-Thread");
         System.out.println("Measuring power with " + JPowerMonitorAgent.class.getSimpleName() + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion());
         System.out.println(SEPARATOR);
         ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
