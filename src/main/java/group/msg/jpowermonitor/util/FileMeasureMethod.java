@@ -41,7 +41,7 @@ public class FileMeasureMethod implements MeasureMethod {
     @NotNull
     private DataPoint createDataPoint(Map<String, String> measurements) {
         String value = measurements.get("\"CPU Package Power [W]\"");
-        return new DataPoint(config.getHwinfoCsvFile(), new BigDecimal(value), Unit.WATT, LocalDateTime.now());
+        return new DataPoint(config.getHwinfoCsvFile(), new BigDecimal(value), Unit.WATT, LocalDateTime.now(), null);
     }
 
 

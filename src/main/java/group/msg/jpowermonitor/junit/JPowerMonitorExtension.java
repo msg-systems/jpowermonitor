@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor.junit;
 
 import group.msg.jpowermonitor.MeasureMethod;
+import group.msg.jpowermonitor.MeasureMethodProvider;
 import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.config.DefaultConfigProvider;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
