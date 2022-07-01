@@ -47,13 +47,13 @@ public class JPowerMonitorAgent {
         System.out.println(Thread.currentThread().getName() + ": Start monitoring application with PID " + pid);
 
         // TimerTask to calculate power consumption per thread at runtime using a configurable measurement interval
-        timer = new Timer();
+        timer = new Timer("PowerStatistics-Thread", true); // start Timer as daemon thread, so that it does not prevent applications from stopping
         powerStatistics = new PowerStatistics(config.getJavaAgent().getMeasurementIntervalInMs(), config.getJavaAgent().getGatherStatisticsIntervalInMs(), pid, threadMXBean, packageFilter);
         timer.schedule(powerStatistics, config.getJavaAgent().getGatherStatisticsIntervalInMs(), config.getJavaAgent().getGatherStatisticsIntervalInMs());
 
         // TimerTask to write energy measurement statistics to CSV files while application still running
         if (config.getJavaAgent().getWriteEnergyMeasurementsToCsvIntervalInS() > 0) {
-            writeEnergyMeasurementResultsToCsv = new Timer();
+            writeEnergyMeasurementResultsToCsv = new Timer("ResultsWriter-Thread", true); // start Timer as daemon thread, so that it does not prevent applications from stopping
             writeEnergyMeasurementResultsToCsv.schedule(new TimerTask() {
                                                             @Override
                                                             public void run() {
@@ -80,6 +80,8 @@ public class JPowerMonitorAgent {
             ));
 
         // Write results to CSV files
-        Runtime.getRuntime().addShutdownHook(new Thread(new ResultsWriter(powerStatistics, true)));
+        Thread powerStatThread = new Thread(new ResultsWriter(powerStatistics, true));
+        powerStatThread.setDaemon(true);
+        Runtime.getRuntime().addShutdownHook(powerStatThread);
     }
 }
