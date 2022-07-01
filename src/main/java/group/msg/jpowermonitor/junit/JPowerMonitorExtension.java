@@ -13,11 +13,6 @@ import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -26,6 +21,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -108,16 +104,13 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     private void setSensorValueIntoAnnotatedFields(ExtensionContext context, List<SensorValue> sensorValues) {
         // Get the list of test instances (instances of test classes)
         final List<Object> testInstances = context.getRequiredTestInstances().getAllInstances();
+        Set<Field> sensorValueFields = new HashSet<>();
         for (Object testInst : testInstances) {
-            Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forClass(testInst.getClass()))
-                .setScanners(Scanners.FieldsAnnotated)
-                .filterInputsBy(new FilterBuilder().add(s -> s.startsWith(testInst.getClass().getName())))); // only look at our current testclass!!
-            Set<Field> sensorValueFields =
-                reflections.getFieldsAnnotatedWith(SensorValues.class)
-                    .stream()
-                    .filter(field -> field.getType().isAssignableFrom(List.class))
-                    .collect(Collectors.toSet());
+            for (Field field : testInst.getClass().getDeclaredFields()) {
+                if (field.isAnnotationPresent(SensorValues.class) && field.getType().isAssignableFrom(List.class)) {
+                    sensorValueFields.add(field);
+                }
+            }
             for (Field field : sensorValueFields) {
                 try {
                     field.setAccessible(true);

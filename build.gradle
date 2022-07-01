@@ -23,7 +23,6 @@ dependencies {
         [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatatypeJsr310Version],
         [group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion],
         [group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion],
-        [group: 'org.reflections', name: 'reflections', version: reflectionsVersion],
     )
     compileOnly(
         [group: 'org.jetbrains', name: 'annotations', version: jetbrainsAnnotationsVersion],
