@@ -2,7 +2,6 @@ package group.msg.jpowermonitor.agent;
 
 import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
@@ -11,8 +10,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -21,7 +20,6 @@ import java.util.function.Consumer;
  *
  * @author deinerj
  */
-@Slf4j
 public class ResultsWriter implements Runnable {
     private static final String NEW_LINE = System.getProperty("line.separator");
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd'T'HH:mm:ss-SSS");
@@ -82,11 +80,9 @@ public class ResultsWriter implements Runnable {
 
     private void logStatistics() {
         if (doWriteStatistics && powerStatistics != null) {
-            log.info(SEPARATOR);
-            log.info("JPowerMonitorAgent successfully finished monitoring application with PID {}", powerStatistics.getPid());
-            logStatisticsCommon(log::info);
-        } else if (log.isTraceEnabled()) {
-            logStatisticsCommon(log::trace);
+            System.out.println(SEPARATOR);
+            System.out.println("JPowerMonitorAgent successfully finished monitoring application with PID " + powerStatistics.getPid());
+            logStatisticsCommon(System.out::println);
         }
     }
 
@@ -112,7 +108,7 @@ public class ResultsWriter implements Runnable {
 
     public void createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(Collection<Activity> measurements) {
         writeToFile(createCsv(powerStatistics.aggregateActivityToDataPoints(measurements, false)), powerConsumptionPerMethodFileName, true);
-        writeToFile(createCsv(powerStatistics.aggregateActivityToDataPoints(measurements, true)), powerConsumptionPerFilteredMethodFileName,true);
+        writeToFile(createCsv(powerStatistics.aggregateActivityToDataPoints(measurements, true)), powerConsumptionPerFilteredMethodFileName, true);
     }
 
     protected String createCsv(Map<String, DataPoint> measurements) {
@@ -133,7 +129,8 @@ public class ResultsWriter implements Runnable {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, append))) {
             bw.write(csv);
         } catch (IOException ex) {
-            log.error(ex.getLocalizedMessage(), ex);
+            System.err.println(ex.getLocalizedMessage());
+            ex.printStackTrace();
         }
     }
 

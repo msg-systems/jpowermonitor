@@ -1,6 +1,8 @@
 package group.msg.jpowermonitor.config;
 
 import group.msg.jpowermonitor.JPowerMonitorException;
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
@@ -9,8 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  * Default configuration provider preferring file system to resources.
@@ -28,7 +28,6 @@ import org.yaml.snakeyaml.Yaml;
  * <li>If nothing was found, throw an exception.</li>
  * </ul>
  */
-@Slf4j
 public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
 
     private static final String DEFAULT_CONFIG = "jpowermonitor.yaml";
@@ -48,12 +47,12 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         throws JPowerMonitorException {
         if (cachedConfig == null) {
             if (isValidSource(source)) {
-                log.info("Reading JPowerMonitor configuration from given source '{}'", source);
+                System.out.println("Reading JPowerMonitor configuration from given source '" + source + "'");
                 cachedConfig = acquireConfigFromSource(source);
             }
 
             if (cachedConfig == null) {
-                log.info("Reading JPowerMonitor configuration from default '{}'", DEFAULT_CONFIG);
+                System.out.println("Reading JPowerMonitor configuration from default '" + DEFAULT_CONFIG + "'");
                 cachedConfig = acquireConfigFromSource(DEFAULT_CONFIG);
             }
         }
@@ -69,8 +68,6 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         cfg.ifPresent(JPowerMonitorConfig::initializeConfiguration);
 
         if (cfg.isEmpty()) {
-            log.debug(
-                "Could not read JPowerMonitor configuration from filesystem, trying resources now");
             cfg = tryReadingFromResources(source);
             cfg.ifPresent(JPowerMonitorConfig::initializeConfiguration);
         }
@@ -87,20 +84,18 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     private Optional<JPowerMonitorConfig> tryReadingFromFileSystem(String source) {
         Path potentialConfig = Paths.get(source);
         if (!Files.isRegularFile(potentialConfig)) {
-            log.warn("'{}' is no regular file, we won't read it from filesystem", source);
+            System.out.println("'" + source + "' is no regular file, we won't read it from filesystem");
             return Optional.empty();
         }
 
         potentialConfig = potentialConfig.toAbsolutePath().normalize();
         try (Reader reader = Files.newBufferedReader(potentialConfig, yamlFileEncoding)) {
-            log.info(
-                "Trying to read '{}' from filesystem using encoding {}",
-                potentialConfig,
-                yamlFileEncoding.displayName());
+            System.out.println(
+                "Trying to read '" + potentialConfig + "' from filesystem using encoding " + yamlFileEncoding.displayName());
             JPowerMonitorConfig config = new Yaml().load(reader);
             return Optional.of(config);
         } catch (Exception exc) {
-            log.warn("Cannot read '{}' from filesystem", potentialConfig, exc);
+            System.err.println("Cannot read '" + potentialConfig + "' from filesystem" + exc.getMessage());
         }
 
         return Optional.empty();
@@ -108,7 +103,7 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
 
     private Optional<JPowerMonitorConfig> tryReadingFromResources(String source) {
         if (resourceLoader.getResource(source) == null) {
-            log.warn("'{}' is not available as resource", source);
+            System.out.println("'" + source + "' is not available as resource");
             return Optional.empty();
         }
 
@@ -116,7 +111,7 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
             JPowerMonitorConfig config = new Yaml().load(input);
             return Optional.of(config);
         } catch (Exception exc) {
-            log.warn("Cannot read '{}' from resources", source, exc);
+            System.out.println("Cannot read '" + source + "' from resources:" + exc.getMessage());
         }
 
         return Optional.empty();

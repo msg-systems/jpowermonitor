@@ -2,7 +2,6 @@ package group.msg.jpowermonitor.agent;
 
 import group.msg.jpowermonitor.config.DefaultConfigProvider;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
-import lombok.extern.slf4j.Slf4j;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ThreadMXBean;
@@ -21,7 +20,6 @@ import static group.msg.jpowermonitor.agent.ResultsWriter.SEPARATOR;
  *
  * @author deinerj
  */
-@Slf4j
 public class JPowerMonitorAgent {
 
     private static Timer timer;
@@ -39,14 +37,14 @@ public class JPowerMonitorAgent {
      * @param inst java agent params
      */
     public static void premain(String args, Instrumentation inst) {
-        Thread.currentThread().setName(JPowerMonitorAgent.class.getSimpleName() + " Thread");
-        log.info(JPowerMonitorAgent.class.getSimpleName());
-        log.info(SEPARATOR);
+        Thread.currentThread().setName(JPowerMonitorAgent.class.getSimpleName() + "-Thread");
+        System.out.println("Measuring power with " + JPowerMonitorAgent.class.getSimpleName() + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion());
+        System.out.println(SEPARATOR);
         ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
         long pid = ProcessHandle.current().pid();
         JPowerMonitorConfig config = new DefaultConfigProvider().readConfig(args);
         Set<String> packageFilter = config.getJavaAgent().getPackageFilter();
-        log.info("{}: Start monitoring application with PID {}", Thread.currentThread().getName(), pid);
+        System.out.println(Thread.currentThread().getName() + ": Start monitoring application with PID " + pid);
 
         // TimerTask to calculate power consumption per thread at runtime using a configurable measurement interval
         timer = new Timer();
@@ -59,7 +57,7 @@ public class JPowerMonitorAgent {
             writeEnergyMeasurementResultsToCsv.schedule(new TimerTask() {
                                                             @Override
                                                             public void run() {
-                                                                ResultsWriter rw = new ResultsWriter(powerStatistics,false);
+                                                                ResultsWriter rw = new ResultsWriter(powerStatistics, false);
                                                                 rw.execute();
                                                             }
                                                         }
@@ -77,9 +75,9 @@ public class JPowerMonitorAgent {
                     writeEnergyMeasurementResultsToCsv.cancel();
                     writeEnergyMeasurementResultsToCsv.purge();
                 }
-                log.info("Power measurement ended gracefully");
+                System.out.println("Power measurement ended gracefully");
             }
-        ));
+            ));
 
         // Write results to CSV files
         Runtime.getRuntime().addShutdownHook(new Thread(new ResultsWriter(powerStatistics, true)));

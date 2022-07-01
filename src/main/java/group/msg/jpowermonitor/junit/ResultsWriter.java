@@ -2,9 +2,7 @@ package group.msg.jpowermonitor.junit;
 
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.dto.DataPoint;
-import group.msg.jpowermonitor.dto.MethodActivity;
 import group.msg.jpowermonitor.dto.SensorValue;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +19,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-@Slf4j
 public class ResultsWriter {
     static {
         setLocaleDependentValues();
@@ -44,7 +41,6 @@ public class ResultsWriter {
     }
 
     public ResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv) {
-        log.debug("Writing result using locale: {}", Locale.getDefault());
         this.pathToResultCsv = pathToResultCsv;
         this.pathToMeasurementCsv = pathToMeasurementCsv;
         if (pathToResultCsv != null && !pathToResultCsv.toFile().exists()) {
@@ -68,7 +64,7 @@ public class ResultsWriter {
             if (fileToCreate.toFile().getParentFile() != null) {
                 boolean createdDir = fileToCreate.toFile().getParentFile().mkdirs();
                 if (createdDir) {
-                    log.debug("Created directory for writing the csv file to: {}", fileToCreate.toFile().getParentFile().getAbsolutePath());
+                    System.out.println("Created directory for writing the csv file to: " + fileToCreate.toFile().getParentFile().getAbsolutePath());
                 }
             }
             Files.createFile(fileToCreate);
@@ -135,7 +131,8 @@ public class ResultsWriter {
         try {
             Files.writeString(path, lineToAppend, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
         } catch (IOException e) {
-            log.error("Unable to append to csv file: {}", path, e);
+            System.err.println("Unable to append to csv file: " + path);
+            e.printStackTrace();
         }
     }
 }

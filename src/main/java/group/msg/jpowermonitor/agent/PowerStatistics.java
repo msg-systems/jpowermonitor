@@ -4,7 +4,6 @@ import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.MethodActivity;
 import group.msg.jpowermonitor.dto.Quantity;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ThreadMXBean;
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
 
 import static group.msg.jpowermonitor.agent.MeasurePower.getCurrentCpuPowerInWatts;
 
-@Slf4j
 public class PowerStatistics extends TimerTask {
 
     private static final String CLASS_METHOD_SEPARATOR = ".";
@@ -57,7 +55,6 @@ public class PowerStatistics extends TimerTask {
     @Override
     public void run() {
         Thread.currentThread().setName(PowerStatistics.class.getSimpleName() + " Thread");
-        log.trace("Start new gather statistics and power measurement cycle...");
 
         Map<Long, Set<MethodActivity>> methodActivityPerThread = new HashMap<>();
         Set<Thread> threads = Thread.getAllStackTraces().keySet();
@@ -70,7 +67,8 @@ public class PowerStatistics extends TimerTask {
             try {
                 TimeUnit.MILLISECONDS.sleep(gatherStatisticsInterval);
             } catch (InterruptedException ex) {
-                log.error(ex.getLocalizedMessage(), ex);
+                System.err.println(ex.getLocalizedMessage());
+                ex.printStackTrace();
             }
         }
 
@@ -195,15 +193,11 @@ public class PowerStatistics extends TimerTask {
     /**
      * Creates a new {@link DataPoint} equivalent for the {@link Activity} provided.
      *
-     * @param activity
-     *  {@link Activity} to create a {@link DataPoint} for
-     * @param filtered
-     *  if the {@link Activity}'s identifier should be filtered
-     *
+     * @param activity {@link Activity} to create a {@link DataPoint} for
+     * @param filtered if the {@link Activity}'s identifier should be filtered
      * @return new {@link DataPoint}
-     * */
+     */
     public DataPoint getDataPointFrom(Activity activity, boolean filtered) {
-        log.trace("activity = {}", activity);
         Optional<Quantity> quantity = Optional.ofNullable(activity.getRepresentedQuantity());
 
         return new DataPoint(
@@ -228,14 +222,10 @@ public class PowerStatistics extends TimerTask {
      *     </li>
      * </ul>
      *
-     * @param activityCollection
-     *  {@link Collection} of {@link Activity}s
-     * @param filtered
-     *  if the filtered identifier should be used instead
-     *
-     * @return
-     *  aggregated {@link Map}
-     * */
+     * @param activityCollection {@link Collection} of {@link Activity}s
+     * @param filtered           if the filtered identifier should be used instead
+     * @return aggregated {@link Map}
+     */
     public Map<String, DataPoint> aggregateActivityToDataPoints(Collection<Activity> activityCollection, boolean filtered) {
         return activityCollection.stream()
             .filter(activity -> activity.getIdentifier(filtered) != null)
@@ -255,11 +245,10 @@ public class PowerStatistics extends TimerTask {
      * @return <code>true</code>, if addable
      */
     public boolean areDataPointsAddable(@NotNull DataPoint dp1, @NotNull DataPoint dp2) {
-        log.trace("dp1 = {}, dp2 = {}", dp1, dp2);
         if (dp1.getUnit() == null || dp2.getUnit() == null
             || dp1.getValue() == null || dp2.getValue() == null
             || !dp1.getUnit().equals(dp2.getUnit())) {
-            log.error("not addable: dp1 = {}, dp2 = {}", dp1, dp2);
+            System.err.println("not addable: dp1 = " + dp1 + ", dp2 = " + dp2);
             return false;
         }
         return true;

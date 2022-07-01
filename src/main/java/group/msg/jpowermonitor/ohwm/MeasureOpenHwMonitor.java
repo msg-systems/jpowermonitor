@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class MeasureOpenHwMonitor implements MeasureMethod {
     HttpClient client;
     JPowerMonitorConfig config;
@@ -87,7 +86,6 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
             throw new JPowerMonitorException(
                 "Unable to find element for path " + pathElement.getPath() + "!");
         }
-        log.trace("Value: {} -> {}", pathElement, elem);
         String[] valueAndUnit = elem.getValue().split("\\s+");// (( "5,4 W" ))
         BigDecimal value = new BigDecimal(valueAndUnit[0].replace(',', '.').trim());
         Unit unit = Unit.fromAbbreviation(valueAndUnit[1].trim());
@@ -152,7 +150,6 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
     }
 
     private DataElem findElementInTree(@NonNull DataElem elem, Object[] parentNodes, String name, int level) {
-        log.trace("looking at element '{}'", elem.getText());
         if (elem.getText().equals(name)) {
             return elem;
         }

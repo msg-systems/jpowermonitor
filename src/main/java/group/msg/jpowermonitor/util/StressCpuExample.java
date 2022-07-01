@@ -1,7 +1,6 @@
 package group.msg.jpowermonitor.util;
 
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -14,7 +13,6 @@ import java.util.function.Function;
  *
  * @author deinerj
  */
-@Slf4j
 public class StressCpuExample {
 
     public static final short DEFAULT_SECONDS_TO_RUN = 15;
@@ -74,20 +72,20 @@ public class StressCpuExample {
                     cmdLineArgs.setCpuThreads(Integer.parseInt(args[1]));
                 }
             } catch (NumberFormatException ex) {
-                log.warn("Could not parse argument, using default of {} seconds and {} CPU threads", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads(), ex);
+                System.out.printf("Could not parse argument, using default of %s seconds and %s CPU threads: %s", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads(), ex.getMessage());
             }
         } else {
-            log.info("No arguments, using default of {} seconds and {} CPU threads", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads());
+            System.out.printf("No arguments, using default of %s seconds and %s CPU threads", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads());
         }
         return cmdLineArgs;
     }
 
     private static void logStart(String logPrefix, short secondsToRun, int usedCpuThreads) {
-        log.info("Start {}EndlessLoopCpuStressTest   for {} seconds using {} CPU thread(s)...", logPrefix, secondsToRun, usedCpuThreads);
+        System.out.printf("Start %sEndlessLoopCpuStressTest   for %s seconds using %s CPU thread(s)...", logPrefix, secondsToRun, usedCpuThreads);
     }
 
     private static void logEnd(String logPrefix, long start, long loopCounter, long sequentialLoopCounter) {
-        log.info("{}EndlessLoopCpuStressTest, took {} seconds, ran loop {} times, {}% of sequential", logPrefix, calcDurationSec(start), loopCounter, calcProgressPercentaged(loopCounter, sequentialLoopCounter));
+        System.out.printf("%s EndlessLoopCpuStressTest, took %s seconds, ran loop %s times, %s %% of sequential", logPrefix, calcDurationSec(start), loopCounter, calcProgressPercentaged(loopCounter, sequentialLoopCounter));
     }
 
     private static long calcDurationSec(long start) {
@@ -100,9 +98,9 @@ public class StressCpuExample {
 
     public static long runMeasurement(short secondsToRun, float factor, Function<Long, Long> runWorkload) {
         float secondsProportionally = secondsToRun * factor;
-        long runUntil = System.currentTimeMillis() + (long)(secondsProportionally * 1000);
+        long runUntil = System.currentTimeMillis() + (long) (secondsProportionally * 1000);
         long loopCounter = runWorkload.apply(runUntil);
-        log.trace("{} took {} seconds, ran loop {} times", Thread.currentThread().getName(), secondsProportionally, loopCounter);
+        System.out.printf("%s took %s seconds, ran loop %s times", Thread.currentThread().getName(), secondsProportionally, loopCounter);
         return loopCounter;
     }
 
@@ -118,10 +116,10 @@ public class StressCpuExample {
             try {
                 t.join();
             } catch (InterruptedException e) {
-                log.error(e.getLocalizedMessage(), e);
+                System.err.println(e.getLocalizedMessage());
             }
         });
-        log.trace("{} threads took {} seconds, ran loop {} times", parallelThreads, secondsToRun, sumLoopCounter);
+        System.out.printf("%s threads took %s seconds, ran loop %s times", parallelThreads, secondsToRun, sumLoopCounter);
         return sumLoopCounter.longValue();
     }
 
