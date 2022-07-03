@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+import static group.msg.jpowermonitor.agent.JPowerMonitorAgent.APP_TITLE;
+
 /**
  * Default configuration provider preferring file system to resources.
  * <p>
@@ -47,12 +49,12 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         throws JPowerMonitorException {
         if (cachedConfig == null) {
             if (isValidSource(source)) {
-                System.out.println("Reading JPowerMonitor configuration from given source '" + source + "'");
+                System.out.println("Reading " + APP_TITLE + " configuration from given source '" + source + "'");
                 cachedConfig = acquireConfigFromSource(source);
             }
 
             if (cachedConfig == null) {
-                System.out.println("Reading JPowerMonitor configuration from default '" + DEFAULT_CONFIG + "'");
+                System.out.println("Reading " + APP_TITLE + " configuration from default '" + DEFAULT_CONFIG + "'");
                 cachedConfig = acquireConfigFromSource(DEFAULT_CONFIG);
             }
         }

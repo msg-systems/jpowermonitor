@@ -15,6 +15,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static group.msg.jpowermonitor.agent.JPowerMonitorAgent.APP_TITLE;
+
 /**
  * Write power and energy measurement results to CSV files at application shutdown.
  *
@@ -33,7 +35,7 @@ public class ResultsWriter implements Runnable {
 
     private static final double JOULE_TO_WATT_HOURS_FACTOR = 3600.0d;
     private static final double WATT_HOURS_TO_KWH_FACTOR = 1000.0d;
-    protected static final String FILE_NAME_PREFIX = JPowerMonitorAgent.class.getSimpleName() + "_";
+    protected static final String FILE_NAME_PREFIX = (APP_TITLE != null ? APP_TITLE : JPowerMonitorAgent.class.getSimpleName()) + "_";
     protected static final String SEPARATOR = "-----------------------------------------------------------------------------------------";
 
     private final PowerStatistics powerStatistics;

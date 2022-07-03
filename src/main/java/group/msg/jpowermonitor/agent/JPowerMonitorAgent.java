@@ -1,7 +1,7 @@
 package group.msg.jpowermonitor.agent;
 
 import group.msg.jpowermonitor.config.DefaultConfigProvider;
-import group.msg.jpowermonitor.config.JPowerMonitorConfig;
+import group.msg.jpowermonitor.config.JavaAgent;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ThreadMXBean;
@@ -25,6 +25,7 @@ public class JPowerMonitorAgent {
     private static Timer timer;
     private static PowerStatistics powerStatistics;
     private static Timer writeEnergyMeasurementResultsToCsv;
+    public static String APP_TITLE = JPowerMonitorAgent.class.getPackage().getImplementationTitle();
 
     private JPowerMonitorAgent() {
     }
@@ -37,31 +38,29 @@ public class JPowerMonitorAgent {
      * @param inst java agent params
      */
     public static void premain(String args, Instrumentation inst) {
-        System.out.println("Measuring power with " + JPowerMonitorAgent.class.getSimpleName() + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion());
+        System.out.println("Measuring power with " + APP_TITLE + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion());
         System.out.println(SEPARATOR);
         ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
         long pid = ProcessHandle.current().pid();
-        JPowerMonitorConfig config = new DefaultConfigProvider().readConfig(args);
-        Set<String> packageFilter = config.getJavaAgent().getPackageFilter();
+        JavaAgent javaAgentCfg = new DefaultConfigProvider().readConfig(args).getJavaAgent();
+        Set<String> packageFilter = javaAgentCfg.getPackageFilter();
         System.out.println(Thread.currentThread().getName() + ": Start monitoring application with PID " + pid);
 
         // TimerTask to calculate power consumption per thread at runtime using a configurable measurement interval
         timer = new Timer("PowerStatistics-Thread", true); // start Timer as daemon thread, so that it does not prevent applications from stopping
-        powerStatistics = new PowerStatistics(config.getJavaAgent().getMeasurementIntervalInMs(), config.getJavaAgent().getGatherStatisticsIntervalInMs(), pid, threadMXBean, packageFilter);
-        timer.schedule(powerStatistics, config.getJavaAgent().getGatherStatisticsIntervalInMs(), config.getJavaAgent().getGatherStatisticsIntervalInMs());
+        powerStatistics = new PowerStatistics(javaAgentCfg.getMeasurementIntervalInMs(), javaAgentCfg.getGatherStatisticsIntervalInMs(), pid, threadMXBean, packageFilter);
+        timer.schedule(powerStatistics, javaAgentCfg.getGatherStatisticsIntervalInMs(), javaAgentCfg.getGatherStatisticsIntervalInMs());
 
         // TimerTask to write energy measurement statistics to CSV files while application still running
-        if (config.getJavaAgent().getWriteEnergyMeasurementsToCsvIntervalInS() > 0) {
+        if (javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() > 0) {
             writeEnergyMeasurementResultsToCsv = new Timer("ResultsWriter-Thread", true); // start Timer as daemon thread, so that it does not prevent applications from stopping
             writeEnergyMeasurementResultsToCsv.schedule(new TimerTask() {
-                                                            @Override
-                                                            public void run() {
-                                                                ResultsWriter rw = new ResultsWriter(powerStatistics, false);
-                                                                rw.execute();
-                                                            }
-                                                        }
-                , config.getJavaAgent().getWriteEnergyMeasurementsToCsvIntervalInS() * 1000
-                , config.getJavaAgent().getWriteEnergyMeasurementsToCsvIntervalInS() * 1000);
+                @Override
+                public void run() {
+                    ResultsWriter rw = new ResultsWriter(powerStatistics, false);
+                    rw.execute();
+                }
+            }, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * 1000, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * 1000);
         }
 
         // Gracefully stop measurement at application shutdown
