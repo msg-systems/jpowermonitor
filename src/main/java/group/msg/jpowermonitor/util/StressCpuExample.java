@@ -72,20 +72,20 @@ public class StressCpuExample {
                     cmdLineArgs.setCpuThreads(Integer.parseInt(args[1]));
                 }
             } catch (NumberFormatException ex) {
-                System.out.printf("Could not parse argument, using default of %s seconds and %s CPU threads: %s", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads(), ex.getMessage());
+                System.out.printf("Could not parse argument, using default of %s seconds and %s CPU threads: %s%n", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads(), ex.getMessage());
             }
         } else {
-            System.out.printf("No arguments, using default of %s seconds and %s CPU threads", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads());
+            System.out.printf("No arguments, using default of %s seconds and %s CPU threads%n", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads());
         }
         return cmdLineArgs;
     }
 
     private static void logStart(String logPrefix, short secondsToRun, int usedCpuThreads) {
-        System.out.printf("Start %sEndlessLoopCpuStressTest   for %s seconds using %s CPU thread(s)...", logPrefix, secondsToRun, usedCpuThreads);
+        System.out.printf("Start %sEndlessLoopCpuStressTest   for %s seconds using %s CPU thread(s)...%n", logPrefix, secondsToRun, usedCpuThreads);
     }
 
     private static void logEnd(String logPrefix, long start, long loopCounter, long sequentialLoopCounter) {
-        System.out.printf("%s EndlessLoopCpuStressTest, took %s seconds, ran loop %s times, %s %% of sequential", logPrefix, calcDurationSec(start), loopCounter, calcProgressPercentaged(loopCounter, sequentialLoopCounter));
+        System.out.printf("%s EndlessLoopCpuStressTest, took %s seconds, ran loop %s times, %s %% of sequential%n", logPrefix, calcDurationSec(start), loopCounter, calcProgressPercentaged(loopCounter, sequentialLoopCounter));
     }
 
     private static long calcDurationSec(long start) {
@@ -99,9 +99,7 @@ public class StressCpuExample {
     public static long runMeasurement(short secondsToRun, float factor, Function<Long, Long> runWorkload) {
         float secondsProportionally = secondsToRun * factor;
         long runUntil = System.currentTimeMillis() + (long) (secondsProportionally * 1000);
-        long loopCounter = runWorkload.apply(runUntil);
-        System.out.printf("%s took %s seconds, ran loop %s times", Thread.currentThread().getName(), secondsProportionally, loopCounter);
-        return loopCounter;
+        return runWorkload.apply(runUntil);
     }
 
     public static long runParallelEndlessLoopCpuStressTest(int parallelThreads, short secondsToRun) {
@@ -119,7 +117,6 @@ public class StressCpuExample {
                 System.err.println(e.getLocalizedMessage());
             }
         });
-        System.out.printf("%s threads took %s seconds, ran loop %s times", parallelThreads, secondsToRun, sumLoopCounter);
         return sumLoopCounter.longValue();
     }
 
