@@ -16,8 +16,6 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static group.msg.jpowermonitor.agent.JPowerMonitorAgent.APP_TITLE;
-
 /**
  * Default configuration provider preferring file system to resources.
  * <p>
@@ -35,6 +33,7 @@ import static group.msg.jpowermonitor.agent.JPowerMonitorAgent.APP_TITLE;
  * </ul>
  */
 public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
+    public static String APP_TITLE = "jPowerMonitor";
     private static final String DEFAULT_CONFIG = APP_TITLE + ".yaml";
     private final Charset yamlFileEncoding;
     private final ClassLoader resourceLoader;

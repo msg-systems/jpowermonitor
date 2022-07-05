@@ -25,7 +25,6 @@ public class JPowerMonitorAgent {
     private static Timer timer;
     private static PowerStatistics powerStatistics;
     private static Timer writeEnergyMeasurementResultsToCsv;
-    public static String APP_TITLE = JPowerMonitorAgent.class.getPackage().getImplementationTitle();
 
     private JPowerMonitorAgent() {
     }
@@ -38,7 +37,7 @@ public class JPowerMonitorAgent {
      * @param inst java agent params
      */
     public static void premain(String args, Instrumentation inst) {
-        System.out.println("Measuring power with " + APP_TITLE + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion());
+        System.out.println("Measuring power with " + DefaultConfigProvider.APP_TITLE + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion());
         System.out.println(SEPARATOR);
         ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
         long pid = ProcessHandle.current().pid();
