@@ -1,7 +1,5 @@
 package group.msg.jpowermonitor.util;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -16,7 +14,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-@Slf4j
+
 public class CsvMeasurementsReader {
     private static final Charset DEFAULT_ENCODING = StandardCharsets.ISO_8859_1;
     private static final String CSV_DELIMITER = ",";
@@ -35,7 +33,7 @@ public class CsvMeasurementsReader {
             @Override
             public void run() {
                 Map<String, String> measurements = cmr.readMeasurementsFromFile();
-                measurements.forEach((k, v) -> log.info("{} - {}", k, v));
+                measurements.forEach((k, v) -> System.out.println(k + " - " + v));
             }
         };
         Timer timer = new Timer();
@@ -50,7 +48,7 @@ public class CsvMeasurementsReader {
     public Map<String, String> readMeasurementsFromFile() {
         Map<String, String> measurements = new HashMap<>();
         try (BufferedReader reader = Files.newBufferedReader(measurementsCsvFile, DEFAULT_ENCODING)) {
-            log.info("Trying to read measurements from file '{}' using encoding {}", measurementsCsvFile.toAbsolutePath().normalize(), DEFAULT_ENCODING.displayName());
+            System.out.println("Trying to read measurements from file '" + measurementsCsvFile.toAbsolutePath().normalize() + "' using encoding " + DEFAULT_ENCODING.displayName());
             if (columnMapping == null) {
                 initializeColumnMapping(reader);
             }
@@ -61,7 +59,8 @@ public class CsvMeasurementsReader {
             String[] values = lastLine.split(CSV_DELIMITER);
             columnsFromInterest.forEach(c -> measurements.putIfAbsent(c, values[columnMapping.get(c)]));
         } catch (IOException ex) {
-            log.warn("Cannot read measurements from file '{}'", measurementsCsvFile.toAbsolutePath().normalize(), ex);
+            System.err.println("Cannot read measurements from file '" + measurementsCsvFile.toAbsolutePath().normalize() + "'");
+            ex.printStackTrace();
         }
         return measurements;
     }
@@ -69,18 +68,16 @@ public class CsvMeasurementsReader {
     private void validateMeasurementsCsvFile(String measurementsCsvFilePath) {
         measurementsCsvFile = Paths.get(measurementsCsvFilePath);
         if (!Files.isRegularFile(measurementsCsvFile)) {
-            log.info("No measurements csv file found at '{}", measurementsCsvFile.toAbsolutePath().normalize());
+            System.err.println("No measurements csv file found at '" + measurementsCsvFile.toAbsolutePath().normalize() + "'");
         }
     }
 
     private void initializeColumnMapping(BufferedReader reader) throws IOException {
         String headerLine = reader.readLine();
-        log.debug(headerLine);
         String[] headers = headerLine.split(CSV_DELIMITER);
         columnMapping = new HashMap<>();
         for (int i = 0; i < headers.length; i++) {
             if (columnsFromInterest.contains(headers[i])) {
-                log.info("Found columnFromInterest {} at index {}", headers[i], i);
                 columnMapping.putIfAbsent(headers[i], i);
             }
         }

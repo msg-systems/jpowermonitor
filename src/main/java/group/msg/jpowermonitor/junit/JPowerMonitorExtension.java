@@ -8,17 +8,11 @@ import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
 import group.msg.jpowermonitor.ohwm.MeasureOpenHwMonitor;
 import group.msg.jpowermonitor.util.HumanReadableTime;
-import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -27,6 +21,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +34,6 @@ import java.util.stream.Collectors;
  * Implements AfterTestExecutionCallback in order to be able to access results in the @AfterEach method in the test class.
  * AfterEachCallback would be too late, since @AfterEach is called before this callback.
  */
-@Slf4j
 public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCallback, AfterTestExecutionCallback {
     private final static MathContext mathContext = new MathContext(30, RoundingMode.HALF_UP);
     private final Map<String, List<DataPoint>> powerMeasurements = new HashMap<>();
@@ -62,7 +56,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     public void beforeEach(ExtensionContext context) throws Exception {
         powerMeasurements.clear();
         measureMethod.configuredSensors().forEach(k -> powerMeasurements.put(k, new ArrayList<>())); // init result map with configured keys
-        log.info("sleeping for {}ms in order to calm down", measureMethod.getCalmDownIntervalInMs());
+        System.out.println("sleeping for " + measureMethod.getCalmDownIntervalInMs() + "ms in order to calm down");
         TimeUnit.MILLISECONDS.sleep(measureMethod.getCalmDownIntervalInMs());
         timer = new Timer();
         timedMeasurement = new TimerTask() {
@@ -100,33 +94,30 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
 
     private void logSensorValue(String testName, SensorValue sensorValue) {
         if (sensorValue.isPowerSensor()) {
-            log.info("{}: energy consumption for {} is {} {}, that is {} Wh for {}", testName, sensorValue.getName(), sensorValue.getValue(),
+            System.out.printf("%s: energy consumption for %s is %s %s, that is %s Wh for %s%n", testName, sensorValue.getName(), sensorValue.getValue(),
                 sensorValue.getUnit(), sensorValue.getValueWithoutIdlePowerPerHour(), HumanReadableTime.ofNanos(sensorValue.getDurationOfTestInNanoSeconds()));
         } else {
-            log.info("{}: sensor value for {} is {} {}", testName, sensorValue.getName(), sensorValue.getValue(), sensorValue.getUnit());
+            System.out.printf("%s: sensor value for %s is %s %s%n", testName, sensorValue.getName(), sensorValue.getValue(), sensorValue.getUnit());
         }
     }
 
     private void setSensorValueIntoAnnotatedFields(ExtensionContext context, List<SensorValue> sensorValues) {
         // Get the list of test instances (instances of test classes)
         final List<Object> testInstances = context.getRequiredTestInstances().getAllInstances();
+        Set<Field> sensorValueFields = new HashSet<>();
         for (Object testInst : testInstances) {
-            Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forClass(testInst.getClass()))
-                .setScanners(Scanners.FieldsAnnotated)
-                .filterInputsBy(new FilterBuilder().add(s -> s.startsWith(testInst.getClass().getName())))); // only look at our current testclass!!
-            Set<Field> sensorValueFields =
-                reflections.getFieldsAnnotatedWith(SensorValues.class)
-                    .stream()
-                    .filter(field -> field.getType().isAssignableFrom(List.class))
-                    .collect(Collectors.toSet());
+            for (Field field : testInst.getClass().getDeclaredFields()) {
+                if (field.isAnnotationPresent(SensorValues.class) && field.getType().isAssignableFrom(List.class)) {
+                    sensorValueFields.add(field);
+                }
+            }
             for (Field field : sensorValueFields) {
                 try {
                     field.setAccessible(true);
                     field.set(testInst, sensorValues);
                 } catch (Exception e) {
-                    log.error("Unable to set sensor values into @SensorValues annotated field {} on class {}",
-                        field.getName(), testInst.getClass(), e);
+                    System.err.printf("Unable to set sensor values into @SensorValues annotated field %s on class %s: %s%n",
+                        field.getName(), testInst.getClass(), e.getMessage());
                 }
             }
         }
@@ -153,7 +144,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
 
     private Map<String, BigDecimal> measureIdleMode() {
         Map<String, BigDecimal> defaults = measureMethod.defaultEnergyInIdleModeForMeasuredSensors();
-        defaults.forEach((k, v) -> log.info("(configured) energy consumption in idle mode for {} is {}", k, v));
+        defaults.forEach((k, v) -> System.out.printf("(configured) energy consumption in idle mode for %s is %s%n", k, v));
         if (defaults.size() == measureMethod.configuredSensors().size()) {
             return defaults; // then we are done
         }
@@ -181,7 +172,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             List<DataPoint> dataPoints = measureMethod.measure();
             dataPoints.forEach(dp -> measurements.get(dp.getName()).add(dp));
         }
-        log.info("energy measurement in idle mode took {}", HumanReadableTime.ofNanos(System.nanoTime() - timeBeforeTest));
+        System.out.printf("energy measurement in idle mode took %s%n", HumanReadableTime.ofNanos(System.nanoTime() - timeBeforeTest));
         for (Map.Entry<String, List<DataPoint>> entry : measurements.entrySet()) {
             List<DataPoint> dataPoints = entry.getValue();
             List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size()), dataPoints.size());  // cut off the first x% measurements
@@ -189,7 +180,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             resultsWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
             BigDecimal prev = defaults.putIfAbsent(entry.getKey(), average.isPowerSensor() ? average.getValue() : BigDecimal.ZERO); // add zero, if not a power sensor!
             if (prev == null) { // then the key was not present in the map => log entry.
-                log.info("(measured) {} in idle mode for {} is {}", average.isPowerSensor() ? "energy consumption" : "sensor value", entry.getKey(), average.getValue());
+                System.out.printf("(measured) %s in idle mode for %s is %s%n", average.isPowerSensor() ? "energy consumption" : "sensor value", entry.getKey(), average.getValue());
             }
         }
         return defaults;
@@ -201,7 +192,6 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         }
         DataPoint reference = dataPoints.get(0);
         BigDecimal avg = dataPoints.stream()
-            .peek(dp -> log.trace("dp: {}", dp))
             .map(DataPoint::getValue)
             .reduce(BigDecimal.ZERO, BigDecimal::add)
             .divide(new BigDecimal(dataPoints.size()), mathContext)

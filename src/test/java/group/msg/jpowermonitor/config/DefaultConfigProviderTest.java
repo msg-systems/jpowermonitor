@@ -1,14 +1,24 @@
 package group.msg.jpowermonitor.config;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import java.nio.charset.*;
-import java.nio.file.*;
-import java.util.*;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 class DefaultConfigProviderTest {
+
+    @BeforeEach
+    void resetConfig() {
+        DefaultConfigProvider.resetCachedConfig();
+    }
 
     /*  HINT
      * Cannot really test the default behaviour for configuration loading: If we put a
@@ -18,7 +28,6 @@ class DefaultConfigProviderTest {
      * Thus, here we skip testing the default branch of configuration finding.
      *  diehla, June 2022
      */
-
     @Test
     public void readConfig_fileSystemOverResource(@TempDir Path dir) throws Exception {
         Path yaml = dir.resolve("DefaultConfigProviderTest.yaml");
