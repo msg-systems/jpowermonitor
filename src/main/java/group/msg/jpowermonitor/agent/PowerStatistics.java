@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import static group.msg.jpowermonitor.agent.MeasurePower.getCurrentCpuPowerInWatts;
 
 public class PowerStatistics extends TimerTask {
-
     private static final String CLASS_METHOD_SEPARATOR = ".";
     private static final MathContext MATH_CONTEXT = new MathContext(30, RoundingMode.HALF_UP);
     private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
