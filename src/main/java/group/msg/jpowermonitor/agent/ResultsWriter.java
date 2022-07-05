@@ -35,7 +35,7 @@ public class ResultsWriter implements Runnable {
 
     private static final double JOULE_TO_WATT_HOURS_FACTOR = 3600.0d;
     private static final double WATT_HOURS_TO_KWH_FACTOR = 1000.0d;
-    protected static final String FILE_NAME_PREFIX = (APP_TITLE != null ? APP_TITLE : JPowerMonitorAgent.class.getSimpleName()) + "_";
+    protected static final String FILE_NAME_PREFIX = APP_TITLE + "_";
     protected static final String SEPARATOR = "-----------------------------------------------------------------------------------------";
 
     private final PowerStatistics powerStatistics;
