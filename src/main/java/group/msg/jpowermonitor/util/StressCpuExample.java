@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 /**
  * Example program to set CPU under (full) load and get comparable energy measurement results.
@@ -103,20 +104,10 @@ public class StressCpuExample {
     }
 
     public static long runParallelEndlessLoopCpuStressTest(int parallelThreads, short secondsToRun) {
-        List<Thread> threads = new ArrayList<>();
         LongAdder sumLoopCounter = new LongAdder();
-        for (int i = 1; i <= parallelThreads; i++) {
-            Thread t = new Thread(() -> sumLoopCounter.add(runMeasurement(secondsToRun, 1, StressCpuExample::iAm100PercentParallel)), "Thread-" + i);
-            threads.add(t);
-            t.start();
-        }
-        threads.forEach(t -> {
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                System.err.println(e.getLocalizedMessage());
-            }
-        });
+        IntStream.range(0,parallelThreads)
+            .parallel()
+            .forEach(k -> sumLoopCounter.add(runMeasurement(secondsToRun, 1, StressCpuExample::iAm100PercentParallel)));
         return sumLoopCounter.longValue();
     }
 

@@ -196,7 +196,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             .reduce(BigDecimal.ZERO, BigDecimal::add)
             .divide(new BigDecimal(dataPoints.size()), mathContext)
             .setScale(2, mathContext.getRoundingMode());
-        return new DataPoint(reference.getName(), avg, reference.getUnit(), LocalDateTime.now(), reference.getThreadId());
+        return new DataPoint(reference.getName(), avg, reference.getUnit(), LocalDateTime.now(), reference.getThreadName());
     }
 
     private String getTestName(ExtensionContext context) {

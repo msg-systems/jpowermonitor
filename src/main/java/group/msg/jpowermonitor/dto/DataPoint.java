@@ -12,5 +12,5 @@ public class DataPoint implements PowerQuestionable {
     BigDecimal value;
     Unit unit;
     LocalDateTime time;
-    Long threadId;
+    String threadName;
 }

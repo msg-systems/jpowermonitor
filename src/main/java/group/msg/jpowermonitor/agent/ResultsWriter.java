@@ -120,7 +120,7 @@ public class ResultsWriter implements Runnable {
     }
 
     public String createCsvEntryForDataPoint(@NotNull DataPoint dp, String namePrefix) {
-        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), namePrefix, dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
+        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
     }
 
     protected void writeToFile(String csv, String fileName) {

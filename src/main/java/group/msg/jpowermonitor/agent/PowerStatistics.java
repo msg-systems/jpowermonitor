@@ -31,7 +31,7 @@ public class PowerStatistics extends TimerTask {
     private static final MathContext MATH_CONTEXT = new MathContext(30, RoundingMode.HALF_UP);
     private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
         new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now(), null));
-    private final Map<Long, Long> threadsCpuTime = new HashMap<>();
+    private final Map<String, Long> threadsCpuTime = new HashMap<>();
     private final Map<String, DataPoint> energyConsumptionPerMethod = new ConcurrentHashMap<>();
     private final long measurementInterval;
     private final long gatherStatisticsInterval;
@@ -55,7 +55,7 @@ public class PowerStatistics extends TimerTask {
     public void run() {
         Thread.currentThread().setName(PowerStatistics.class.getSimpleName() + " Thread");
 
-        Map<Long, Set<MethodActivity>> methodActivityPerThread = new HashMap<>();
+        Map<String, Set<MethodActivity>> methodActivityPerThread = new HashMap<>();
         Set<Thread> threads = Thread.getAllStackTraces().keySet();
 
         int duration = 0;
@@ -80,7 +80,7 @@ public class PowerStatistics extends TimerTask {
 
         // CPU time for each thread
         long totalApplicationCpuTime = CpuAndThreadUtils.getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(threadMXBean, threadsCpuTime, threads);
-        Map<Long, BigDecimal> powerPerThread = CpuAndThreadUtils.calculatePowerPerApplicationThread(threadsCpuTime, currentPower, totalApplicationCpuTime);
+        Map<String, BigDecimal> powerPerThread = CpuAndThreadUtils.calculatePowerPerApplicationThread(threadsCpuTime, currentPower, totalApplicationCpuTime);
 
         // Now we have power for each thread, and stats for methods in each thread
         // We allocated power to each method based on activity
@@ -89,7 +89,7 @@ public class PowerStatistics extends TimerTask {
         writePowerMeasurementsToCsvFiles(methodActivityPerThread);
     }
 
-    private static void gatherMethodActivityPerThread(Map<Long, Set<MethodActivity>> methodActivityPerThread, Set<Thread> threads) {
+    private static void gatherMethodActivityPerThread(Map<String, Set<MethodActivity>> methodActivityPerThread, Set<Thread> threads) {
         for (Thread thread : threads) {
             // Only consider threads that are currently running (not waiting or blocked)
             if (Thread.State.RUNNABLE == thread.getState()) {
@@ -98,10 +98,10 @@ public class PowerStatistics extends TimerTask {
                     continue;
                 }
 
-                long threadId = thread.getId();
-                methodActivityPerThread.putIfAbsent(threadId, new HashSet<>());
+                String threadName = thread.getName();
+                methodActivityPerThread.putIfAbsent(threadName, new HashSet<>());
                 MethodActivity activity = new MethodActivity();
-                activity.setProcessID(threadId);
+                activity.setThreadName(threadName);
                 activity.setTime(LocalDateTime.now());
 
                 Arrays.stream(stackTrace)
@@ -114,7 +114,7 @@ public class PowerStatistics extends TimerTask {
                     .findFirst()
                     .ifPresent(activity::setFilteredMethodQualifier);
 
-                methodActivityPerThread.get(threadId).add(activity);
+                methodActivityPerThread.get(threadName).add(activity);
             }
         }
     }
@@ -129,12 +129,12 @@ public class PowerStatistics extends TimerTask {
             .anyMatch(method::startsWith);
     }
 
-    private void allocateEnergyUsageToActivity(Map<Long, Set<MethodActivity>> methodActivityPerThread, Map<Long, BigDecimal> powerPerApplicationThread) {
-        for (Map.Entry<Long, Set<MethodActivity>> entry : methodActivityPerThread.entrySet()) {
-            long threadId = entry.getKey();
+    private void allocateEnergyUsageToActivity(Map<String, Set<MethodActivity>> methodActivityPerThread, Map<String, BigDecimal> powerPerApplicationThread) {
+        for (Map.Entry<String, Set<MethodActivity>> entry : methodActivityPerThread.entrySet()) {
+            String threadName = entry.getKey();
 
             for (MethodActivity activity : entry.getValue()) {
-                Quantity methodPower = Quantity.of(powerPerApplicationThread.get(threadId).multiply(activityToEnergyRatio), Unit.WATT);
+                Quantity methodPower = Quantity.of(powerPerApplicationThread.get(threadName).multiply(activityToEnergyRatio), Unit.WATT);
                 Quantity methodEnergy = Quantity.of(
                     methodPower.getValue().multiply(BigDecimal.valueOf(measurementInterval)).divide(BigDecimal.valueOf(1000L), MATH_CONTEXT),
                     Unit.JOULE
@@ -161,7 +161,7 @@ public class PowerStatistics extends TimerTask {
         );
     }
 
-    private void writePowerMeasurementsToCsvFiles(Map<Long, Set<MethodActivity>> methodActivityPerThread) {
+    private void writePowerMeasurementsToCsvFiles(Map<String, Set<MethodActivity>> methodActivityPerThread) {
         new ResultsWriter(this, false).createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(
             methodActivityPerThread.values().stream()
                 .flatMap(Collection::stream)
@@ -204,7 +204,7 @@ public class PowerStatistics extends TimerTask {
             quantity.map(Quantity::getValue).orElse(null),
             quantity.map(Quantity::getUnit).orElse(null),
             activity.getTime(),
-            activity.getProcessID()
+            activity.getThreadName()
         );
     }
 
@@ -267,7 +267,7 @@ public class PowerStatistics extends TimerTask {
         DataPoint reference = dataPoints[0];
         AtomicReference<BigDecimal> sum = new AtomicReference<>(BigDecimal.ZERO);
         Arrays.stream(dataPoints).filter(dp -> areDataPointsAddable(reference, dp)).forEach(dp -> sum.getAndAccumulate(dp.getValue(), BigDecimal::add));
-        return new DataPoint(reference.getName(), sum.get(), reference.getUnit(), LocalDateTime.now(), reference.getThreadId());
+        return new DataPoint(reference.getName(), sum.get(), reference.getUnit(), LocalDateTime.now(), reference.getThreadName());
     }
 
     /**
@@ -278,7 +278,7 @@ public class PowerStatistics extends TimerTask {
      * @return <code>DataPoint</code> with new <code>unit</code>
      */
     public DataPoint cloneDataPointWithNewUnit(@NotNull DataPoint dp, @NotNull Unit unit) {
-        return new DataPoint(dp.getName(), dp.getValue(), unit, dp.getTime(), dp.getThreadId());
+        return new DataPoint(dp.getName(), dp.getValue(), unit, dp.getTime(), dp.getThreadName());
     }
 
 }
