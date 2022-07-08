@@ -18,7 +18,6 @@ import java.util.Set;
  *
  * @author deinerj
  */
-@Slf4j
 public class CpuAndThreadUtils {
     private static final MathContext MATH_CONTEXT = new MathContext(30, RoundingMode.HALF_UP);
 
@@ -27,7 +26,7 @@ public class CpuAndThreadUtils {
         ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
         // Check if CPU Time measurement is supported by the JVM. Quit otherwise
         if (!threadMxBean.isThreadCpuTimeSupported()) {
-            log.error("Thread CPU Time is not supported in this JVM, unable to measure energy consumption.");
+            System.err.println("Thread CPU Time is not supported in this JVM, unable to measure energy consumption.");
             System.exit(1);
         }
 

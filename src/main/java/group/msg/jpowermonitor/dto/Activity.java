@@ -3,7 +3,7 @@ package group.msg.jpowermonitor.dto;
 import java.time.LocalDateTime;
 
 /**
- * Represents an act of work as part of a measured time frame.</br>
+ * Represents an act of work as part of a measured time frame.<br>
  * As an example, we take a time frame of 1,000ms. We look every 10ms
  * what kind of work our application does, e.g. which thread called which method.
  * In this case, an {@link Activity} represents <code>(10ms / 1,000ms) = 1/100</code> part of

@@ -9,7 +9,6 @@ import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.config.PathElement;
 import group.msg.jpowermonitor.dto.DataPoint;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class MeasureOpenHwMonitor implements MeasureMethod {
     HttpClient client;
     JPowerMonitorConfig config;
@@ -42,11 +40,9 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
     public @NotNull List<DataPoint> measure() throws JPowerMonitorException {
         try {
             LocalDateTime time = LocalDateTime.now();
-            HttpResponse response = client.execute(
-                new HttpGet(config.getOpenHardwareMonitor().getUrl()));
+            HttpResponse response = client.execute(new HttpGet(config.getOpenHardwareMonitor().getUrl()));
             ObjectMapper objectMapper = new ObjectMapper();
-            DataElem root = objectMapper.readValue(response.getEntity().getContent(),
-                DataElem.class);
+            DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
             List<DataPoint> result = new ArrayList<>();
             for (PathElement pathElement : config.getOpenHardwareMonitor().getPaths()) {
                 DataPoint dp = createDataPoint(root, pathElement, time);
@@ -54,9 +50,7 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
             }
             return result;
         } catch (IOException e) {
-            throw new JPowerMonitorException(
-                "Unable to reach hardware monitor at url: " + config.getOpenHardwareMonitor()
-                    .getUrl() + "!", e);
+            throw new JPowerMonitorException("Unable to reach hardware monitor at url: " + config.getOpenHardwareMonitor().getUrl() + "!", e);
         }
     }
 
@@ -64,18 +58,14 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
     public @NotNull DataPoint measureFirst() throws JPowerMonitorException {
         try {
             LocalDateTime time = LocalDateTime.now();
-            HttpResponse response = client.execute(
-                new HttpGet(config.getOpenHardwareMonitor().getUrl()));
+            HttpResponse response = client.execute(new HttpGet(config.getOpenHardwareMonitor().getUrl()));
             ObjectMapper objectMapper = new ObjectMapper();
-            DataElem root = objectMapper.readValue(response.getEntity().getContent(),
-                DataElem.class);
+            DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
             // config assures that getPaths is not null and has at least one element!
             PathElement pathElement = config.getOpenHardwareMonitor().getPaths().get(0);
             return createDataPoint(root, pathElement, time);
         } catch (IOException e) {
-            throw new JPowerMonitorException(
-                "Unable to reach hardware monitor at url: " + config.getOpenHardwareMonitor()
-                    .getUrl() + "!", e);
+            throw new JPowerMonitorException("Unable to reach hardware monitor at url: " + config.getOpenHardwareMonitor().getUrl() + "!", e);
         }
     }
 
@@ -83,10 +73,8 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
     private DataPoint createDataPoint(DataElem root, PathElement pathElement, LocalDateTime time) {
         DataElem elem = findElement(root, pathElement.getPath().toArray());
         if (elem == null) {
-            throw new JPowerMonitorException(
-                "Unable to find element for path " + pathElement.getPath() + "!");
+            throw new JPowerMonitorException("Unable to find element for path " + pathElement.getPath() + "!");
         }
-        log.trace("Value: {} -> {}", pathElement, elem);
         String[] valueAndUnit = elem.getValue().split("\\s+");// (( "5,4 W" ))
         BigDecimal value = new BigDecimal(valueAndUnit[0].replace(',', '.').trim());
         Unit unit = Unit.fromAbbreviation(valueAndUnit[1].trim());
@@ -95,8 +83,10 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
 
     @Override
     public @NotNull List<String> configuredSensors() {
-        return config.getOpenHardwareMonitor().getPaths().stream()
-            .map(p -> String.join("->", p.getPath())).collect(Collectors.toList());
+        return config.getOpenHardwareMonitor().getPaths()
+            .stream()
+            .map(p -> String.join("->", p.getPath()))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -104,8 +94,7 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
         Map<String, BigDecimal> energyInIdleModeForMeasuredSensors = new HashMap<>();
         config.getOpenHardwareMonitor().getPaths().stream()
             .filter(x -> x.getEnergyInIdleMode() != null)
-            .forEach(p -> energyInIdleModeForMeasuredSensors.put(String.join("->", p.getPath()),
-                p.getEnergyInIdleMode()));
+            .forEach(p -> energyInIdleModeForMeasuredSensors.put(String.join("->", p.getPath()), p.getEnergyInIdleMode()));
         return energyInIdleModeForMeasuredSensors;
     }
 
@@ -131,14 +120,12 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
 
     @Override
     public @Nullable Path getPathToResultCsv() {
-        return config.getCsvRecording().getResultCsv() != null ? Paths.get(
-            config.getCsvRecording().getResultCsv()) : null;
+        return config.getCsvRecording().getResultCsv() != null ? Paths.get(config.getCsvRecording().getResultCsv()) : null;
     }
 
     @Override
     public @Nullable Path getPathToMeasurementCsv() {
-        return config.getCsvRecording().getMeasurementCsv() != null ? Paths.get(
-            config.getCsvRecording().getMeasurementCsv()) : null;
+        return config.getCsvRecording().getMeasurementCsv() != null ? Paths.get(config.getCsvRecording().getMeasurementCsv()) : null;
     }
 
     @Override
@@ -151,7 +138,6 @@ public class MeasureOpenHwMonitor implements MeasureMethod {
     }
 
     private DataElem findElementInTree(@NonNull DataElem elem, Object[] parentNodes, String name, int level) {
-        log.trace("looking at element '{}'", elem.getText());
         if (elem.getText().equals(name)) {
             return elem;
         }
