@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class MethodActivity implements Activity {
-    Long processID;
+    String threadName;
     LocalDateTime time;
     String methodQualifier;
     String filteredMethodQualifier;
