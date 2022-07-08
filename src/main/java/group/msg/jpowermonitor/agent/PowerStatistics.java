@@ -230,7 +230,7 @@ public class PowerStatistics extends TimerTask {
             .filter(activity -> activity.getIdentifier(filtered) != null)
             .filter(Activity::isFinalized)
             .collect(Collectors.toMap(
-                activity -> activity.getIdentifier(filtered),
+                activity -> activity.getIdentifier(filtered) + activity.getThreadName(),
                 activity -> getDataPointFrom(activity, filtered),
                 this::addDataPoint
             ));
