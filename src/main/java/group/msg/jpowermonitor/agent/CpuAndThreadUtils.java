@@ -37,26 +37,26 @@ public class CpuAndThreadUtils {
         return threadMxBean;
     }
 
-    static long getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(ThreadMXBean threadMxBean, Map<Long, Long> cpuTimePerApplicationThread, Set<Thread> applicationThreads) {
+    static long getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(ThreadMXBean threadMxBean, Map<String, Long> cpuTimePerApplicationThread, Set<Thread> applicationThreads) {
         long totalApplicationCpuTime = 0;
         for (Thread t : applicationThreads) {
             long applicationThreadCpuTime = threadMxBean.getThreadCpuTime(t.getId());
 
             // If thread already monitored, then calculate CPU time since last time
-            if (cpuTimePerApplicationThread.containsKey(t.getId())) {
-                applicationThreadCpuTime -= cpuTimePerApplicationThread.get(t.getId());
+            if (cpuTimePerApplicationThread.containsKey(t.getName())) {
+                applicationThreadCpuTime -= cpuTimePerApplicationThread.get(t.getName());
             }
 
-            cpuTimePerApplicationThread.put(t.getId(), applicationThreadCpuTime);
+            cpuTimePerApplicationThread.put(t.getName(), applicationThreadCpuTime);
             totalApplicationCpuTime += applicationThreadCpuTime;
         }
         return totalApplicationCpuTime;
     }
 
     @NotNull
-    static Map<Long, BigDecimal> calculatePowerPerApplicationThread(Map<Long, Long> cpuTimePerApplicationThread, DataPoint currentPower, long totalApplicationCpuTime) {
-        Map<Long, BigDecimal> powerPerApplicationThread = new HashMap<>();
-        for (Map.Entry<Long, Long> entry : cpuTimePerApplicationThread.entrySet()) {
+    static Map<String, BigDecimal> calculatePowerPerApplicationThread(Map<String, Long> cpuTimePerApplicationThread, DataPoint currentPower, long totalApplicationCpuTime) {
+        Map<String, BigDecimal> powerPerApplicationThread = new HashMap<>();
+        for (Map.Entry<String, Long> entry : cpuTimePerApplicationThread.entrySet()) {
             BigDecimal percentageCpuTimePerApplicationThread = new BigDecimal(entry.getValue() * 100.0 / totalApplicationCpuTime, MATH_CONTEXT);
             BigDecimal applicationThreadPower = currentPower.getValue().multiply(percentageCpuTimePerApplicationThread.divide(BigDecimal.valueOf(100), MATH_CONTEXT));
             powerPerApplicationThread.put(entry.getKey(), applicationThreadPower);

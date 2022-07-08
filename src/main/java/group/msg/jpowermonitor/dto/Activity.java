@@ -15,9 +15,9 @@ import java.time.LocalDateTime;
 public interface Activity {
     /**
      * @return
-     *  ID of the process the activity was part of when measured
+     *  name of the thread the activity was part of when measured
      * */
-    Long getProcessID();
+    String getThreadName();
 
     /**
      * @return
