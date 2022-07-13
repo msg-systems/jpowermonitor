@@ -33,7 +33,7 @@ class DefaultConfigProviderTest {
         Path yaml = dir.resolve("DefaultConfigProviderTest.yaml");
         Files.write(yaml, List.of(
             "!!group.msg.jpowermonitor.config.JPowerMonitorConfig",
-            "openHardwareMonitor:",
+            "ohm:",
             "  url: 'blablabla'",
             "  paths:",
             "    - { path: ['pc', 'cpu', 'path'], energyInIdleMode: }",

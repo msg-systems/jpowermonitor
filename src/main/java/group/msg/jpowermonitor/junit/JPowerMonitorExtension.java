@@ -9,7 +9,6 @@ import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.PowerQuestionable;
 import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
-import group.msg.jpowermonitor.ohwm.MeasureOpenHwMonitor;
 import group.msg.jpowermonitor.util.HumanReadableTime;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;

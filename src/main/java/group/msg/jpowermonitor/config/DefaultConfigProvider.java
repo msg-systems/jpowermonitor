@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor.config;
 
 import group.msg.jpowermonitor.JPowerMonitorException;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
@@ -43,7 +44,12 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         this.yamlFileEncoding = StandardCharsets.UTF_8;
         this.resourceLoader = DefaultConfigProvider.class.getClassLoader();
     }
-
+    public synchronized JPowerMonitorConfig getCachedConfig() throws JPowerMonitorException {
+        if (cachedConfig == null) {
+            cachedConfig = acquireConfigFromSource(DEFAULT_CONFIG);
+        }
+        return cachedConfig;
+    }
     @Override
     public synchronized JPowerMonitorConfig readConfig(String source) throws JPowerMonitorException {
         if (cachedConfig == null) {

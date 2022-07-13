@@ -24,7 +24,7 @@ public interface MeasureMethod {
      * @return the first data point in the configured paths.
      * @throws JPowerMonitorException if measurement tool is not available.
      */
-    @NotNull DataPoint measureFirst() throws JPowerMonitorException;
+    @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException;
 
     /**
      * @return list of configured sensor paths.

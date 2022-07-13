@@ -11,22 +11,30 @@ percentageOfSamplesAtBeginningToDiscard: 20
 # Sampling interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
 # Too short intervals also affect the energy consumption!
 samplingIntervalInMs: 300
-# Which measure method to be used. Possible values: ohwm, hwinfo - defaults to ohwm
-measureMethod: 'hwinfo'
-# absolut path to csvfile to read from
-hwinfoCsvFile: 'C:/greencoding/HWINFO_ohne_footer.CSV'
-# ------------------------------------------------
-# configuration for accessing open hardware monitor
-openHardwareMonitor:
-  # URL to open hardware monitor (** started in administrator mode **)
-  url: 'http://localhost:8085'
-  # The paths define the path to the leaf node underneath the root 'Sensor' node in Open Hardware Monitor to access and store with every sample.
-  # The more paths defined (no more than about 10), the greater the impact on power consumption, since the values must be extracted from the json data.
-  paths:
-    - { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Package' ], energyInIdleMode: } # if energyInIdleMode is specified, it does not need to be measured before each test.
-    #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Cores' ], energyInIdleMode: 9.5 }
-    #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
-    #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
+
+measurement:
+  # Specify which measurement method to use. Possible values: ohm, csv
+  method: 'csv'
+  # configuration for reading from csv file. E.g. output from HWInfo
+  csv:
+    # path to csv file to read measure values from
+    inputFile: 'hwinfo.csv'
+    # columns to read
+    columns:
+      - { index: 2, name: 'CPU Power' }
+    delimiter: ','
+  # configuration for reading from open hardware monitor
+  ohm:
+    # URL to open hardware monitor (** started in administrator mode **)
+    url: 'http://localhost:8085'
+    # The paths define the path to the leaf node underneath the root 'Sensor' node in Open Hardware Monitor to access and store with every sample.
+    # The more paths defined (no more than about 10), the greater the impact on power consumption, since the values must be extracted from the json data.
+    paths:
+      - { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Package' ], energyInIdleMode: } # if energyInIdleMode is specified, it does not need to be measured before each test.
+      #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Cores' ], energyInIdleMode: 9.5 }
+      #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
+      #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
+
 # ------------------------------------------------
 # recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
 csvRecording:

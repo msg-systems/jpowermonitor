@@ -18,17 +18,23 @@ public class JPowerMonitorConfigTest {
     @Test
     public void initialization_noUrl() {
         JPowerMonitorConfig config = new JPowerMonitorConfig();
-        config.setOpenHardwareMonitor(new OpenHardwareMonitor());
+        Measurement measurement = new Measurement();
+        measurement.setMethod("ohm");
+        measurement.setOhm(new OpenHardwareMonitorCfg());
+        config.setMeasurement(measurement);
         assertThrows(JPowerMonitorException.class, config::initializeConfiguration);
     }
 
     @Test
     public void initialization_noPath() {
-        OpenHardwareMonitor ohwMon = new OpenHardwareMonitor();
-        ohwMon.setUrl("some.url");
-        ohwMon.setPaths(List.of(new PathElement()));
+        OpenHardwareMonitorCfg ohmConfig = new OpenHardwareMonitorCfg();
+        ohmConfig.setUrl("some.url");
+        ohmConfig.setPaths(List.of(new PathElement()));
         JPowerMonitorConfig config = new JPowerMonitorConfig();
-        config.setOpenHardwareMonitor(ohwMon);
+        Measurement measurement = new Measurement();
+        measurement.setMethod("ohm");
+        measurement.setOhm(ohmConfig);
+        config.setMeasurement(measurement);
         assertThrows(JPowerMonitorException.class, config::initializeConfiguration);
     }
 
@@ -36,24 +42,30 @@ public class JPowerMonitorConfigTest {
     public void initialization_urlPreparation() {
         PathElement path = new PathElement();
         path.setPath(List.of("path"));
-        OpenHardwareMonitor ohwMon = new OpenHardwareMonitor();
-        ohwMon.setUrl("some.url");
-        ohwMon.setPaths(List.of(path));
+        OpenHardwareMonitorCfg ohmConfig = new OpenHardwareMonitorCfg();
+        ohmConfig.setUrl("some.url");
+        ohmConfig.setPaths(List.of(path));
         JPowerMonitorConfig config = new JPowerMonitorConfig();
-        config.setOpenHardwareMonitor(ohwMon);
+        Measurement measurement = new Measurement();
+        measurement.setMethod("ohm");
+        measurement.setOhm(ohmConfig);
+        config.setMeasurement(measurement);
         config.initializeConfiguration();
-        assertEquals("some.url/data.json", config.getOpenHardwareMonitor().getUrl());
+        assertEquals("some.url/data.json", config.getMeasurement().getOhm().getUrl());
     }
 
     @Test
     public void initialization_defaultValues() {
         PathElement path = new PathElement();
         path.setPath(List.of("path"));
-        OpenHardwareMonitor ohwMon = new OpenHardwareMonitor();
-        ohwMon.setUrl("some.url");
-        ohwMon.setPaths(List.of(path));
+        OpenHardwareMonitorCfg ohmConfig = new OpenHardwareMonitorCfg();
+        ohmConfig.setUrl("some.url");
+        ohmConfig.setPaths(List.of(path));
         JPowerMonitorConfig config = new JPowerMonitorConfig();
-        config.setOpenHardwareMonitor(ohwMon);
+        Measurement measurement = new Measurement();
+        measurement.setMethod("ohm");
+        measurement.setOhm(ohmConfig);
+        config.setMeasurement(measurement);
         config.initializeConfiguration();
 
         assertEquals(300, config.getSamplingIntervalInMs());

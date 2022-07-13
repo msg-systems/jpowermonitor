@@ -4,10 +4,21 @@ samplingIntervalForInitInMs: 1
 calmDownIntervalInMs: 1
 percentageOfSamplesAtBeginningToDiscard: 1
 samplingIntervalInMs: 1
-openHardwareMonitor:
-  url: 'some.test.url'
-  paths:
-    - { path: [ 'pc', 'cpu', 'path1', 'path2' ], energyInIdleMode: }
+measurement:
+  # Specify which measurement method to use. Possible values: ohm, csv
+  method: 'ohm'
+  # configuration for reading from csv file. E.g. output from HWInfo
+  csv:
+    # path to csv file to read measure values from
+    inputFile: 'hwinfo.csv'
+    # columns to read
+    columns:
+      - { index: 2, name: 'CPU Power' }
+  # configuration for reading from open hardware monitor
+  ohm:
+    url: 'some.test.url'
+    paths:
+      - { path: [ 'pc', 'cpu', 'path1', 'path2' ], energyInIdleMode: }
 csvRecording:
   resultCsv: 'test_energyconsumption.csv'
   measurementCsv: 'test_measurement.csv'
