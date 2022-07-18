@@ -38,7 +38,5 @@ out/
 *.csv
 /src/main/resources/jpowermonitor.yaml
 /src/test/resources/jpowermonitor.yaml
-/src/test/resources/EndlessLoopTest.yaml
-/src/test/resources/MyTest.yaml
 
 jpowermonitor.yaml

@@ -17,7 +17,6 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.List;
 
-@EnabledOnOs(OS.WINDOWS)
 @ExtendWith({JPowerMonitorExtension.class})
 @Slf4j
 public class MyTest {

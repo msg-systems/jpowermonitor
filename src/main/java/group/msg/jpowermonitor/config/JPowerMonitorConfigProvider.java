@@ -8,8 +8,9 @@ import group.msg.jpowermonitor.*;
  * Any specific reading is part of the implementation, this might include finding the source as well
  * as caching.
  */
-@FunctionalInterface
 public interface JPowerMonitorConfigProvider {
+
+    JPowerMonitorConfig getCachedConfig() throws JPowerMonitorException;
 
     /**
      * Reads a JPowerMonitor configuration using the given source.

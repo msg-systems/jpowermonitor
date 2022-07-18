@@ -11,6 +11,9 @@ import java.util.List;
 @Data
 public class CsvMeasurementCfg {
     private String inputFile;
+    // this is set during initialization of CommaSeparatedValuesReader.
+    private Path inputFileAsPath;
+    private String lineToRead = "last";
     private List<CsvColumn> columns;
     private String delimiter = ",";
     private String encoding;
@@ -20,9 +23,5 @@ public class CsvMeasurementCfg {
             return StandardCharsets.ISO_8859_1;
         }
         return Charset.forName(encoding);
-    }
-
-    public Path getInputFileAsPath() {
-        return Paths.get(inputFile);
     }
 }

@@ -13,6 +13,11 @@ public class ConfigProviderForTests implements JPowerMonitorConfigProvider {
     }
 
     @Override
+    public JPowerMonitorConfig getCachedConfig() throws JPowerMonitorException {
+        throw new JPowerMonitorException("Cache not implemented for " + ConfigProviderForTests.class);
+    }
+
+    @Override
     public JPowerMonitorConfig readConfig(String source) throws JPowerMonitorException {
         ClassLoader cl = ConfigProviderForTests.class.getClassLoader();
         try (InputStream input = cl.getResourceAsStream(source)) {

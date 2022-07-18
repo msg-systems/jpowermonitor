@@ -15,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 
-@EnabledOnOs(OS.WINDOWS)
 @ExtendWith({JPowerMonitorExtension.class})
 @Slf4j
 public class EndlessLoopTest {

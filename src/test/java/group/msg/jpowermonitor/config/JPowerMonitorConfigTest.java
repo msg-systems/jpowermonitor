@@ -1,11 +1,17 @@
 package group.msg.jpowermonitor.config;
 
-import static org.junit.jupiter.api.Assertions.*;
+import group.msg.jpowermonitor.ConfigProviderForTests;
+import group.msg.jpowermonitor.JPowerMonitorException;
+import org.junit.jupiter.api.Test;
 
-import group.msg.jpowermonitor.*;
-import java.math.*;
-import java.util.*;
-import org.junit.jupiter.api.*;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JPowerMonitorConfigTest {
 

@@ -15,15 +15,17 @@ samplingIntervalInMs: 300
 measurement:
   # Specify which measurement method to use. Possible values: ohm, csv
   method: 'ohm'
-  # configuration for reading from csv file. E.g. output from HWInfo
+  # Configuration for reading from csv file. E.g. output from HWInfo
   csv:
-    # path to csv file to read measure values from
-    inputFile: 'hwinfo.csv'
-    # columns to read
+    # Path to csv file to read measure values from
+    inputFile: 'hwinfo-test.csv'
+    # Which line in the csv input file contains the current measured values? The first or the last? This depends on the measurement tool. Possible value: first, last
+    lineToRead: 'last'    
+    # Columns to read, index starts at 0.
     columns:
       - { index: 2, name: 'CPU Power' }
     delimiter: ','
-  # configuration for reading from open hardware monitor
+  # Configuration for reading from open hardware monitor
   ohm:
     # URL to open hardware monitor (** started in administrator mode **)
     url: 'http://localhost:8085'
@@ -35,16 +37,16 @@ measurement:
       #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
       #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
 # ------------------------------------------------
-# recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
+# Recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
 csvRecording:
-  # if specified, the results for every test are appended to a csv file.
+  # If specified, the results for every test are appended to a csv file.
   # On Windows: the file must not be opened in Excel in parallel!
   resultCsv: 'energyconsumption.csv'
-  # if specified, all single measurements are recorded/appended in this csv.
+  # If specified, all single measurements are recorded/appended in this csv.
   # On Windows: the file must not be opened in Excel in parallel!
   measurementCsv: 'measurement.csv'
 # ------------------------------------------------
-# configuration for JavaAgent
+# Configuration for JavaAgent
 javaAgent:
   # Filter power and energy for methods starting with this packageFilter names
   packageFilter: [ 'com.msg', 'de.gillardon' ]

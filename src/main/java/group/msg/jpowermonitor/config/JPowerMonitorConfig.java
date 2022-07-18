@@ -38,7 +38,7 @@ public class JPowerMonitorConfig {
             }
         } else {
             if (measurement.getCsv() == null || measurement.getCsv().getInputFile() == null || measurement.getCsv().getColumns() == null || measurement.getCsv().getColumns().size() == 0) {
-                throw new JPowerMonitorException("OpenHardwareMonitor REST endpoint URL must be configured");
+                throw new JPowerMonitorException("CSV input filepath and columns must be configured");
             }
         }
         setDefaultIfNotSet(samplingIntervalInMs, this::setSamplingIntervalInMs, 300);
