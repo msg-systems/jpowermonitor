@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CommaSeparatedValuesReaderTest {
@@ -43,7 +44,7 @@ class CommaSeparatedValuesReaderTest {
         JPowerMonitorConfig config = configProvider.getCachedConfig();
         CommaSeparatedValuesReader cmr = new CommaSeparatedValuesReader(config);
         String firstLine = cmr.readFirstLine(Paths.get("src/test/resources/hwinfo-test.csv"), StandardCharsets.UTF_8);
-        assertEquals("12.7.2022,18:7:10.680,6.352,0.061,24.733,76.0,363,84,581.376,46.206,", firstLine);
+        assertThat(firstLine).isEqualTo("12.7.2022,18:7:10.680,6.352,0.061,24.733,76.0,363,84,581.376,46.206,");
     }
 
     @Test
@@ -54,7 +55,7 @@ class CommaSeparatedValuesReaderTest {
         CommaSeparatedValuesReader cmr = new CommaSeparatedValuesReader(config);
         String umlauts = Files.readAllLines(Path.of("src/test/resources/umlauts.txt"), StandardCharsets.UTF_8).get(0);
         String firstLine = cmr.readFirstLine(Paths.get("src/test/resources/firstLineLastLine-test.csv"), StandardCharsets.UTF_8);
-        assertEquals("MyFirstLine," + umlauts + ";WithUmlauts;", firstLine);
+        assertThat(firstLine).isEqualTo("MyFirstLine," + umlauts + ";WithUmlauts;");
     }
 
     @Test
@@ -64,7 +65,7 @@ class CommaSeparatedValuesReaderTest {
         JPowerMonitorConfig config = configProvider.getCachedConfig();
         CommaSeparatedValuesReader cmr = new CommaSeparatedValuesReader(config);
         String lastLine = cmr.readLastLine(Paths.get("src/test/resources/hwinfo-test.csv"), StandardCharsets.UTF_8);
-        assertEquals("12.7.2022,18:7:16.865,7.055,0.012,25.458,75.0,367,84,603.767,47.299,", lastLine);
+        assertThat(lastLine).isEqualTo("12.7.2022,18:7:16.865,7.055,0.012,25.458,75.0,367,84,603.767,47.299,");
     }
 
     @Test
@@ -77,7 +78,7 @@ class CommaSeparatedValuesReaderTest {
         JPowerMonitorConfig config = configProvider.getCachedConfig();
         CommaSeparatedValuesReader cmr = new CommaSeparatedValuesReader(config);
         String lastLine = cmr.readLastLine(Paths.get("src/test/resources/firstLineLastLine-test.csv"), StandardCharsets.UTF_8);
-        assertEquals(expectedSb.toString(), lastLine);
+        assertThat(lastLine).isEqualTo(expectedSb.toString());
     }
 
 }

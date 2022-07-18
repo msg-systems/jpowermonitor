@@ -16,6 +16,10 @@ measurement:
     # Columns to read, index starts at 0.
     columns:
       - { index: 42, name: 'CPU Power' }
+    # Encoding to use for reading the csv input file
+    encoding: 'UTF-16'
+    # Delimiter to use for separating the columns in the csv input file
+    delimiter: ';'
   # Configuration for reading from open hardware monitor
   ohm:
     url: 'some.test.url'

@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,7 +20,7 @@ public class JPowerMonitorConfigTest {
     @Test
     public void initialization_noHWGroup() {
         JPowerMonitorConfig config = new JPowerMonitorConfig();
-        assertThrows(JPowerMonitorException.class, config::initializeConfiguration);
+        assertThatThrownBy(config::initializeConfiguration).isInstanceOf(JPowerMonitorException.class);
     }
 
     @Test
@@ -28,7 +30,7 @@ public class JPowerMonitorConfigTest {
         measurement.setMethod("ohm");
         measurement.setOhm(new OpenHardwareMonitorCfg());
         config.setMeasurement(measurement);
-        assertThrows(JPowerMonitorException.class, config::initializeConfiguration);
+        assertThatThrownBy(config::initializeConfiguration).isInstanceOf(JPowerMonitorException.class);
     }
 
     @Test
@@ -41,7 +43,7 @@ public class JPowerMonitorConfigTest {
         measurement.setMethod("ohm");
         measurement.setOhm(ohmConfig);
         config.setMeasurement(measurement);
-        assertThrows(JPowerMonitorException.class, config::initializeConfiguration);
+        assertThatThrownBy(config::initializeConfiguration).isInstanceOf(JPowerMonitorException.class);
     }
 
     @Test
@@ -57,7 +59,7 @@ public class JPowerMonitorConfigTest {
         measurement.setOhm(ohmConfig);
         config.setMeasurement(measurement);
         config.initializeConfiguration();
-        assertEquals("some.url/data.json", config.getMeasurement().getOhm().getUrl());
+        assertThat(config.getMeasurement().getOhm().getUrl()).isEqualTo("some.url/data.json");
     }
 
     @Test
@@ -74,39 +76,39 @@ public class JPowerMonitorConfigTest {
         config.setMeasurement(measurement);
         config.initializeConfiguration();
 
-        assertEquals(300, config.getSamplingIntervalInMs());
-        assertEquals(1000, config.getSamplingIntervalForInitInMs());
-        assertEquals(10, config.getInitCycles());
-        assertEquals(1000, config.getCalmDownIntervalInMs());
-        assertEquals(BigDecimal.valueOf(15), config.getPercentageOfSamplesAtBeginningToDiscard());
-        assertNotNull(config.getJavaAgent());
-        assertNotNull(config.getJavaAgent().getPackageFilter());
-        assertTrue(config.getJavaAgent().getPackageFilter().isEmpty());
-        assertEquals(0L, config.getJavaAgent().getMeasurementIntervalInMs());
-        assertEquals(0L, config.getJavaAgent().getGatherStatisticsIntervalInMs());
-        assertEquals(0L, config.getJavaAgent().getWriteEnergyMeasurementsToCsvIntervalInS());
+        assertThat(config.getSamplingIntervalInMs()).isEqualTo(300);
+        assertThat(config.getSamplingIntervalForInitInMs()).isEqualTo(1000);
+        assertThat(config.getInitCycles()).isEqualTo(10);
+        assertThat(config.getCalmDownIntervalInMs()).isEqualTo(1000);
+        assertThat(config.getPercentageOfSamplesAtBeginningToDiscard()).isEqualTo(BigDecimal.valueOf(15));
+        assertThat(config.getJavaAgent()).isNotNull();
+        assertThat(config.getJavaAgent().getPackageFilter()).isNotNull();
+        assertThat(config.getJavaAgent().getPackageFilter().isEmpty()).isTrue();
+        assertThat(config.getJavaAgent().getMeasurementIntervalInMs()).isEqualTo(0L);
+        assertThat(config.getJavaAgent().getGatherStatisticsIntervalInMs()).isEqualTo(0L);
+        assertThat(config.getJavaAgent().getWriteEnergyMeasurementsToCsvIntervalInS()).isEqualTo(0L);
     }
 
     @Test
     public void testFilterSet() {
         JPowerMonitorConfig config = new ConfigProviderForTests().readConfig(getClass());
         Set<String> packageFilter = config.getJavaAgent().getPackageFilter();
-        assertTrue(packageFilter.contains("com.msg"));
-        assertTrue(packageFilter.contains("de.gillardon"));
+        assertThat(packageFilter.contains("com.msg")).isTrue();
+        assertThat(packageFilter.contains("de.gillardon")).isTrue();
     }
 
     @Test
     public void testMeasurementInterval() {
         JPowerMonitorConfig config = new ConfigProviderForTests().readConfig(getClass());
         long measurementIntervalInMs = config.getJavaAgent().getMeasurementIntervalInMs();
-        assertEquals(1000L, measurementIntervalInMs);
+        assertThat(measurementIntervalInMs).isEqualTo(1000L);
     }
 
     @Test
     public void testGatherStatisticsIntervalInMsInterval() {
         JPowerMonitorConfig config = new ConfigProviderForTests().readConfig(getClass());
         long gatherStatisticsIntervalInMs = config.getJavaAgent().getGatherStatisticsIntervalInMs();
-        assertEquals(100L, gatherStatisticsIntervalInMs);
+        assertThat(gatherStatisticsIntervalInMs).isEqualTo(100L);
     }
 
     @Test
@@ -114,6 +116,6 @@ public class JPowerMonitorConfigTest {
         JPowerMonitorConfig config = new ConfigProviderForTests().readConfig(getClass());
         long writeEnergyMeasurementsToCsvIntervalInS = config.getJavaAgent()
             .getWriteEnergyMeasurementsToCsvIntervalInS();
-        assertEquals(20L, writeEnergyMeasurementsToCsvIntervalInS);
+        assertThat(writeEnergyMeasurementsToCsvIntervalInS).isEqualTo(20L);
     }
 }

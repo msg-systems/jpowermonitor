@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -34,9 +35,9 @@ class MeasurePowerTest {
             }
             DataPoint dp2 = MeasurePower.getCurrentCpuPowerInWatts();
             log.debug("{}", dp2);
-            assertEquals(dp2.getUnit(), dp.getUnit());
-            assertNotEquals(dp2.getTime(), dp.getTime());
-            assertNotEquals(dp2.getValue(), dp.getValue());
+            assertThat(dp.getUnit()).isEqualTo(dp2.getUnit());
+            assertThat(dp.getTime()).isNotEqualTo(dp2.getTime());
+            assertThat(dp.getValue()).isNotEqualTo(dp2.getValue());
         }
     }
 
@@ -56,9 +57,9 @@ class MeasurePowerTest {
             Thread.sleep(intervalInMs);
             DataPoint dp2 = MeasurePower.getCurrentCpuPowerInWatts();
             log.debug("{}", dp2);
-            assertEquals(dp2.getUnit(), dp.getUnit());
-            assertNotEquals(dp2.getTime(), dp.getTime());
-            assertNotEquals(dp2.getValue(), dp.getValue());
+            assertThat(dp.getUnit()).isEqualTo(dp2.getUnit());
+            assertThat(dp.getTime()).isNotEqualTo(dp2.getTime());
+            assertThat(dp.getValue()).isNotEqualTo(dp2.getValue());
         }
     }
 }

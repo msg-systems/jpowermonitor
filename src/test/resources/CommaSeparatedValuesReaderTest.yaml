@@ -16,6 +16,8 @@ measurement:
     # Columns to read, index starts at 0.
     columns:
       - { index: 2, name: 'CPU Power' }
+    encoding: 'UTF-8'
+    delimiter: ','
   # Configuration for reading from open hardware monitor
   ohm:
     url: 'some.test.url'

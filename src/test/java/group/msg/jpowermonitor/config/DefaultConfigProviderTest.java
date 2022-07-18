@@ -7,22 +7,20 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-class DefaultConfigProviderTest {
 
+class DefaultConfigProviderTest {
     @BeforeEach
     void resetConfig() {
         DefaultConfigProvider.invalidateCachedConfig();
     }
 
-
     @Test
     public void readConfig_fromResourceIfNoFile() {
         JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig("DefaultConfigProviderTest.yaml");
-        assertNotNull(cfg);
+        assertThat(cfg).isNotNull();
 
         JPowerMonitorConfig expected = new JPowerMonitorConfig();
         expected.setInitCycles(7);
@@ -48,6 +46,8 @@ class DefaultConfigProviderTest {
         csvColumn.setIndex(42);
         csvColumn.setName("CPU Power");
         csv.setColumns(List.of(csvColumn));
+        csv.setEncoding("UTF-16");
+        csv.setDelimiter(";");
         measurement.setCsv(csv);
         expected.setMeasurement(measurement);
 
@@ -63,14 +63,14 @@ class DefaultConfigProviderTest {
         javaAgent.setPackageFilter(Set.of("com.something", "com.anything"));
         expected.setJavaAgent(javaAgent);
 
-        assertEquals(expected, cfg);
+        assertThat(cfg).usingRecursiveComparison().isEqualTo(expected);
     }
 
     @Test
     public void readConfig_usesCaching() {
         JPowerMonitorConfigProvider provider = new DefaultConfigProvider();
         JPowerMonitorConfig first = provider.readConfig("DefaultConfigProviderTest.yaml");
-        assertNotNull(first);
+        assertThat(first).isNotNull();
         JPowerMonitorConfig second = provider.readConfig("something.else");
         assertSame(first, second);
     }
