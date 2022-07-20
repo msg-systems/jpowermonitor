@@ -1,22 +1,24 @@
 !!group.msg.jpowermonitor.config.JPowerMonitorConfig
-initCycles: 1
+initCycles: 0
 samplingIntervalForInitInMs: 1
 calmDownIntervalInMs: 1
 percentageOfSamplesAtBeginningToDiscard: 1
 samplingIntervalInMs: 1
 measurement:
   # Specify which measurement method to use. Possible values: ohm, csv
-  method: 'ohm'
+  method: 'csv'
   # Configuration for reading from csv file. E.g. output from HWInfo
   csv:
     # Path to csv file to read measure values from
     inputFile: 'hwinfo-test.csv'
     # Which line in the csv input file contains the current measured values? The first or the last? This depends on the measurement tool. Possible value: first, last
-    lineToRead: 'first'
+    lineToRead: 'last'
     # Columns to read, index starts at 0.
     columns:
-      - { index: 2, name: 'CPU Power', energyInIdleMode: 1.01 }
+      - { index: 2, name: 'CPU Power', energyInIdleMode: 2.0 }
+    # Encoding to use for reading the csv input file
     encoding: 'UTF-8'
+    # Delimiter to use for separating the columns in the csv input file
     delimiter: ','
   # Configuration for reading from open hardware monitor
   ohm:

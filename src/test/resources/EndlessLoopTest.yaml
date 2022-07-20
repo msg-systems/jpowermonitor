@@ -1,5 +1,5 @@
 !!group.msg.jpowermonitor.config.JPowerMonitorConfig
-initCycles: 1
+initCycles: 0
 samplingIntervalForInitInMs: 1
 calmDownIntervalInMs: 1
 percentageOfSamplesAtBeginningToDiscard: 1
@@ -15,7 +15,7 @@ measurement:
     lineToRead: 'last'
     # Columns to read, index starts at 0.
     columns:
-      - { index: 2, name: 'CPU Power' }
+      - { index: 2, name: 'CPU Power', energyInIdleMode: 2.01}
     # Encoding to use for reading the csv input file
     encoding: 'UTF-8'
     # Delimiter to use for separating the columns in the csv input file

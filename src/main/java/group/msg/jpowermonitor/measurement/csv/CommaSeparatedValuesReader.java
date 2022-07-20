@@ -187,10 +187,13 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
 
     @Override
     public @NotNull Map<String, BigDecimal> defaultEnergyInIdleModeForMeasuredSensors() {
-        return new HashMap<>(); // only ohm
+        Map<String, BigDecimal> energyInIdleModeForMeasuredSensors = new HashMap<>();
+        config.getMeasurement().getCsv().getColumns().stream()
+            .filter(x -> x.getEnergyInIdleMode() != null)
+            .forEach(c -> energyInIdleModeForMeasuredSensors.put(c.getName(), c.getEnergyInIdleMode()));
+        return energyInIdleModeForMeasuredSensors;
     }
 
-    // same as ohwm TODO remove duplication
     @Override
     public int getSamplingInterval() {
         return config.getSamplingIntervalInMs();
