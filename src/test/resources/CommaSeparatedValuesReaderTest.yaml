@@ -1,25 +1,23 @@
 !!group.msg.jpowermonitor.config.JPowerMonitorConfig
-initCycles: 7
-samplingIntervalForInitInMs: 8
-calmDownIntervalInMs: 9
-percentageOfSamplesAtBeginningToDiscard: 3
-samplingIntervalInMs: 4
+initCycles: 1
+samplingIntervalForInitInMs: 1
+calmDownIntervalInMs: 1
+percentageOfSamplesAtBeginningToDiscard: 1
+samplingIntervalInMs: 1
 measurement:
   # Specify which measurement method to use. Possible values: ohm, csv
   method: 'ohm'
   # Configuration for reading from csv file. E.g. output from HWInfo
   csv:
     # Path to csv file to read measure values from
-    inputFile: 'mycsv.csv'
+    inputFile: 'hwinfo-test.csv'
     # Which line in the csv input file contains the current measured values? The first or the last? This depends on the measurement tool. Possible value: first, last
     lineToRead: 'first'
     # Columns to read, index starts at 0.
     columns:
-      - { index: 42, name: 'CPU Power' }
-    # Encoding to use for reading the csv input file
-    encoding: 'UTF-16'
-    # Delimiter to use for separating the columns in the csv input file
-    delimiter: ';'
+      - { index: 2, name: 'CPU Power', energyInIdleMode: 1.01 }
+    encoding: 'UTF-8'
+    delimiter: ','
   # Configuration for reading from open hardware monitor
   ohm:
     url: 'some.test.url'
@@ -30,6 +28,6 @@ csvRecording:
   measurementCsv: 'test_measurement.csv'
 javaAgent:
   packageFilter: [ 'com.something', 'com.anything' ]
-  measurementIntervalInMs: 2
-  gatherStatisticsIntervalInMs: 3
-  writeEnergyMeasurementsToCsvIntervalInS: 4
+  measurementIntervalInMs: 1
+  gatherStatisticsIntervalInMs: 1
+  writeEnergyMeasurementsToCsvIntervalInS: 1

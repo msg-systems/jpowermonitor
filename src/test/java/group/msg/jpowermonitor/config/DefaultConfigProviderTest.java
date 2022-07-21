@@ -2,65 +2,77 @@ package group.msg.jpowermonitor.config;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-class DefaultConfigProviderTest {
 
+class DefaultConfigProviderTest {
     @BeforeEach
     void resetConfig() {
-        DefaultConfigProvider.resetCachedConfig();
-    }
-
-    /*  HINT
-     * Cannot really test the default behaviour for configuration loading: If we put a
-     * "jpowermonitor.yaml" into working dir, it would either break the full measurement tests
-     * (like EndlessLoopTest) or this test here. So without tricking the file system (like changing
-     * the working directory during tests) it's not possible to fulfill all needs.
-     * Thus, here we skip testing the default branch of configuration finding.
-     *  diehla, June 2022
-     */
-    @Test
-    public void readConfig_fileSystemOverResource(@TempDir Path dir) throws Exception {
-        Path yaml = dir.resolve("DefaultConfigProviderTest.yaml");
-        Files.write(yaml, List.of(
-            "!!group.msg.jpowermonitor.config.JPowerMonitorConfig",
-            "openHardwareMonitor:",
-            "  url: 'blablabla'",
-            "  paths:",
-            "    - { path: ['pc', 'cpu', 'path'], energyInIdleMode: }",
-            "csvRecording:",
-            "  resultCsv: 'someTempFile.csv'"), StandardCharsets.UTF_8);
-
-        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig(
-            yaml.toAbsolutePath().toString());
-        assertNotNull(cfg);
-        assertEquals("someTempFile.csv", cfg.getCsvRecording().getResultCsv());
+        DefaultConfigProvider.invalidateCachedConfig();
     }
 
     @Test
     public void readConfig_fromResourceIfNoFile() {
-        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig(
-            "DefaultConfigProviderTest.yaml");
-        assertNotNull(cfg);
-        assertEquals("test_energyconsumption.csv", cfg.getCsvRecording().getResultCsv());
+        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig("DefaultConfigProviderTest.yaml");
+        assertThat(cfg).isNotNull();
+
+        JPowerMonitorConfig expected = new JPowerMonitorConfig();
+        expected.setInitCycles(7);
+        expected.setSamplingIntervalForInitInMs(8);
+        expected.setCalmDownIntervalInMs(9);
+        expected.setPercentageOfSamplesAtBeginningToDiscard(new BigDecimal("3"));
+        expected.setSamplingIntervalInMs(4);
+
+        Measurement measurement = new Measurement();
+        measurement.setMethod("ohm");
+
+        OpenHardwareMonitorCfg ohm = new OpenHardwareMonitorCfg();
+        PathElement pe = new PathElement();
+        pe.path = List.of("pc", "cpu", "path1", "path2");
+        ohm.setPaths(List.of(pe));
+        ohm.setUrl("some.test.url" + "/data.json"); // /data.json is internally added
+        measurement.setOhm(ohm);
+
+        CsvMeasurementCfg csv = new CsvMeasurementCfg();
+        csv.setInputFile("mycsv.csv");
+        csv.setLineToRead("first");
+        CsvColumn csvColumn = new CsvColumn();
+        csvColumn.setIndex(42);
+        csvColumn.setName("CPU Power");
+        csv.setColumns(List.of(csvColumn));
+        csv.setEncoding("UTF-16");
+        csv.setDelimiter(";");
+        measurement.setCsv(csv);
+        expected.setMeasurement(measurement);
+
+        CsvRecording csvRecording = new CsvRecording();
+        csvRecording.setMeasurementCsv("test_measurement.csv");
+        csvRecording.setResultCsv("test_energyconsumption.csv");
+        expected.setCsvRecording(csvRecording);
+
+        JavaAgent javaAgent = new JavaAgent();
+        javaAgent.setMeasurementIntervalInMs(2);
+        javaAgent.setGatherStatisticsIntervalInMs(3);
+        javaAgent.setWriteEnergyMeasurementsToCsvIntervalInS(4);
+        javaAgent.setPackageFilter(Set.of("com.something", "com.anything"));
+        expected.setJavaAgent(javaAgent);
+
+        assertThat(cfg).usingRecursiveComparison().isEqualTo(expected);
     }
 
     @Test
     public void readConfig_usesCaching() {
         JPowerMonitorConfigProvider provider = new DefaultConfigProvider();
-        JPowerMonitorConfig cfg1 = provider.readConfig("DefaultConfigProviderTest.yaml");
-        assertNotNull(cfg1);
-        JPowerMonitorConfig cfg2 = provider.readConfig("something.else");
-        assertSame(cfg1, cfg2);
+        JPowerMonitorConfig first = provider.readConfig("DefaultConfigProviderTest.yaml");
+        assertThat(first).isNotNull();
+        JPowerMonitorConfig second = provider.readConfig("something.else");
+        assertSame(first, second);
     }
 
 }

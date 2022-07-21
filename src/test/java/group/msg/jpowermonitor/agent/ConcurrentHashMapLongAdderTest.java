@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.LongAdder;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ConcurrentHashMapLongAdderTest {
@@ -14,10 +15,10 @@ public class ConcurrentHashMapLongAdderTest {
      void concurrentHashMapLongAdderTest() {
         ConcurrentMap<String, LongAdder> callsPerMethod = new ConcurrentHashMap<>();
         callsPerMethod.computeIfAbsent("test", callCount -> new LongAdder()).increment();
-        assertEquals(1, callsPerMethod.get("test").intValue());
+        assertThat(callsPerMethod.get("test").intValue()).isEqualTo(1);
         callsPerMethod.computeIfAbsent("test", callCount -> new LongAdder()).increment();
-        assertEquals(2, callsPerMethod.get("test").intValue());
+        assertThat(callsPerMethod.get("test").intValue()).isEqualTo(2);
         callsPerMethod.computeIfAbsent("test2", callCount -> new LongAdder()).increment();
-        assertEquals(1, callsPerMethod.get("test2").intValue());
+        assertThat(callsPerMethod.get("test2").intValue()).isEqualTo(1);
     }
 }

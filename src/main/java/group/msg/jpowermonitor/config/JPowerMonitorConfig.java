@@ -15,27 +15,32 @@ public class JPowerMonitorConfig {
     private Integer initCycles;
     private Integer calmDownIntervalInMs;
     private BigDecimal percentageOfSamplesAtBeginningToDiscard;
-    private OpenHardwareMonitor openHardwareMonitor;
+    private Measurement measurement;
     private CsvRecording csvRecording;
     private JavaAgent javaAgent;
 
     void initializeConfiguration() {
-        if (openHardwareMonitor == null
-            || openHardwareMonitor.getUrl() == null) {
-            throw new JPowerMonitorException(
-                "OpenHardwareMonitor REST endpoint URL must be configured");
+        if (measurement == null || measurement.getMethod() == null) {
+            throw new JPowerMonitorException("A measuring method must be defined!");
         }
-        openHardwareMonitor.setUrl(openHardwareMonitor.getUrl() + "/data.json");
-
-        List<PathElement> pathElems = openHardwareMonitor.getPaths();
-        if (pathElems == null
-            || pathElems.isEmpty()
-            || pathElems.get(0) == null
-            || pathElems.get(0).getPath() == null
-            || pathElems.get(0).getPath().isEmpty()) {
-            throw new JPowerMonitorException("At least one path to a sensor value must be configured under paths");
+        if ("ohm".equals(measurement.getMethod())) {
+            if (measurement.getOhm() == null || measurement.getOhm().getUrl() == null) {
+                throw new JPowerMonitorException("OpenHardwareMonitor REST endpoint URL must be configured");
+            }
+            measurement.getOhm().setUrl(measurement.getOhm().getUrl() + "/data.json");
+            List<PathElement> pathElems =  measurement.getOhm().getPaths();
+            if (pathElems == null
+                || pathElems.isEmpty()
+                || pathElems.get(0) == null
+                || pathElems.get(0).getPath() == null
+                || pathElems.get(0).getPath().isEmpty()) {
+                throw new JPowerMonitorException("At least one path to a sensor value must be configured under paths");
+            }
+        } else {
+            if (measurement.getCsv() == null || measurement.getCsv().getInputFile() == null || measurement.getCsv().getColumns() == null || measurement.getCsv().getColumns().size() == 0) {
+                throw new JPowerMonitorException("CSV input filepath and columns must be configured");
+            }
         }
-
         setDefaultIfNotSet(samplingIntervalInMs, this::setSamplingIntervalInMs, 300);
         setDefaultIfNotSet(samplingIntervalForInitInMs, this::setSamplingIntervalForInitInMs, 1000);
         setDefaultIfNotSet(initCycles, this::setInitCycles, 10);

@@ -11,29 +11,46 @@ percentageOfSamplesAtBeginningToDiscard: 20
 # Sampling interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
 # Too short intervals also affect the energy consumption!
 samplingIntervalInMs: 300
+
+measurement:
+  # Specify which measurement method to use. Possible values: ohm, csv
+  method: 'csv'
+  # Configuration for reading from csv file. E.g. output from HWInfo
+  csv:
+    # Path to csv file to read measure values from
+    inputFile: 'hwinfo.csv'
+    # Which line in the csv input file contains the current measured values? The first or the last? This depends on the measurement tool. Possible value: first, last
+    lineToRead: 'last'
+    # Columns to read, index starts at 0.
+    columns:
+      - { index: 2, name: 'CPU Power', energyInIdleMode: }
+    # Encoding to use for reading the csv input file
+    encoding: 'UTF-8'
+    # Delimiter to use for separating the columns in the csv input file
+    delimiter: ','
+  # Configuration for reading from open hardware monitor
+  ohm:
+    # URL to open hardware monitor (** started in administrator mode **)
+    url: 'http://localhost:8085'
+    # The paths define the path to the leaf node underneath the root 'Sensor' node in Open Hardware Monitor to access and store with every sample.
+    # The more paths defined (no more than about 10), the greater the impact on power consumption, since the values must be extracted from the json data.
+    paths:
+      - { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Package' ], energyInIdleMode: } # if energyInIdleMode is specified, it does not need to be measured before each test.
+      #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Cores' ], energyInIdleMode: 9.5 }
+      #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
+      #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
+
 # ------------------------------------------------
-# configuration for accessing open hardware monitor
-openHardwareMonitor:
-  # URL to open hardware monitor (** started in administrator mode **)
-  url: 'http://localhost:8085'
-  # The paths define the path to the leaf node underneath the root 'Sensor' node in Open Hardware Monitor to access and store with every sample.
-  # The more paths defined (no more than about 10), the greater the impact on power consumption, since the values must be extracted from the json data.
-  paths:
-    - { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Package' ], energyInIdleMode: } # if energyInIdleMode is specified, it does not need to be measured before each test.
-    #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Cores' ], energyInIdleMode: 9.5 }
-    #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
-    #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
-# ------------------------------------------------
-# recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
+# Recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
 csvRecording:
-  # if specified, the results for every test are appended to a csv file.
+  # If specified, the results for every test are appended to a csv file.
   # On Windows: the file must not be opened in Excel in parallel!
   resultCsv: 'energyconsumption.csv'
-  # if specified, all single measurements are recorded/appended in this csv.
+  # If specified, all single measurements are recorded/appended in this csv.
   # On Windows: the file must not be opened in Excel in parallel!
   measurementCsv: 'measurement.csv'
 # ------------------------------------------------
-# configuration for JavaAgent
+# Configuration for JavaAgent
 javaAgent:
   # Filter power and energy for methods starting with this packageFilter names
   packageFilter: [ 'com.msg', 'de.gillardon' ]

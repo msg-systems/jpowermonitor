@@ -36,12 +36,17 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     public static String APP_TITLE = "jPowerMonitor";
     private static final String DEFAULT_CONFIG = APP_TITLE + ".yaml";
     private final Charset yamlFileEncoding;
-    private final ClassLoader resourceLoader;
     private static JPowerMonitorConfig cachedConfig = null;
 
     public DefaultConfigProvider() {
         this.yamlFileEncoding = StandardCharsets.UTF_8;
-        this.resourceLoader = DefaultConfigProvider.class.getClassLoader();
+    }
+    @Override
+    public synchronized JPowerMonitorConfig getCachedConfig() throws JPowerMonitorException {
+        if (cachedConfig == null) {
+            cachedConfig = acquireConfigFromSource(DEFAULT_CONFIG);
+        }
+        return cachedConfig;
     }
 
     @Override
@@ -88,7 +93,7 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         System.out.println("Reading " + APP_TITLE + " configuration from filesystem: '" + source + "'");
         Path path = Paths.get(source);
         if (!Files.isRegularFile(path)) {
-            System.out.println("'" + source + "' is no regular file, we won't read it from filesystem");
+            System.out.println("'" + source + "' is not a regular file, it will not be read from filesystem");
             return null;
         }
         return readConfigFromPath(path);
@@ -105,7 +110,7 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
 
     private JPowerMonitorConfig tryReadingFromResources(String source) {
         System.out.println("Reading " + APP_TITLE + " configuration from resources: '" + source + "'");
-        if (resourceLoader.getResource(source) == null) {
+        if (DefaultConfigProvider.class.getClassLoader().getResource(source) == null) {
             System.out.println("'" + source + "' is not available as resource");
             return null;
         }
@@ -113,7 +118,7 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     }
 
     private JPowerMonitorConfig readConfigFromResource(String source) {
-        try (InputStream input = resourceLoader.getResourceAsStream(source)) {
+        try (InputStream input = DefaultConfigProvider.class.getClassLoader().getResourceAsStream(source)) {
             return new Yaml().load(input);
         } catch (Exception exc) {
             System.out.println("Cannot read '" + source + "' from resources:" + exc.getMessage());
@@ -122,9 +127,9 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     }
 
     /**
-     * For testing need to reset the internally cached config.
+     * For testing need to invalidate the static internally cached config in order to re-read it.
      */
-    public static void resetCachedConfig() {
+    public static void invalidateCachedConfig() {
         cachedConfig = null;
     }
 

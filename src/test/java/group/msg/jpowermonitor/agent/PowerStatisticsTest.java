@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -31,38 +33,38 @@ class PowerStatisticsTest {
     @Test
     void areNotAddableFailBecauseOfValueNullTest() {
         PowerStatistics testee = new PowerStatistics(0L, 0L, 0L, null, null);
-        assertThrows(Exception.class, () -> testee.areDataPointsAddable(DP1, null));
-        Exception ex = assertThrows(Exception.class, () -> testee.areDataPointsAddable(null, DP2));
+        assertThatThrownBy(() -> testee.areDataPointsAddable(DP1, null)).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> testee.areDataPointsAddable(null, DP2)).isInstanceOf(Exception.class);
     }
 
     @Test
     void areNotAddableBecauseOfValueNullTest() {
         DataPoint dp2 = new DataPoint("y", null, Unit.WATT, LocalDateTime.now(), null);
         PowerStatistics testee = new PowerStatistics(0L, 0L, 0L, null, null);
-        assertFalse(testee.areDataPointsAddable(DP1, dp2));
-        assertFalse(testee.areDataPointsAddable(dp2, DP1));
+        assertThat(testee.areDataPointsAddable(DP1, dp2)).isFalse();
+        assertThat(testee.areDataPointsAddable(dp2, DP1)).isFalse();
     }
 
     @Test
     void areNotAddableBecauseOfUnitNullTest() {
         DataPoint dp2 = new DataPoint("y", BigDecimal.ZERO, null, LocalDateTime.now(), null);
         PowerStatistics testee = new PowerStatistics(0L, 0L, 0L, null, null);
-        assertFalse(testee.areDataPointsAddable(DP1, dp2));
-        assertFalse(testee.areDataPointsAddable(dp2, DP1));
+        assertThat(testee.areDataPointsAddable(DP1, dp2)).isFalse();
+        assertThat(testee.areDataPointsAddable(dp2, DP1)).isFalse();
     }
 
     @Test
     void areNotAddableBecauseOfDifferentUnitsTest() {
         PowerStatistics testee = new PowerStatistics(0L, 0L, 0L, null, null);
         DataPoint dp2 = testee.cloneDataPointWithNewUnit(DP2, Unit.WATTHOURS);
-        assertFalse(testee.areDataPointsAddable(DP1, dp2));
+        assertThat(testee.areDataPointsAddable(DP1, dp2)).isFalse();
     }
 
     @Test
     void addTwoDataPointsTest() {
         PowerStatistics testee = new PowerStatistics(0L, 0L, 0L, null, null);
         DataPoint dpSum = testee.addDataPoint(DP1, DP2);
-        assertEquals(DP1.getValue().add((DP2.getValue())), dpSum.getValue());
+        assertThat(dpSum.getValue()).isEqualTo(DP1.getValue().add((DP2.getValue())));
     }
 
     @Test
@@ -71,7 +73,7 @@ class PowerStatisticsTest {
         DataPoint dp3 = new DataPoint("x", BigDecimal.TEN, Unit.WATT, LocalDateTime.now(), null);
         DataPoint dp4 = new DataPoint("x", BigDecimal.valueOf(100), Unit.WATT, LocalDateTime.now(), null);
         DataPoint dpSum = testee.addDataPoint(DP1, DP2, dp3, dp4);
-        assertEquals(BigDecimal.valueOf(111), dpSum.getValue());
+        assertThat(dpSum.getValue()).isEqualTo(BigDecimal.valueOf(111));
     }
 
     @Test
@@ -80,7 +82,7 @@ class PowerStatisticsTest {
         DataPoint dp3 = new DataPoint("x", BigDecimal.TEN, Unit.WATT, LocalDateTime.now(), null);
         DataPoint dp4 = new DataPoint("x", BigDecimal.valueOf(100), Unit.WATTHOURS, LocalDateTime.now(), null);
         DataPoint dpSum = testee.addDataPoint(DP1, DP2, dp3, dp4);
-        assertEquals(BigDecimal.valueOf(11), dpSum.getValue());
+        assertThat(dpSum.getValue()).isEqualTo(BigDecimal.valueOf(11));
     }
 
     @Test

@@ -1,4 +1,4 @@
-package group.msg.jpowermonitor.ohwm;
+package group.msg.jpowermonitor.measurement.ohm;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

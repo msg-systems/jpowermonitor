@@ -1,6 +1,5 @@
 package group.msg.jpowermonitor.junit;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class ResultsWriterTest {
@@ -45,7 +45,7 @@ class ResultsWriterTest {
         // Act
         new ResultsWriter(pathToResultCsv, pathToMeasurementCsv);
         // Assert
-        Assertions.assertEquals(expContentResultCsv + NEW_LINE, Files.readString(pathToResultCsv, StandardCharsets.UTF_8)); // trim carriage-return
-        Assertions.assertEquals(expContentMeasurementCsv + NEW_LINE, Files.readString(pathToMeasurementCsv, StandardCharsets.UTF_8)); // trim carriage-return
+        assertThat(Files.readString(pathToResultCsv, StandardCharsets.UTF_8)).isEqualTo(expContentResultCsv + NEW_LINE); // trim carriage-return
+        assertThat(Files.readString(pathToMeasurementCsv, StandardCharsets.UTF_8)).isEqualTo(expContentMeasurementCsv + NEW_LINE); // trim carriage-return
     }
 }
