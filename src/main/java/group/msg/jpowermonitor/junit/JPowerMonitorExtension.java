@@ -48,6 +48,9 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
 
     @Override
     public void beforeAll(ExtensionContext context) {
+        System.out.println("Invalidating and re-reading config for " + context.getDisplayName());
+        DefaultConfigProvider.invalidateCachedConfig();
+
         String configFile = context.getTestClass().map(c -> c.getSimpleName() + ".yaml").orElse(null);
         JPowerMonitorConfig config = new DefaultConfigProvider().readConfig(configFile);
         measureMethod = MeasureMethodProvider.resolveMeasureMethod(config);

@@ -1,11 +1,14 @@
 package com.msg.myapplication;
 
+import group.msg.jpowermonitor.config.DefaultConfigProvider;
 import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
 import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
 import group.msg.jpowermonitor.util.StressCpuExample;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -24,6 +27,8 @@ public class EndlessLoopTest {
     @AfterEach
     void printValues() {
         assertThat(valueList).isNotNull();
+        //
+        // as we use a fix csv file, the outcome is fix for this test:
         valueList.forEach(x -> {
             assertThat(x.getValue()).isEqualTo(new BigDecimal("5.05"));
             assertThat(x.getPowerInIdleMode()).isEqualTo(new BigDecimal("2.01"));

@@ -5,6 +5,7 @@ import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
 import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.RepeatedTest;
@@ -25,11 +26,6 @@ public class MyTest {
     @SensorValues
     List<SensorValue> sensorValueList;
 
-    @BeforeAll
-    static void resetConfig() {
-        DefaultConfigProvider.invalidateCachedConfig();
-    }
-
     @RepeatedTest(1)
     void myPowerConsumingSuperTest() {
         BigDecimal sum = BigDecimal.ZERO;
@@ -47,6 +43,8 @@ public class MyTest {
         // @SensorValues annotated fields of type List<SensorValue> are accessible after each test
         log.info("sensorvalues: {}", sensorValueList);
         assertThat(sensorValueList).isNotNull();
+        //
+        // as we use a fix csv file, the outcome is fix for this test:
         sensorValueList.forEach(x -> {
             assertThat(x.getValue()).isEqualTo(new BigDecimal("5.06"));
             assertThat(x.getPowerInIdleMode()).isEqualTo(new BigDecimal("2.0"));
