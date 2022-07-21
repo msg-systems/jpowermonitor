@@ -48,8 +48,8 @@ public class MyTest {
         log.info("sensorvalues: {}", sensorValueList);
         assertThat(sensorValueList).isNotNull();
         sensorValueList.forEach(x -> {
-            assertThat(x.getValue()).isEqualTo(new BigDecimal("5.05"));
-            assertThat(x.getPowerInIdleMode()).isEqualTo(new BigDecimal("2.01"));
+            assertThat(x.getValue()).isEqualTo(new BigDecimal("5.06"));
+            assertThat(x.getPowerInIdleMode()).isEqualTo(new BigDecimal("2.0"));
             assertThat(x.getName()).isEqualTo("CPU Power");
             assertThat(x.getUnit()).isEqualTo(WATT);
         });
