@@ -29,10 +29,12 @@ public class ResultsWriter implements Runnable {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd'T'HH:mm:ss-SSS");
     private static final DecimalFormat DECIMAL_FORMAT;
     private static final String dataPointFormatCsv;
+    private static final String dataPointFormatEnergyConsumptionCsv;
     private static final String UNIT_GRAMS_CO2 = "gCO2";
 
     static {
-        dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s,%s,%s%s";
+        dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s%s";
+        dataPointFormatEnergyConsumptionCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s,%s,%s%s";
         DECIMAL_FORMAT = new DecimalFormat("###0.#####", DecimalFormatSymbols.getInstance(Locale.getDefault()));
     }
 
@@ -118,13 +120,16 @@ public class ResultsWriter implements Runnable {
 
     protected String createCsv(Map<String, DataPoint> measurements) {
         StringBuilder csv = new StringBuilder();
-        measurements.forEach((method, energy) -> csv.append(createCsvEntryForDataPoint(energy, method)));
+        measurements.forEach((method, energy) -> csv.append(createCsvEntryForDataPoint(energy)));
         return csv.toString();
     }
 
-    public String createCsvEntryForDataPoint(@NotNull DataPoint dp, String namePrefix) {
-        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(),
-            DECIMAL_FORMAT.format(convertJouleToCarbonDioxideGrams(dp.getValue(), BigDecimal.valueOf(485.0d))), UNIT_GRAMS_CO2, NEW_LINE);
+    protected String createCsvEntryForDataPoint(@NotNull DataPoint dp) {
+        if (Unit.JOULE == dp.getUnit()) {
+            return String.format(dataPointFormatEnergyConsumptionCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(),
+                DECIMAL_FORMAT.format(convertJouleToCarbonDioxideGrams(dp.getValue(), BigDecimal.valueOf(485.0d))), UNIT_GRAMS_CO2, NEW_LINE);
+        }
+        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
     }
 
     protected void writeToFile(String csv, String fileName) {
@@ -147,9 +152,11 @@ public class ResultsWriter implements Runnable {
     protected BigDecimal convertJouleToKiloWattHours(BigDecimal joule) {
         return convertJouleToWattHours(joule).divide(WATT_HOURS_TO_KWH_FACTOR, MATH_CONTEXT);
     }
+
     protected BigDecimal convertKiloWattHoursToCarbonDioxideGrams(BigDecimal kWh, BigDecimal energyMix) {
         return kWh.multiply(energyMix);
     }
+
     protected BigDecimal convertJouleToCarbonDioxideGrams(BigDecimal joule, BigDecimal energyMix) {
         return convertKiloWattHoursToCarbonDioxideGrams(convertJouleToKiloWattHours(joule), energyMix);
     }
