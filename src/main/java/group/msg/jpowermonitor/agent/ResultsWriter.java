@@ -27,9 +27,10 @@ public class ResultsWriter implements Runnable {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd'T'HH:mm:ss-SSS");
     private static final DecimalFormat DECIMAL_FORMAT;
     private static final String dataPointFormatCsv;
+    private static final String UNIT_GRAMS_CO2 = "gCO2";
 
     static {
-        dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s%s";
+        dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s,%s,%s%s";
         DECIMAL_FORMAT = new DecimalFormat("###0.#####", DecimalFormatSymbols.getInstance(Locale.getDefault()));
     }
 
@@ -120,7 +121,8 @@ public class ResultsWriter implements Runnable {
     }
 
     public String createCsvEntryForDataPoint(@NotNull DataPoint dp, String namePrefix) {
-        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
+        return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(),
+            DECIMAL_FORMAT.format(convertJouleToCarbonDioxideGrams(dp.getValue().doubleValue(), 485.0)), UNIT_GRAMS_CO2, NEW_LINE);
     }
 
     protected void writeToFile(String csv, String fileName) {
@@ -143,6 +145,11 @@ public class ResultsWriter implements Runnable {
     protected double convertJouleToKiloWattHours(double joule) {
         return convertJouleToWattHours(joule) / WATT_HOURS_TO_KWH_FACTOR;
     }
-
+    protected double convertKiloWattHoursToCarbonDioxideGrams(double kWh, double energyMix) {
+        return kWh * energyMix;
+    }
+    protected double convertJouleToCarbonDioxideGrams(double joule, double energyMix) {
+        return convertKiloWattHoursToCarbonDioxideGrams(convertJouleToKiloWattHours(joule), energyMix);
+    }
 
 }
