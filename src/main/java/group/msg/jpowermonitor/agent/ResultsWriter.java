@@ -103,10 +103,11 @@ public class ResultsWriter implements Runnable {
             || powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue() == null) {
             return;
         }
-        prioritizedLogger.accept(String.format("Application consumed %.2f joule - %.3f wh - %.6f kwh total",
+        prioritizedLogger.accept(String.format("Application consumed %.2f joule - %.3f wh - %.6f kwh - %.3f gCO2 total",
             powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue()
             , convertJouleToWattHours(powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue())
-            , convertJouleToKiloWattHours(powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue())));
+            , convertJouleToKiloWattHours(powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue())
+            , convertJouleToCarbonDioxideGrams(powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue(), kWhToCarbonDioxideEnergyMixFactor)));
         prioritizedLogger.accept("Energy consumption per method and filtered methods written to '" + energyConsumptionPerMethodFileName + "' / '" + energyConsumptionPerFilteredMethodFileName + "'");
         prioritizedLogger.accept(SEPARATOR);
     }
