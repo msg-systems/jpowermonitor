@@ -1,10 +1,12 @@
 package group.msg.jpowermonitor.agent;
 
 import group.msg.jpowermonitor.config.DefaultConfigProvider;
+import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.config.JavaAgent;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ThreadMXBean;
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -41,7 +43,8 @@ public class JPowerMonitorAgent {
         System.out.println(SEPARATOR);
         ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
         long pid = ProcessHandle.current().pid();
-        JavaAgent javaAgentCfg = new DefaultConfigProvider().readConfig(args).getJavaAgent();
+        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig(args);
+        JavaAgent javaAgentCfg = cfg.getJavaAgent();
         Set<String> packageFilter = javaAgentCfg.getPackageFilter();
         System.out.println(Thread.currentThread().getName() + ": Start monitoring application with PID " + pid);
 
@@ -56,7 +59,7 @@ public class JPowerMonitorAgent {
             writeEnergyMeasurementResultsToCsv.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    ResultsWriter rw = new ResultsWriter(powerStatistics, false);
+                    ResultsWriter rw = new ResultsWriter(powerStatistics, false, cfg.getKWhToCarbonDioxideEnergyMixFactor());
                     rw.execute();
                 }
             }, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * 1000, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * 1000);
@@ -77,7 +80,7 @@ public class JPowerMonitorAgent {
             ));
 
         // Write results to CSV files
-        Thread powerStatThread = new Thread(new ResultsWriter(powerStatistics, true));
+        Thread powerStatThread = new Thread(new ResultsWriter(powerStatistics, true, cfg.getKWhToCarbonDioxideEnergyMixFactor()));
         powerStatThread.setDaemon(true);
         Runtime.getRuntime().addShutdownHook(powerStatThread);
     }

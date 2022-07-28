@@ -11,10 +11,13 @@ percentageOfSamplesAtBeginningToDiscard: 20
 # Sampling interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
 # Too short intervals also affect the energy consumption!
 samplingIntervalInMs: 300
+# Conversion factor to calculate approximated CO2 consumption in grams from energy consumtion per kWh.
+# Depends on the energy mix of your location, for germany compare e. g. https://www.umweltbundesamt.de/themen/klima-energie/energieversorgung/strom-waermeversorgung-in-zahlen#Strommix
+KWhToCarbonDioxideEnergyMixFactor: 485
 
 measurement:
   # Specify which measurement method to use. Possible values: ohm, csv
-  method: 'csv'
+  method: 'ohm'
   # Configuration for reading from csv file. E.g. output from HWInfo
   csv:
     # Path to csv file to read measure values from
@@ -23,7 +26,7 @@ measurement:
     lineToRead: 'last'
     # Columns to read, index starts at 0.
     columns:
-      - { index: 2, name: 'CPU Power', energyInIdleMode: }
+      - { index: 95, name: 'CPU Package Power [W]', energyInIdleMode: }
     # Encoding to use for reading the csv input file
     encoding: 'UTF-8'
     # Delimiter to use for separating the columns in the csv input file
@@ -53,7 +56,7 @@ csvRecording:
 # Configuration for JavaAgent
 javaAgent:
   # Filter power and energy for methods starting with this packageFilter names
-  packageFilter: [ 'com.msg', 'de.gillardon' ]
+  packageFilter: [ 'group.msg', 'de.gillardon' ]
   # Energy measurement interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
   # Too short intervals also affect the energy consumption!
   measurementIntervalInMs: 1000

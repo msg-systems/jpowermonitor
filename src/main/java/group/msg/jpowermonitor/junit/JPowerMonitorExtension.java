@@ -18,8 +18,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,12 +30,13 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
+
 /**
  * Implements AfterTestExecutionCallback in order to be able to access results in the @AfterEach method in the test class.
  * AfterEachCallback would be too late, since @AfterEach is called before this callback.
  */
 public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCallback, AfterTestExecutionCallback {
-    private final static MathContext mathContext = new MathContext(30, RoundingMode.HALF_UP);
     private final Map<String, List<DataPoint>> powerMeasurements = new HashMap<>();
     private Timer timer;
     private TimerTask timedMeasurement;
@@ -132,10 +131,10 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     private SensorValue calculateResult(long timeTaken, BigDecimal powerInIdleMode, DataPoint dp) {
         BigDecimal valueWithoutIdlePower = dp.getValue().subtract(powerInIdleMode);
         BigDecimal valuePerHour = dp.isPowerSensor() ?
-            valueWithoutIdlePower.multiply(HumanReadableTime.nanosToHours(timeTaken), mathContext).setScale(5, mathContext.getRoundingMode())
+            valueWithoutIdlePower.multiply(HumanReadableTime.nanosToHours(timeTaken), MATH_CONTEXT).setScale(5, MATH_CONTEXT.getRoundingMode())
             : BigDecimal.ZERO;
         BigDecimal valueWithIdlePowerPerHour = dp.isPowerSensor() ?
-            dp.getValue().multiply(HumanReadableTime.nanosToHours(timeTaken), mathContext).setScale(5, mathContext.getRoundingMode())
+            dp.getValue().multiply(HumanReadableTime.nanosToHours(timeTaken), MATH_CONTEXT).setScale(5, MATH_CONTEXT.getRoundingMode())
             : BigDecimal.ZERO;
         return SensorValue.builder().name(dp.getName())
             .value(valueWithoutIdlePower)
@@ -200,8 +199,8 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         BigDecimal avg = dataPoints.stream()
             .map(DataPoint::getValue)
             .reduce(BigDecimal.ZERO, BigDecimal::add)
-            .divide(new BigDecimal(dataPoints.size()), mathContext)
-            .setScale(2, mathContext.getRoundingMode());
+            .divide(new BigDecimal(dataPoints.size()), MATH_CONTEXT)
+            .setScale(2, MATH_CONTEXT.getRoundingMode());
         return new DataPoint(reference.getName(), avg, reference.getUnit(), LocalDateTime.now(), reference.getThreadName());
     }
 
@@ -217,7 +216,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     }
 
     private int firstXPercent(int size) {
-        BigDecimal xPercent = new BigDecimal(String.valueOf(size)).multiply(measureMethod.getPercentageOfSamplesAtBeginningToDiscard()).divide(new BigDecimal("100"), mathContext);
-        return xPercent.setScale(0, mathContext.getRoundingMode()).intValue();
+        BigDecimal xPercent = new BigDecimal(String.valueOf(size)).multiply(measureMethod.getPercentageOfSamplesAtBeginningToDiscard()).divide(new BigDecimal("100"), MATH_CONTEXT);
+        return xPercent.setScale(0, MATH_CONTEXT.getRoundingMode()).intValue();
     }
 }

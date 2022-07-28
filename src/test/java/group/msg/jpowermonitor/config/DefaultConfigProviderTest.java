@@ -28,6 +28,7 @@ class DefaultConfigProviderTest {
         expected.setCalmDownIntervalInMs(9);
         expected.setPercentageOfSamplesAtBeginningToDiscard(new BigDecimal("3"));
         expected.setSamplingIntervalInMs(4);
+        expected.setKWhToCarbonDioxideEnergyMixFactor(new BigDecimal("485"));
 
         Measurement measurement = new Measurement();
         measurement.setMethod("ohm");
