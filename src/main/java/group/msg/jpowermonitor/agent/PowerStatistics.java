@@ -8,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ThreadMXBean;
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,10 +23,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static group.msg.jpowermonitor.agent.MeasurePower.getCurrentCpuPowerInWatts;
+import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
 
 public class PowerStatistics extends TimerTask {
     private static final String CLASS_METHOD_SEPARATOR = ".";
-    private static final MathContext MATH_CONTEXT = new MathContext(30, RoundingMode.HALF_UP);
     private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
         new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now(), null));
     private final Map<String, Long> threadsCpuTime = new HashMap<>();
