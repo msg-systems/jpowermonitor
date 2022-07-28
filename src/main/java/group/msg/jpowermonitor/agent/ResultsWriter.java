@@ -45,6 +45,7 @@ public class ResultsWriter implements Runnable {
 
     private final PowerStatistics powerStatistics;
     private final boolean doWriteStatistics;
+    private final BigDecimal kWhToCarbonDioxideEnergyMixFactor;
 
     private String energyConsumptionPerMethodFileName;
     private String energyConsumptionPerFilteredMethodFileName;
@@ -54,12 +55,14 @@ public class ResultsWriter implements Runnable {
     /**
      * Constructor
      *
-     * @param powerStatistics   energy consumption measurements
-     * @param doWriteStatistics set 'true' if this is shutdown hook - logs some statistics
+     * @param powerStatistics                   energy consumption measurements
+     * @param doWriteStatistics                 set 'true' if this is shutdown hook - logs some statistics
+     * @param kWhToCarbonDioxideEnergyMixFactor conversion factor to calculate CO2 usage from energy usage
      */
-    public ResultsWriter(PowerStatistics powerStatistics, boolean doWriteStatistics) {
+    public ResultsWriter(PowerStatistics powerStatistics, boolean doWriteStatistics, BigDecimal kWhToCarbonDioxideEnergyMixFactor) {
         this.powerStatistics = powerStatistics;
         this.doWriteStatistics = doWriteStatistics;
+        this.kWhToCarbonDioxideEnergyMixFactor = kWhToCarbonDioxideEnergyMixFactor;
         initCsvFileNames();
     }
 
@@ -127,7 +130,7 @@ public class ResultsWriter implements Runnable {
     protected String createCsvEntryForDataPoint(@NotNull DataPoint dp) {
         if (Unit.JOULE == dp.getUnit()) {
             return String.format(dataPointFormatEnergyConsumptionCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(),
-                DECIMAL_FORMAT.format(convertJouleToCarbonDioxideGrams(dp.getValue(), BigDecimal.valueOf(485.0d))), UNIT_GRAMS_CO2, NEW_LINE);
+                DECIMAL_FORMAT.format(convertJouleToCarbonDioxideGrams(dp.getValue(), kWhToCarbonDioxideEnergyMixFactor)), UNIT_GRAMS_CO2, NEW_LINE);
         }
         return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
     }

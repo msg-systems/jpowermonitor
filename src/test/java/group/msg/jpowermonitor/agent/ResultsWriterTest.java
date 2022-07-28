@@ -14,7 +14,7 @@ public class ResultsWriterTest {
 
     @BeforeAll
     static void setUp() {
-        rw = new ResultsWriter(new PowerStatistics(0l, 0l, 123, null, null), false);
+        rw = new ResultsWriter(new PowerStatistics(0l, 0l, 123, null, null), false, BigDecimal.ZERO);
     }
 
     @Test

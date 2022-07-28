@@ -160,7 +160,7 @@ public class PowerStatistics extends TimerTask {
     }
 
     private void writePowerMeasurementsToCsvFiles(Map<String, Set<MethodActivity>> methodActivityPerThread) {
-        new ResultsWriter(this, false).createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(
+        new ResultsWriter(this, false, BigDecimal.ZERO).createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(
             methodActivityPerThread.values().stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList())
