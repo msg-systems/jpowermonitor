@@ -4,6 +4,7 @@ samplingIntervalForInitInMs: 8
 calmDownIntervalInMs: 9
 percentageOfSamplesAtBeginningToDiscard: 3
 samplingIntervalInMs: 4
+carbonDioxideEmissionFactor: 777
 measurement:
   # Specify which measurement method to use. Possible values: ohm, csv
   method: 'ohm'

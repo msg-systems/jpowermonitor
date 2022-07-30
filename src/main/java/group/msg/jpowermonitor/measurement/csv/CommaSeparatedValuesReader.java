@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,16 +100,25 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
     public @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException {
         Path csvInputFile = config.getMeasurement().getCsv().getInputFileAsPath();
         try {
-            String lastLine = "last".equalsIgnoreCase(config.getMeasurement().getCsv().getLineToRead()) ?
-                readLastLine(csvInputFile, config.getMeasurement().getCsv().getEncodingAsCharset()) :
-                readFirstLine(csvInputFile, config.getMeasurement().getCsv().getEncodingAsCharset());
-            String[] values = lastLine.split(config.getMeasurement().getCsv().getDelimiter());
+            String[] values = readColumnsFromCsv(csvInputFile);
             CsvColumn column = config.getMeasurement().getCsv().getColumns().get(0);
+            while (values.length < column.getIndex() + 1) {
+                System.out.printf("%s re-reading line since it did not contain column %s\n", DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()), column.getIndex());
+                values = readColumnsFromCsv(csvInputFile);
+            }
             BigDecimal value = parseBigDecimalFromColumnConfig(csvInputFile, values[column.getIndex()]);
             return new DataPoint(column.getName(), value, Unit.WATT, LocalDateTime.now(), null);
         } catch (IOException ex) {
             throw new JPowerMonitorException("Cannot read measurements from file '" + csvInputFile.toAbsolutePath().normalize() + "'");
         }
+    }
+
+    @NotNull
+    private String[] readColumnsFromCsv(Path csvInputFile) throws IOException {
+        String csvLine = "last".equalsIgnoreCase(config.getMeasurement().getCsv().getLineToRead()) ?
+            readLastLine(csvInputFile, config.getMeasurement().getCsv().getEncodingAsCharset()) :
+            readFirstLine(csvInputFile, config.getMeasurement().getCsv().getEncodingAsCharset());
+        return csvLine.split(config.getMeasurement().getCsv().getDelimiter());
     }
 
     @NotNull

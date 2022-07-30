@@ -40,3 +40,4 @@ out/
 /src/test/resources/jpowermonitor.yaml
 
 jpowermonitor.yaml
+/my-config.yaml

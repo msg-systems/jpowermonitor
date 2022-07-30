@@ -6,7 +6,6 @@ import group.msg.jpowermonitor.config.JavaAgent;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ThreadMXBean;
-import java.math.BigDecimal;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -59,7 +58,7 @@ public class JPowerMonitorAgent {
             writeEnergyMeasurementResultsToCsv.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    ResultsWriter rw = new ResultsWriter(powerStatistics, false, cfg.getKWhToCarbonDioxideEnergyMixFactor());
+                    ResultsWriter rw = new ResultsWriter(powerStatistics, false, cfg.getCarbonDioxideEmissionFactor());
                     rw.execute();
                 }
             }, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * 1000, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * 1000);
@@ -80,7 +79,7 @@ public class JPowerMonitorAgent {
             ));
 
         // Write results to CSV files
-        Thread powerStatThread = new Thread(new ResultsWriter(powerStatistics, true, cfg.getKWhToCarbonDioxideEnergyMixFactor()));
+        Thread powerStatThread = new Thread(new ResultsWriter(powerStatistics, true, cfg.getCarbonDioxideEmissionFactor()));
         powerStatThread.setDaemon(true);
         Runtime.getRuntime().addShutdownHook(powerStatThread);
     }
