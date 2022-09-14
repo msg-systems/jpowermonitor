@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+/**
+ * Result writer for the JUnit extension.
+ */
 public class ResultsWriter {
     static {
         setLocaleDependentValues();

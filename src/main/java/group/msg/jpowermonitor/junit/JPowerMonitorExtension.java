@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
 
 /**
+ * JUnit Extension for measuring energy.
+ * <br>
  * Implements AfterTestExecutionCallback in order to be able to access results in the @AfterEach method in the test class.
  * AfterEachCallback would be too late, since @AfterEach is called before this callback.
  */

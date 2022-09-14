@@ -28,6 +28,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the Open Hardware Monitor measure method.
+ * @see MeasureMethod
+ */
 public class OpenHardwareMonitorReader implements MeasureMethod {
     HttpClient client;
     JPowerMonitorConfig config;

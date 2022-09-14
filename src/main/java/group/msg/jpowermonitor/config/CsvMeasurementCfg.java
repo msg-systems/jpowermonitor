@@ -7,7 +7,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-
+/**
+ * Data class for csv measurement config.
+ * @see CsvColumn
+ */
 @Data
 public class CsvMeasurementCfg {
     private String inputFile;
