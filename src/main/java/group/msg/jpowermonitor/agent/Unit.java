@@ -3,6 +3,13 @@ package group.msg.jpowermonitor.agent;
 import lombok.Getter;
 import java.util.Arrays;
 
+/**
+ * Unit of a sensor value.
+ *
+ * @see group.msg.jpowermonitor.dto.Quantity
+ * @see group.msg.jpowermonitor.dto.DataPoint
+ * @see group.msg.jpowermonitor.dto.PowerQuestionable
+ */
 public enum Unit {
     JOULE("J"), WATT("W"), WATTHOURS("Wh"), NONE("");
     @Getter

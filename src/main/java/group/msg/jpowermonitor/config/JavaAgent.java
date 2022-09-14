@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.Set;
 
+/**
+ * Data class for java agent config.
+ */
 @Data
 public class JavaAgent {
     private Set<String> packageFilter;

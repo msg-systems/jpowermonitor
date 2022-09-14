@@ -7,7 +7,14 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-
+/**
+ * Data class for jpower monitor config.
+ * Includes all configuration values.
+ *
+ * @see Measurement
+ * @see CsvRecording
+ * @see JavaAgent
+ */
 @Data
 public class JPowerMonitorConfig {
     private Integer samplingIntervalInMs;

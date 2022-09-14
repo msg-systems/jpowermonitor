@@ -25,6 +25,9 @@ import java.util.stream.Collectors;
 import static group.msg.jpowermonitor.agent.MeasurePower.getCurrentCpuPowerInWatts;
 import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
 
+/**
+ * Thread for collecting power statistics.
+ */
 public class PowerStatistics extends TimerTask {
     private static final String CLASS_METHOD_SEPARATOR = ".";
     private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =

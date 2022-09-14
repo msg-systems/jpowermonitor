@@ -5,6 +5,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+/**
+ * Data element for open hardware monitor config.
+ * @see PathElement
+ */
 @Data
 public class OpenHardwareMonitorCfg {
     @Nullable

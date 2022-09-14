@@ -8,6 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Class for formatting time in nanos or millis to a readable format.
+ */
 public class HumanReadableTime {
     private static final long MILLION = 1000 * 1000;
     private static final Map<TimeUnit, String> TIME_UNITS_NANOS = timeUnitsToNanos();

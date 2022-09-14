@@ -9,6 +9,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Interface for different types of measuring the consumed energy.<br>
+ * E.g. Open Hardware Monitor or HWiNFO.
+ */
 public interface MeasureMethod {
     /**
      * Measure all data points for the configured paths.

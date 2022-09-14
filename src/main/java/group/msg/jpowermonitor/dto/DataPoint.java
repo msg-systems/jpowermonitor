@@ -6,6 +6,9 @@ import lombok.Value;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * One data point.
+ */
 @Value
 public class DataPoint implements PowerQuestionable {
     String name;
