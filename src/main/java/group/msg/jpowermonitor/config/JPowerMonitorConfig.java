@@ -15,7 +15,7 @@ public class JPowerMonitorConfig {
     private Integer initCycles;
     private Integer calmDownIntervalInMs;
     private BigDecimal percentageOfSamplesAtBeginningToDiscard;
-    private BigDecimal kWhToCarbonDioxideEnergyMixFactor;
+    private BigDecimal carbonDioxideEmissionFactor;
     private Measurement measurement;
     private CsvRecording csvRecording;
     private JavaAgent javaAgent;
@@ -47,7 +47,7 @@ public class JPowerMonitorConfig {
         setDefaultIfNotSet(initCycles, this::setInitCycles, 10);
         setDefaultIfNotSet(calmDownIntervalInMs, this::setCalmDownIntervalInMs, 1000);
         setDefaultIfNotSet(percentageOfSamplesAtBeginningToDiscard, this::setPercentageOfSamplesAtBeginningToDiscard, new BigDecimal("15"));
-        setDefaultIfNotSet(kWhToCarbonDioxideEnergyMixFactor, this::setKWhToCarbonDioxideEnergyMixFactor, new BigDecimal("485"));
+        setDefaultIfNotSet(carbonDioxideEmissionFactor, this::setCarbonDioxideEmissionFactor, new BigDecimal("485"));
         setDefaultIfNotSet(javaAgent, this::setJavaAgent, new JavaAgent());
         setDefaultIfNotSet(javaAgent.getPackageFilter(), javaAgent::setPackageFilter, Collections.emptySet());
     }

@@ -11,9 +11,9 @@ percentageOfSamplesAtBeginningToDiscard: 20
 # Sampling interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
 # Too short intervals also affect the energy consumption!
 samplingIntervalInMs: 300
-# Conversion factor to calculate approximated CO2 consumption in grams from energy consumtion per kWh.
+# Conversion factor to calculate approximated CO2 consumption in grams from energy consumption per kWh.
 # Depends on the energy mix of your location, for germany compare e. g. https://www.umweltbundesamt.de/themen/klima-energie/energieversorgung/strom-waermeversorgung-in-zahlen#Strommix
-KWhToCarbonDioxideEnergyMixFactor: 485
+carbonDioxideEmissionFactor: 485
 
 measurement:
   # Specify which measurement method to use. Possible values: ohm, csv

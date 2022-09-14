@@ -23,6 +23,8 @@ before_script:
 
 build:
   stage: build
+  tags:
+    - coc-gitlab-runner
   script:
     - bash ./gradlew assemble
   cache:
@@ -34,6 +36,8 @@ build:
 
 test:
   stage: test
+  tags:
+    - coc-gitlab-runner
   script:
     - bash ./gradlew check
   cache:
