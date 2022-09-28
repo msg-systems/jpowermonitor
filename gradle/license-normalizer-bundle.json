@@ -1,0 +1,139 @@
+{
+    "bundles": [
+        {
+            "bundleName": "Apache-1.1",
+            "licenseName": "Apache License, Version 1.1",
+            "licenseUrl": "https://opensource.org/licenses/Apache-1.1"
+        },
+        {
+            "bundleName": "Apache-2.0",
+            "licenseName": "Apache License, Version 2.0",
+            "licenseUrl": "https://opensource.org/licenses/Apache-2.0"
+        },
+        {
+            "bundleName": "CDDL-1.0",
+            "licenseName": "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE Version 1.0 (CDDL-1.0)",
+            "licenseUrl": "http://opensource.org/licenses/CDDL-1.0"
+        },
+        {
+            "bundleName": "CDDL-1.1",
+            "licenseName": "COMMON DEVELOPMENT AND DISTRIBUTION LICENSE Version 1.1 (CDDL-1.1)",
+            "licenseUrl": "http://opensource.org/licenses/CDDL-1.1"
+        },
+        {
+            "bundleName": "MPL-1.1",
+            "licenseName": "Mozilla Public License Version 1.1",
+            "licenseUrl": "https://opensource.org/licenses/MPL-1.1"
+        },
+        {
+            "bundleName": "0BSD",
+            "licenseName": "BSD 0-Clause License",
+            "licenseUrl": "https://opensource.org/licenses/0BSD"
+        },
+        {
+            "bundleName": "BSD-2-Clause",
+            "licenseName": "BSD 2-Clause License",
+            "licenseUrl": "https://opensource.org/licenses/BSD-2-Clause"
+        },
+        {
+            "bundleName": "BSD-3-Clause",
+            "licenseName": "BSD 3-Clause License",
+            "licenseUrl": "https://opensource.org/licenses/BSD-3-Clause"
+        },
+        {
+            "bundleName": "CC0-1.0",
+            "licenseName": "PUBLIC DOMAIN",
+            "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/"
+        }
+    ],
+    "transformationRules": [
+        {
+            "bundleName": "Apache-2.0",
+            "licenseNamePattern": ".*The Apache Software License, Version 2.0.*"
+        },
+        {
+            "bundleName": "0BSD",
+            "licenseNamePattern": ".*BSD Zero Clause.*"
+        },
+        {
+            "bundleName": "BSD-2-Clause",
+            "licenseNamePattern": ".*2-Clause BSD.*"
+        },
+        {
+            "bundleName": "BSD-3-Clause",
+            "licenseNamePattern": ".*3-Clause BSD.*"
+        },
+        {
+            "bundleName": "Apache-2.0",
+            "licenseNamePattern": "Apache 2"
+        },
+        {
+            "bundleName": "CDDL-1.1",
+            "licenseNamePattern": "CDDL v1.1 / GPL v2 dual license"
+        },
+        {
+            "bundleName": "CDDL-1.1",
+            "licenseNamePattern": "CDDL/GPLv2+CE"
+        },
+        {
+            "bundleName": "CDDL-1.0",
+            "licenseNamePattern": "CDDL + GPLv2 with classpath exception"
+        },
+        {
+            "bundleName": "CDDL-1.0",
+            "licenseUrlPattern": "https://oss.oracle.com/licenses/CDDL"
+        },
+        {
+            "bundleName": "CDDL-1.1",
+            "licenseUrlPattern": "https://oss.oracle.com/licenses/CDDL-1.1"
+        },
+        {
+            "bundleName": "Apache-2.0",
+            "licenseUrlPattern": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+        },
+        {
+            "bundleName": "Apache-2.0",
+            "modulePattern": "avalon-framework:avalon-framework-impl:4.2.0"
+        },
+        {
+            "bundleName": "Apache-2.0",
+            "modulePattern": "org.apache.ant:ant.*:1.7.1"
+        },
+        {
+          "bundleName": "Apache-2.0",
+          "modulePattern": "com.fasterxml.jackson:jackson.*:2.13.3"
+        },
+        {
+            "bundleName": "Apache-1.1",
+            "modulePattern": "commons-cli:commons-cli:1.0"
+        },
+        {
+            "bundleName": "CDDL-1.0",
+            "modulePattern": "javax.mail:mail:1.4.7"
+        },
+        {
+            "bundleName": "MPL-1.1",
+            "modulePattern": "com.lowagie:itext:2.1.5"
+        },
+        {
+            "bundleName": "Apache-2.0",
+            "modulePattern": "xalan:xalan:2.6.0"
+        },
+        {
+            "bundleName": "Apache-2.0",
+            "modulePattern": "xml-apis:xml-apis:.*"
+        },
+        {
+            "bundleName": "CC0-1.0",
+            "modulePattern": "org.hdrhistogram:HdrHistogram:2.1.12"
+        },
+        {
+            "bundleName": "CC0-1.0",
+            "modulePattern": "org.latencyutils:LatencyUtils:2.0.3"
+        },
+        {
+            "bundleName": "msg.group",
+            "modulePattern": "(com|group)\\.msg[.:].*"
+        }
+    ]
+}

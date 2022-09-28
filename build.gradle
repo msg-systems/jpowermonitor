@@ -6,6 +6,7 @@ plugins {
     id 'maven-publish'
     id 'java-library'
     id "com.github.johnrengelman.shadow" version "$shadowPluginVersion"
+    id 'com.github.jk1.dependency-license-report' version "$licensePluginVersion"
 }
 
 group = 'group.msg'
@@ -45,4 +46,13 @@ apply from: "gradle/dist.gradle"
 shadowJar {
     exclude("*.yaml")
     exclude("logback.xml")
+}
+
+// --------------------- license-report:
+
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+import com.github.jk1.license.render.InventoryHtmlReportRenderer
+licenseReport {
+    renderers = [new InventoryHtmlReportRenderer()]
+    filters = [new LicenseBundleNormalizer(bundlePath: "$projectDir/gradle/license-normalizer-bundle.json")]
 }
