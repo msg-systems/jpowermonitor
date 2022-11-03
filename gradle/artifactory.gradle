@@ -25,6 +25,59 @@ publishing {
             version = project.version
             artifact sourcesJar
             from components.java
+
+            pom {
+                name = "${rootProject.name}-${project.name}"
+                description = project.description
+                url = 'https://github.com/<TODO>/jPowerMonitor' // TODO URL github
+
+                scm {
+                    connection = 'scm:git:https://github.com/<TODO>/jPowerMonitor.git'
+                    developerConnection = 'scm:git:git@github.com:<TODO>/jPowerMonitor.git'
+                    url = 'https://github.com/<TODO>/jPowerMonitor.git'
+                }
+
+                licenses {
+                    license {
+                        name = 'The MIT License (MIT)'
+                        url = 'http://opensource.org/licenses/MIT'
+                        distribution = 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'deinerj'
+                        name = 'Jakob Deiner'
+                        email = 'jakob.deiner@msg.group'
+                    }
+                    developer {
+                        id = 'keilhofh'
+                        name = 'Hans-Peter Keilhofer'
+                        email = 'hans-peter.keilhofer@msg.group'
+                    }
+                    developer {
+                        id = 'brandenstein'
+                        name = 'Christian Brandenstein'
+                        email = 'christian.brandenstein@msg.group'
+                    }
+                    developer {
+                        id = 'schmiedgen'
+                        name = 'Lukas Schmiedgen'
+                        email = 'lukas.schmiedgen@msg.group'
+                    }
+                    developer {
+                        id = 'jacksons'
+                        name = 'Sara Jackson'
+                        email = 'sara.jackson@msg.group'
+                    }
+                    developer {
+                        id = 'diehla'
+                        name = 'Andreas Diehl'
+                        email = 'andreas.diehl@msg.group'
+                    }
+                }
+            }
         }
     }
 }

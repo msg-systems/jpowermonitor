@@ -3,8 +3,6 @@ package group.msg.jpowermonitor.util;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.stream.IntStream;

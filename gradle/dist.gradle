@@ -17,6 +17,11 @@ task copyDocAndConfigFilesToDist(type: Copy) {
     from('.') { include 'README.md' }
     into "${buildDir}/${project.name}"
 }
+task copySbomToDist(type: Copy) {
+    from('build/reports') { include 'bom.*'}
+    into "${buildDir}/${project.name}/sbom"
+    dependsOn cyclonedxBom
+}
 task copyLibsToDist(type: Copy) {
     includeEmptyDirs = false
     from jar
@@ -24,7 +29,7 @@ task copyLibsToDist(type: Copy) {
     exclude "${project.name}*.jar"
     from sourceSets.main.runtimeClasspath
     into "${buildDir}/${project.name}/lib"
-    dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist
+    dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist, copySbomToDist
 }
 task copyMainLibToDist(type: Copy) {
     includeEmptyDirs = false
@@ -32,7 +37,7 @@ task copyMainLibToDist(type: Copy) {
     include "${project.name}*.jar"
     from sourceSets.main.runtimeClasspath
     into "${buildDir}/${project.name}"
-    dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist
+    dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist, copySbomToDist
 }
 task dist(type: Zip) {
     group = 'build'
@@ -41,6 +46,6 @@ task dist(type: Zip) {
         include "${project.name}/**"
     }
     archiveFileName = "${buildDir}/${project.name}.zip"
-    dependsOn copyMainLibToDist, copyDocAndConfigFilesToDist, copyJavadocToDist, copyLibsToDist
+    dependsOn copyLibsToDist, copyMainLibToDist, copyDocAndConfigFilesToDist, copyJavadocToDist, copySbomToDist
 }
 

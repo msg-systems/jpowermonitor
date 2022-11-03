@@ -1,7 +1,6 @@
 package group.msg.jpowermonitor.agent;
 
 import lombok.Getter;
-import java.util.Arrays;
 
 /**
  * Unit of a sensor value.

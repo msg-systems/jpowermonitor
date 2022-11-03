@@ -5,7 +5,6 @@ import lombok.Data;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 /**
  * Data class for csv measurement config.

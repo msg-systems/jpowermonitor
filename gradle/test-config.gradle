@@ -5,4 +5,18 @@ test {
 testlogger {
     showStandardStreams true
     showPassedStandardStreams false
+    showSkippedStandardStreams false
+    showFailedStandardStreams true
+}
+
+jacoco {
+    toolVersion = jacocoVersion
+}
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+    dependsOn test // test must be run before jacocoTestReports.
 }
