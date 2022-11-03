@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 /**
  * Implementation of the Open Hardware Monitor measure method.
+ *
  * @see MeasureMethod
  */
 public class OpenHardwareMonitorReader implements MeasureMethod {

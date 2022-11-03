@@ -103,7 +103,7 @@ public class StressCpuExample {
 
     public static long runParallelEndlessLoopCpuStressTest(int parallelThreads, short secondsToRun) {
         LongAdder sumLoopCounter = new LongAdder();
-        IntStream.range(0,parallelThreads)
+        IntStream.range(0, parallelThreads)
             .parallel()
             .forEach(k -> sumLoopCounter.add(runMeasurement(secondsToRun, 1, StressCpuExample::iAm100PercentParallel)));
         return sumLoopCounter.longValue();

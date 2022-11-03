@@ -44,6 +44,7 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     public DefaultConfigProvider() {
         this.yamlFileEncoding = StandardCharsets.UTF_8;
     }
+
     @Override
     public synchronized JPowerMonitorConfig getCachedConfig() throws JPowerMonitorException {
         if (cachedConfig == null) {

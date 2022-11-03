@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * Data element for open hardware monitor config.
+ *
  * @see PathElement
  */
 @Data

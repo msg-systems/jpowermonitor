@@ -11,39 +11,32 @@ import java.time.LocalDateTime;
  * on the time frame. Assuming it took the CPU package 31W to execute our example
  * (constantly over 1,000ms), an {@link Activity} would represent <code>(1/100 * 31W) = 0.31W</code>
  * power over the same period and should be treated as such.
- * */
+ */
 public interface Activity {
     /**
-     * @return
-     *  name of the thread the activity was part of when measured
-     * */
+     * @return name of the thread the activity was part of when measured
+     */
     String getThreadName();
 
     /**
-     * @return
-     *  {@link LocalDateTime} when the activity was measured
-     * */
+     * @return {@link LocalDateTime} when the activity was measured
+     */
     LocalDateTime getTime();
 
     /**
-     * @param asFiltered
-     *  if the filter configured in javaAgent.packageFilter should be applied, see jpowermonitor.yaml
-     *
-     * @return
-     *  identifier of the kind of work measured, e.g. a method name
-     * */
+     * @param asFiltered if the filter configured in javaAgent.packageFilter should be applied, see jpowermonitor.yaml
+     * @return identifier of the kind of work measured, e.g. a method name
+     */
     String getIdentifier(boolean asFiltered);
 
     /**
-     * @return
-     *  the {@link Quantity} represented by this activity
-     * */
+     * @return the {@link Quantity} represented by this activity
+     */
     Quantity getRepresentedQuantity();
 
     /**
-     * @return
-     *  if the activity can be used for further processing, e.g. if a {@link Quantity}
-     *  has been attributed already
-     * */
+     * @return if the activity can be used for further processing, e.g. if a {@link Quantity}
+     * has been attributed already
+     */
     boolean isFinalized();
 }

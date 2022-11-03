@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ConcurrentHashMapLongAdderTest {
 
     @Test
-     void concurrentHashMapLongAdderTest() {
+    void concurrentHashMapLongAdderTest() {
         ConcurrentMap<String, LongAdder> callsPerMethod = new ConcurrentHashMap<>();
         callsPerMethod.computeIfAbsent("test", callCount -> new LongAdder()).increment();
         assertThat(callsPerMethod.get("test").intValue()).isEqualTo(1);

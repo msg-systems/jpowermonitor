@@ -6,6 +6,7 @@ import group.msg.jpowermonitor.measurement.ohm.OpenHardwareMonitorReader;
 
 /**
  * Factory for creating the MeasureMethod from the config.
+ *
  * @see MeasureMethod
  */
 public class MeasureMethodProvider {
