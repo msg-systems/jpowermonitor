@@ -79,7 +79,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
 
     @Override
     public void afterTestExecution(ExtensionContext context) {
-        System.out.println("in afterTestExecution");
+        System.out.println("writing sensor values for test " + context.getDisplayName());
         long timeTaken = System.nanoTime() - timeBeforeTest;
         timedMeasurement.cancel();
         timer.cancel();
@@ -89,7 +89,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         for (Map.Entry<String, List<DataPoint>> entry : powerMeasurements.entrySet()) {
             List<DataPoint> dataPoints = new ArrayList<>(entry.getValue()); // clone list in order to avoid ConcurrentModification
             // cut off the first x% measurements
-            List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size()), dataPoints.size());
+            List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size(), measureMethod.getPercentageOfSamplesAtBeginningToDiscard()), dataPoints.size());
             DataPoint average = calculateAvg(dataPointsToConsider);
             SensorValue sensorValue = calculateResult(timeTaken, energyInIdleMode.get(entry.getKey()), average);
             sensorValues.add(sensorValue);
@@ -194,7 +194,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     private void fillDefaultMeasurements(Map<String, BigDecimal> defaults, Map<String, List<DataPoint>> measurements) {
         for (Map.Entry<String, List<DataPoint>> entry : measurements.entrySet()) {
             List<DataPoint> dataPoints = new ArrayList<>(entry.getValue()); // clone list in order to avoid ConcurrentModification
-            List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size()), dataPoints.size());  // cut off the first x% measurements
+            List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size(), measureMethod.getPercentageOfSamplesAtBeginningToDiscard()), dataPoints.size());  // cut off the first x% measurements
             DataPoint average = calculateAvg(dataPointsToConsider);
             resultsWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
             BigDecimal prev = defaults.putIfAbsent(entry.getKey(), average.isPowerSensor() ? average.getValue() : BigDecimal.ZERO); // add zero, if not a power sensor!
@@ -238,8 +238,15 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         return x.getParent().map(y -> y.getDisplayName() + "->").orElse("");
     }
 
-    private int firstXPercent(int size) {
-        BigDecimal xPercent = new BigDecimal(String.valueOf(size)).multiply(measureMethod.getPercentageOfSamplesAtBeginningToDiscard()).divide(new BigDecimal("100"), MATH_CONTEXT);
+    /**
+     * Calculates the first x percent of an integer value.
+     * @param baseSize the base size
+     * @param percentage the percent value to be used. For negative percentages return 0.
+     * @return the first percentage % of size.
+     */
+    int firstXPercent(int baseSize, BigDecimal percentage) {
+        BigDecimal positivePercentage = percentage.max(BigDecimal.ZERO);
+        BigDecimal xPercent = new BigDecimal(String.valueOf(baseSize)).multiply(positivePercentage).divide(new BigDecimal("100"), MATH_CONTEXT);
         return xPercent.setScale(0, MATH_CONTEXT.getRoundingMode()).intValue();
     }
 }
