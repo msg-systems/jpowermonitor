@@ -1,7 +1,6 @@
 package group.msg.jpowermonitor.agent;
 
 import lombok.Getter;
-import java.util.Arrays;
 
 /**
  * Unit of a sensor value.
@@ -18,6 +17,7 @@ public enum Unit {
     Unit(String abbreviation) {
         this.abbreviation = abbreviation;
     }
+
     public String toString() {
         return abbreviation;
     }

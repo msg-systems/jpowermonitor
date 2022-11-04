@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 /**
  * Data class for csv column config.
+ *
  * @see CsvMeasurementCfg
  */
 @Data

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+
 /**
  * Data class for jpower monitor config.
  * Includes all configuration values.
@@ -36,7 +37,7 @@ public class JPowerMonitorConfig {
                 throw new JPowerMonitorException("OpenHardwareMonitor REST endpoint URL must be configured");
             }
             measurement.getOhm().setUrl(measurement.getOhm().getUrl() + "/data.json");
-            List<PathElement> pathElems =  measurement.getOhm().getPaths();
+            List<PathElement> pathElems = measurement.getOhm().getPaths();
             if (pathElems == null
                 || pathElems.isEmpty()
                 || pathElems.get(0) == null

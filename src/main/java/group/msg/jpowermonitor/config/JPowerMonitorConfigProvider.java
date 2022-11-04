@@ -1,6 +1,6 @@
 package group.msg.jpowermonitor.config;
 
-import group.msg.jpowermonitor.*;
+import group.msg.jpowermonitor.JPowerMonitorException;
 
 /**
  * Interface for reading JPowerMonitor configuration.

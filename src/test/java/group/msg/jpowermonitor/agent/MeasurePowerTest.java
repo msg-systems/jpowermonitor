@@ -3,13 +3,10 @@ package group.msg.jpowermonitor.agent;
 import group.msg.jpowermonitor.dto.DataPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @EnabledOnOs(OS.WINDOWS)
 @Slf4j

@@ -3,8 +3,6 @@ package group.msg.jpowermonitor.util;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -105,7 +103,7 @@ public class StressCpuExample {
 
     public static long runParallelEndlessLoopCpuStressTest(int parallelThreads, short secondsToRun) {
         LongAdder sumLoopCounter = new LongAdder();
-        IntStream.range(0,parallelThreads)
+        IntStream.range(0, parallelThreads)
             .parallel()
             .forEach(k -> sumLoopCounter.add(runMeasurement(secondsToRun, 1, StressCpuExample::iAm100PercentParallel)));
         return sumLoopCounter.longValue();

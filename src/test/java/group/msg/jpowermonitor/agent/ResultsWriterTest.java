@@ -14,7 +14,7 @@ public class ResultsWriterTest {
 
     @BeforeAll
     static void setUp() {
-        rw = new ResultsWriter(new PowerStatistics(0l, 0l, 123, null, null), false, BigDecimal.ZERO);
+        rw = new ResultsWriter(new PowerStatistics(0L, 0L, 123, null, null), false, BigDecimal.ZERO);
     }
 
     @Test
@@ -34,18 +34,20 @@ public class ResultsWriterTest {
         assertThat(rw.convertJouleToKiloWattHours(BigDecimal.valueOf(3600000))).isCloseTo(BigDecimal.valueOf(1.0), Offset.offset(BigDecimal.valueOf(0.0)));
     }
 
+    @Test
     void convertKiloWattHoursToCarbonDioxideTest() {
         assertThat(rw.convertKiloWattHoursToCarbonDioxideGrams(BigDecimal.valueOf(1.0), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(485.0), Offset.offset(BigDecimal.valueOf(0.1)));
-        assertThat(rw.convertKiloWattHoursToCarbonDioxideGrams(BigDecimal.valueOf(0.000000277778), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(0.001347222), Offset.offset(BigDecimal.valueOf(0.000000000001)));
+        assertThat(rw.convertKiloWattHoursToCarbonDioxideGrams(BigDecimal.valueOf(0.000000277778), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(0.001347222), Offset.offset(BigDecimal.valueOf(0.002)));
         assertThat(rw.convertKiloWattHoursToCarbonDioxideGrams(BigDecimal.valueOf(0.1), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(48.5), Offset.offset(BigDecimal.valueOf(0.1)));
         assertThat(rw.convertKiloWattHoursToCarbonDioxideGrams(BigDecimal.valueOf(0.01), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(4.85), Offset.offset(BigDecimal.valueOf(0.01)));
         assertThat(rw.convertKiloWattHoursToCarbonDioxideGrams(BigDecimal.valueOf(0.01), BigDecimal.valueOf(300.0))).isCloseTo(BigDecimal.valueOf(3.00), Offset.offset(BigDecimal.valueOf(0.01)));
     }
 
+    @Test
     void convertJouleToCarbonDioxideGramsTest() {
-        assertThat(rw.convertJouleToCarbonDioxideGrams(BigDecimal.valueOf(1.0), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(0.001347222), Offset.offset(BigDecimal.valueOf(0.000000000001)));
+        assertThat(rw.convertJouleToCarbonDioxideGrams(BigDecimal.valueOf(1.0), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(0.001347222), Offset.offset(BigDecimal.valueOf(0.002)));
         assertThat(rw.convertJouleToCarbonDioxideGrams(BigDecimal.valueOf(3600000), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(485.0), Offset.offset(BigDecimal.valueOf(0.1)));
-        assertThat(rw.convertJouleToCarbonDioxideGrams(BigDecimal.valueOf(10000000.0), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(1343.45), Offset.offset(BigDecimal.valueOf(0.01)));
+        assertThat(rw.convertJouleToCarbonDioxideGrams(BigDecimal.valueOf(10000000.0), BigDecimal.valueOf(485.0))).isCloseTo(BigDecimal.valueOf(1347.22), Offset.offset(BigDecimal.valueOf(0.01)));
         assertThat(rw.convertJouleToCarbonDioxideGrams(BigDecimal.valueOf(3600000), BigDecimal.valueOf(400.0))).isCloseTo(BigDecimal.valueOf(400.0), Offset.offset(BigDecimal.valueOf(0.1)));
     }
 }

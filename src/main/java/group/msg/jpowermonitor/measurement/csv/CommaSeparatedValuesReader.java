@@ -29,8 +29,10 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 /**
  * Implementation of the Comma separated value measure method. E.g. for HWiNFO or other CSV generating tools.
+ *
  * @see MeasureMethod
  */
 public class CommaSeparatedValuesReader implements MeasureMethod {
