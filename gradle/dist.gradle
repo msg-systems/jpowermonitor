@@ -5,24 +5,24 @@ javadoc {
     source = sourceSets.main.allJava
     options.optionFiles = [file("gradle/javadoc.options")]
 }
-task copyJavadocToDist(type: Copy) {
+tasks.register('copyJavadocToDist', Copy) {
     includeEmptyDirs = false
     from javadoc
     into "${buildDir}/${project.name}/doc"
     dependsOn javadoc
 }
-task copyDocAndConfigFilesToDist(type: Copy) {
+tasks.register('copyDocAndConfigFilesToDist', Copy) {
     includeEmptyDirs = false
     from('src/main/resources') { include '*-template.yaml' }
     from('.') { include 'README.md' }
     into "${buildDir}/${project.name}"
 }
-task copySbomToDist(type: Copy) {
-    from('build/reports') { include 'bom.*'}
+tasks.register('copySbomToDist', Copy) {
+    from('build/reports') { include 'bom.*' }
     into "${buildDir}/${project.name}/sbom"
     dependsOn cyclonedxBom
 }
-task copyLibsToDist(type: Copy) {
+tasks.register('copyLibsToDist', Copy) {
     includeEmptyDirs = false
     from jar
     include '**/*.jar'
@@ -31,7 +31,7 @@ task copyLibsToDist(type: Copy) {
     into "${buildDir}/${project.name}/lib"
     dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist, copySbomToDist
 }
-task copyMainLibToDist(type: Copy) {
+tasks.register('copyMainLibToDist', Copy) {
     includeEmptyDirs = false
     from jar
     include "${project.name}*.jar"
@@ -39,7 +39,7 @@ task copyMainLibToDist(type: Copy) {
     into "${buildDir}/${project.name}"
     dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist, copySbomToDist
 }
-task dist(type: Zip) {
+tasks.register('dist', Zip) {
     group = 'build'
     description("Creates the ${project.name}.zip with all jars")
     from("${buildDir}") {
