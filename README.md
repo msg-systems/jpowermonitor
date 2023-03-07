@@ -97,3 +97,7 @@ I got very good results after I calibrated the PC with the (deprecated and no lo
 #### Note
 This markdown can be converted to html with
 `pandoc --self-contained -t slidy -c docs/slidy.css -o Readme.html README.md` to html and from there to pdf via print function of the browser.
+
+# Copyright & License
+Copyright &copy; 2022-2023 msg for banking ag <br/>
+Licensed under [Apache License 2.0](./LICENSE.txt)

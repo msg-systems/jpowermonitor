@@ -24,6 +24,8 @@ dependencies {
         [group: 'org.apache.httpcomponents', name: 'httpclient', version: httpclientVersion],
         [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatatypeJsr310Version],
         [group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion],
+    )
+    runtimeOnly(
         [group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion],
     )
     compileOnly(
