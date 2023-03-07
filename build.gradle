@@ -32,6 +32,7 @@ dependencies {
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
         [group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion],
         [group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion],
         [group: 'org.assertj', name: 'assertj-core', version: assertJVersion]
     )
