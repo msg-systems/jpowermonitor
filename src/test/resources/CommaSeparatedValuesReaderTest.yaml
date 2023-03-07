@@ -1,4 +1,3 @@
-!!group.msg.jpowermonitor.config.JPowerMonitorConfig
 initCycles: 1
 samplingIntervalForInitInMs: 1
 calmDownIntervalInMs: 1

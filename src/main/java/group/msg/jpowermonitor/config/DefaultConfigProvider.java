@@ -105,7 +105,7 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
 
     private JPowerMonitorConfig readConfigFromPath(Path path) {
         try (Reader reader = Files.newBufferedReader(path, yamlFileEncoding)) {
-            return new Yaml().load(reader);
+            return new Yaml().loadAs(reader, JPowerMonitorConfig.class);
         } catch (Exception e) {
             System.err.println("Cannot read '" + path + "' from filesystem: " + e.getMessage());
         }
@@ -123,7 +123,7 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
 
     private JPowerMonitorConfig readConfigFromResource(String source) {
         try (InputStream input = DefaultConfigProvider.class.getClassLoader().getResourceAsStream(source)) {
-            return new Yaml().load(input);
+            return new Yaml().loadAs(input, JPowerMonitorConfig.class);
         } catch (Exception exc) {
             System.out.println("Cannot read '" + source + "' from resources:" + exc.getMessage());
         }

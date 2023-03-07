@@ -1,4 +1,3 @@
-!!group.msg.jpowermonitor.config.JPowerMonitorConfig
 # Number of initial calls to open hardware monitor for measuring the power consumption in idle mode (without running any tests)
 initCycles: 10
 # Sampling interval in milliseconds for the initialization period. This is the interval the data source for the sensor values is questioned for new values while measuring idle energy.
