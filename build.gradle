@@ -24,10 +24,10 @@ dependencies {
         [group: 'org.apache.httpcomponents', name: 'httpclient', version: httpclientVersion],
         [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatatypeJsr310Version],
         [group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion],
     )
     compileOnly(
         [group: 'org.jetbrains', name: 'annotations', version: jetbrainsAnnotationsVersion],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion],
     )
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
