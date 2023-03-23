@@ -2,12 +2,12 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'jacoco'
-    id 'com.adarshr.test-logger' version "$testLoggerPluginVersion"
-    id 'com.github.ben-manes.versions' version "$versionsPluginVersion"
-    id "io.freefair.lombok" version "$lombokPluginVersion"
-    id "com.github.johnrengelman.shadow" version "$shadowPluginVersion"
-    id 'com.github.jk1.dependency-license-report' version "$licensePluginVersion"
-    id 'org.cyclonedx.bom' version "$cyclonedxBOMPluginVersion"
+    id 'com.adarshr.test-logger' version "3.2.0"
+    id 'com.github.ben-manes.versions' version "0.46.0"
+    id "io.freefair.lombok" version "6.6.3"
+    id "com.github.johnrengelman.shadow" version "8.1.0"
+    id 'com.github.jk1.dependency-license-report' version "2.1"
+    id 'org.cyclonedx.bom' version "1.7.4"
 }
 
 group = 'group.msg'
@@ -21,20 +21,20 @@ repositories {
 }
 dependencies {
     implementation(
-        [group: 'org.apache.httpcomponents', name: 'httpclient', version: httpclientVersion],
-        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonDatatypeJsr310Version],
-        [group: 'org.yaml', name: 'snakeyaml', version: snakeYamlVersion],
+        [group: 'org.apache.httpcomponents', name: 'httpclient', version: "4.5.14"],
+        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "2.14.2"],
+        [group: 'org.yaml', name: 'snakeyaml', version: "2.0"],
     )
     compileOnly(
-        [group: 'org.jetbrains', name: 'annotations', version: jetbrainsAnnotationsVersion],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion],
+        [group: 'org.jetbrains', name: 'annotations', version: "24.0.1"],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.9.2"],
     )
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
-        [group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: jupiterVersion],
-        [group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion],
-        [group: 'org.assertj', name: 'assertj-core', version: assertJVersion]
+        [group: 'org.slf4j', name: 'slf4j-api', version: "2.0.6"],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.9.2"],
+        [group: 'ch.qos.logback', name: 'logback-classic', version: "1.4.5"],
+        [group: 'org.assertj', name: 'assertj-core', version: "3.24.2"]
     )
 }
 
