@@ -1,0 +1,39 @@
+name: Java CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  checks: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: step-security/harden-runner@1f99358870fe1c846a3ccba386cc2b2246836776 # v2.2.1
+        with:
+          disable-sudo: true
+          egress-policy: block
+          allowed-endpoints: >
+            api.adoptopenjdk.net:443
+            downloads.gradle-dn.com:443
+            github-cloud.githubusercontent.com:443
+            github.com:443
+            jcenter.bintray.com:443
+            objects.githubusercontent.com:443
+            plugins.gradle.org:443
+            repo.maven.apache.org:443
+            services.gradle.org:443
+      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+        with:
+          lfs: true
+      - uses: actions/setup-java@3f07048e3d294f56e9b90ac5ea2c6f74e9ad0f98 # v3.10.0
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+          cache: 'gradle'
+      - uses: gradle/wrapper-validation-action@8d49e559aae34d3e0eb16cde532684bc9702762b # v1.0.6
+      - run: ./gradlew --no-daemon check
