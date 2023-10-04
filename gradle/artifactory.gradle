@@ -29,12 +29,12 @@ publishing {
             pom {
                 name = "${rootProject.name}-${project.name}"
                 description = project.description
-                url = 'https://github.com/<TODO>/jPowerMonitor' // TODO URL github
+                url = 'https://github.com/msg-systems/jpowermonitor'
 
                 scm {
-                    connection = 'scm:git:https://github.com/<TODO>/jPowerMonitor.git'
-                    developerConnection = 'scm:git:git@github.com:<TODO>/jPowerMonitor.git'
-                    url = 'https://github.com/<TODO>/jPowerMonitor.git'
+                    connection = 'scm:git:https://github.com/msg-systems/jpowermonitor.git'
+                    developerConnection = 'scm:git:git@github.com/msg-systems/jpowermonitor.git'
+                    url = 'https://github.com/msg-systems/jpowermonitor.git'
                 }
 
                 licenses {
