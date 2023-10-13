@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static group.msg.jpowermonitor.agent.CpuAndThreadUtils.ONE_THOUSAND;
 import static group.msg.jpowermonitor.agent.MeasurePower.getCurrentCpuPowerInWatts;
 import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
 
@@ -30,7 +31,6 @@ import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
  */
 public class PowerStatistics extends TimerTask {
     private static final String CLASS_METHOD_SEPARATOR = ".";
-    private static final BigDecimal ONE_THOUSAND = new BigDecimal("1000");
     private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
         new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now(), null));
     private final Map<String, Long> threadsCpuTime = new HashMap<>();

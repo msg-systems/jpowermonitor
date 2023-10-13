@@ -18,8 +18,8 @@ import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
  * @author deinerj
  */
 public class CpuAndThreadUtils {
-    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
-
+    public static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
+    public static final BigDecimal ONE_THOUSAND = new BigDecimal("1000");
     @NotNull
     static ThreadMXBean initializeAndGetThreadMxBeanOrFailAndQuitApplication() {
         ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
