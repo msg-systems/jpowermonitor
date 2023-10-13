@@ -215,7 +215,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     }
 
     private DataPoint calculateAvg(@NotNull List<DataPoint> dataPoints) {
-        if (dataPoints.size() == 0) {
+        if (dataPoints.isEmpty()) {
             return new DataPoint("No Datapoints for Average", BigDecimal.ZERO, Unit.NONE, LocalDateTime.now(), null);
         }
         DataPoint reference = dataPoints.get(0);
@@ -246,7 +246,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
      */
     int firstXPercent(int baseSize, BigDecimal percentage) {
         BigDecimal positivePercentage = percentage.max(BigDecimal.ZERO);
-        BigDecimal xPercent = new BigDecimal(String.valueOf(baseSize)).multiply(positivePercentage).divide(new BigDecimal("100"), MATH_CONTEXT);
+        BigDecimal xPercent = new BigDecimal(String.valueOf(baseSize)).multiply(positivePercentage, MATH_CONTEXT).divide(new BigDecimal("100"), MATH_CONTEXT);
         return xPercent.setScale(0, MATH_CONTEXT.getRoundingMode()).intValue();
     }
 }

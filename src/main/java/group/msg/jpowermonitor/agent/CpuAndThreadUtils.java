@@ -18,6 +18,7 @@ import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
  * @author deinerj
  */
 public class CpuAndThreadUtils {
+    private static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
 
     @NotNull
     static ThreadMXBean initializeAndGetThreadMxBeanOrFailAndQuitApplication() {
@@ -55,8 +56,9 @@ public class CpuAndThreadUtils {
     static Map<String, BigDecimal> calculatePowerPerApplicationThread(Map<String, Long> cpuTimePerApplicationThread, DataPoint currentPower, long totalApplicationCpuTime) {
         Map<String, BigDecimal> powerPerApplicationThread = new HashMap<>();
         for (Map.Entry<String, Long> entry : cpuTimePerApplicationThread.entrySet()) {
-            BigDecimal percentageCpuTimePerApplicationThread = new BigDecimal(entry.getValue() * 100.0 / totalApplicationCpuTime, MATH_CONTEXT);
-            BigDecimal applicationThreadPower = currentPower.getValue().multiply(percentageCpuTimePerApplicationThread.divide(BigDecimal.valueOf(100), MATH_CONTEXT));
+            BigDecimal percentageCpuTimePerApplicationThread =
+                totalApplicationCpuTime > 0 ? new BigDecimal(entry.getValue()).multiply(ONE_HUNDRED, MATH_CONTEXT).divide(new BigDecimal(totalApplicationCpuTime), MATH_CONTEXT) : BigDecimal.ZERO;
+            BigDecimal applicationThreadPower = currentPower.getValue().multiply(percentageCpuTimePerApplicationThread.divide(ONE_HUNDRED, MATH_CONTEXT), MATH_CONTEXT);
             powerPerApplicationThread.put(entry.getKey(), applicationThreadPower);
         }
         return powerPerApplicationThread;

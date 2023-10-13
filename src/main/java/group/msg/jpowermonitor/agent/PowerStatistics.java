@@ -30,6 +30,7 @@ import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
  */
 public class PowerStatistics extends TimerTask {
     private static final String CLASS_METHOD_SEPARATOR = ".";
+    private static final BigDecimal ONE_THOUSAND = new BigDecimal("1000");
     private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
         new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now(), null));
     private final Map<String, Long> threadsCpuTime = new HashMap<>();
@@ -59,7 +60,7 @@ public class PowerStatistics extends TimerTask {
         Map<String, Set<MethodActivity>> methodActivityPerThread = new HashMap<>();
         Set<Thread> threads = Thread.getAllStackTraces().keySet();
 
-        int duration = 0;
+        long duration = 0;
         while (duration < measurementInterval) {
             gatherMethodActivityPerThread(methodActivityPerThread, threads);
             duration += gatherStatisticsInterval;
@@ -135,9 +136,9 @@ public class PowerStatistics extends TimerTask {
             String threadName = entry.getKey();
 
             for (MethodActivity activity : entry.getValue()) {
-                Quantity methodPower = Quantity.of(powerPerApplicationThread.get(threadName).multiply(activityToEnergyRatio), Unit.WATT);
+                Quantity methodPower = Quantity.of(powerPerApplicationThread.get(threadName).multiply(activityToEnergyRatio, MATH_CONTEXT), Unit.WATT);
                 Quantity methodEnergy = Quantity.of(
-                    methodPower.getValue().multiply(BigDecimal.valueOf(measurementInterval)).divide(BigDecimal.valueOf(1000L), MATH_CONTEXT),
+                    methodPower.getValue().multiply(BigDecimal.valueOf(measurementInterval), MATH_CONTEXT).divide(ONE_THOUSAND, MATH_CONTEXT),
                     Unit.JOULE
                 );
 

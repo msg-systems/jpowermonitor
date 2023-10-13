@@ -158,7 +158,7 @@ public class ResultsWriter implements Runnable {
     }
 
     protected BigDecimal convertKiloWattHoursToCarbonDioxideGrams(BigDecimal kWh, BigDecimal energyMix) {
-        return kWh.multiply(energyMix);
+        return kWh.multiply(energyMix, MATH_CONTEXT);
     }
 
     protected BigDecimal convertJouleToCarbonDioxideGrams(BigDecimal joule, BigDecimal energyMix) {
