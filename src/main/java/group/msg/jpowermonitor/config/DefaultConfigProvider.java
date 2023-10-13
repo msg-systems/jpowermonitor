@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  */
 public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     public static String APP_TITLE = "jPowerMonitor";
-    public final static MathContext MATH_CONTEXT = new MathContext(30, RoundingMode.HALF_UP);
+    public final static MathContext MATH_CONTEXT = new MathContext(25, RoundingMode.HALF_UP);
     private static final String DEFAULT_CONFIG = APP_TITLE + ".yaml";
     private final Charset yamlFileEncoding;
     private static JPowerMonitorConfig cachedConfig = null;
