@@ -4,6 +4,7 @@ import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.MethodActivity;
 import group.msg.jpowermonitor.dto.Quantity;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ThreadMXBean;
@@ -22,15 +23,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static group.msg.jpowermonitor.agent.CpuAndThreadUtils.ONE_THOUSAND;
 import static group.msg.jpowermonitor.agent.MeasurePower.getCurrentCpuPowerInWatts;
-import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
+import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
+import static group.msg.jpowermonitor.util.Constants.ONE_THOUSAND;
 
 /**
  * Thread for collecting power statistics.
  */
 public class PowerStatistics extends TimerTask {
     private static final String CLASS_METHOD_SEPARATOR = ".";
+    /**
+     * Total energy consumption of application.
+     */
+    @Getter
     private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
         new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now(), null));
     private final Map<String, Long> threadsCpuTime = new HashMap<>();
@@ -38,6 +43,10 @@ public class PowerStatistics extends TimerTask {
     private final long measurementInterval;
     private final long gatherStatisticsInterval;
     private final BigDecimal activityToEnergyRatio;
+    /**
+     * Process id.
+     */
+    @Getter
     private final long pid;
     private final ThreadMXBean threadMXBean;
     private static Set<String> packageFilter;
@@ -171,24 +180,10 @@ public class PowerStatistics extends TimerTask {
         );
     }
 
-    /**
-     * @return total energy consumption of application
-     */
-    public AtomicReference<DataPoint> getEnergyConsumptionTotalInJoule() {
-        return energyConsumptionTotalInJoule;
-    }
-
     public Map<String, DataPoint> getEnergyConsumptionPerMethod(boolean asFiltered) {
         return energyConsumptionPerMethod.entrySet().stream()
             .filter(e -> asFiltered ? isMethodInFilterList(e.getKey()) : e.getKey() != null)
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    /**
-     * @return process id
-     */
-    public long getPid() {
-        return pid;
     }
 
     /**

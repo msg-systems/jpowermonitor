@@ -16,8 +16,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static group.msg.jpowermonitor.config.DefaultConfigProvider.APP_TITLE;
-import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
+import static group.msg.jpowermonitor.util.Constants.APP_TITLE;
+import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
 
 /**
  * Write power and energy measurement results to CSV files at application shutdown.

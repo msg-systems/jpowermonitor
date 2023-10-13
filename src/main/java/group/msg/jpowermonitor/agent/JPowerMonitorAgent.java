@@ -3,6 +3,7 @@ package group.msg.jpowermonitor.agent;
 import group.msg.jpowermonitor.config.DefaultConfigProvider;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.config.JavaAgent;
+import group.msg.jpowermonitor.util.Constants;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ThreadMXBean;
@@ -22,7 +23,7 @@ import static group.msg.jpowermonitor.agent.ResultsWriter.SEPARATOR;
  * @author deinerj
  */
 public class JPowerMonitorAgent {
-
+    private static final int ONE_SECOND_IN_MILLIES = 1000;
     private static Timer timer;
     private static PowerStatistics powerStatistics;
     private static Timer writeEnergyMeasurementResultsToCsv;
@@ -38,7 +39,7 @@ public class JPowerMonitorAgent {
      * @param inst java agent params
      */
     public static void premain(String args, Instrumentation inst) {
-        System.out.println("Measuring power with " + DefaultConfigProvider.APP_TITLE + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion());
+        System.out.println("Measuring power with " + Constants.APP_TITLE + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion());
         System.out.println(SEPARATOR);
         ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
         long pid = ProcessHandle.current().pid();
@@ -61,7 +62,7 @@ public class JPowerMonitorAgent {
                     ResultsWriter rw = new ResultsWriter(powerStatistics, false, cfg.getCarbonDioxideEmissionFactor());
                     rw.execute();
                 }
-            }, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * 1000, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * 1000);
+            }, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * ONE_SECOND_IN_MILLIES, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * ONE_SECOND_IN_MILLIES);
         }
 
         // Gracefully stop measurement at application shutdown

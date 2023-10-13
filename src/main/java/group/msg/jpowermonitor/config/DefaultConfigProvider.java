@@ -7,8 +7,6 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,6 +15,8 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static group.msg.jpowermonitor.util.Constants.APP_TITLE;
 
 /**
  * Default configuration provider preferring file system to resources.
@@ -35,8 +35,6 @@ import java.util.stream.Stream;
  * </ul>
  */
 public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
-    public static String APP_TITLE = "jPowerMonitor";
-    public final static MathContext MATH_CONTEXT = new MathContext(25, RoundingMode.HALF_UP);
     private static final String DEFAULT_CONFIG = APP_TITLE + ".yaml";
     private final Charset yamlFileEncoding;
     private static JPowerMonitorConfig cachedConfig = null;
