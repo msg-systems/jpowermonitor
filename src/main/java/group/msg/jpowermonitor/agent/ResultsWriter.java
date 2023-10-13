@@ -38,8 +38,8 @@ public class ResultsWriter implements Runnable {
         DECIMAL_FORMAT = new DecimalFormat("###0.#####", DecimalFormatSymbols.getInstance(Locale.getDefault()));
     }
 
-    private static final BigDecimal JOULE_TO_WATT_HOURS_FACTOR = BigDecimal.valueOf(3600.0d);
-    private static final BigDecimal WATT_HOURS_TO_KWH_FACTOR = BigDecimal.valueOf(1000.0d);
+    private static final BigDecimal JOULE_TO_WATT_HOURS_FACTOR = new BigDecimal("3600");
+    private static final BigDecimal WATT_HOURS_TO_KWH_FACTOR = new BigDecimal("1000");
     protected static final String FILE_NAME_PREFIX = APP_TITLE + "_";
     protected static final String SEPARATOR = "-----------------------------------------------------------------------------------------";
 

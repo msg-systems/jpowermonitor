@@ -30,6 +30,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static group.msg.jpowermonitor.agent.CpuAndThreadUtils.ONE_HUNDRED;
 import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
 
 /**
@@ -246,7 +247,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
      */
     int firstXPercent(int baseSize, BigDecimal percentage) {
         BigDecimal positivePercentage = percentage.max(BigDecimal.ZERO);
-        BigDecimal xPercent = new BigDecimal(String.valueOf(baseSize)).multiply(positivePercentage, MATH_CONTEXT).divide(new BigDecimal("100"), MATH_CONTEXT);
+        BigDecimal xPercent = new BigDecimal(String.valueOf(baseSize)).multiply(positivePercentage, MATH_CONTEXT).divide(ONE_HUNDRED, MATH_CONTEXT);
         return xPercent.setScale(0, MATH_CONTEXT.getRoundingMode()).intValue();
     }
 }
