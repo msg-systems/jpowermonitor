@@ -10,7 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
+import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
+import static group.msg.jpowermonitor.util.Constants.ONE_HUNDRED;
 
 /**
  * Utility class for all CPU and thread time/power related tasks
@@ -18,8 +19,6 @@ import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
  * @author deinerj
  */
 public class CpuAndThreadUtils {
-    public static final BigDecimal ONE_HUNDRED = new BigDecimal("100");
-    public static final BigDecimal ONE_THOUSAND = new BigDecimal("1000");
     @NotNull
     static ThreadMXBean initializeAndGetThreadMxBeanOrFailAndQuitApplication() {
         ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();

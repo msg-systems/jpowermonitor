@@ -9,6 +9,7 @@ import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.PowerQuestionable;
 import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
+import group.msg.jpowermonitor.util.Constants;
 import group.msg.jpowermonitor.util.HumanReadableTime;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
@@ -30,8 +31,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static group.msg.jpowermonitor.agent.CpuAndThreadUtils.ONE_HUNDRED;
-import static group.msg.jpowermonitor.config.DefaultConfigProvider.MATH_CONTEXT;
+import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
 
 /**
  * JUnit Extension for measuring energy.
@@ -247,7 +247,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
      */
     int firstXPercent(int baseSize, BigDecimal percentage) {
         BigDecimal positivePercentage = percentage.max(BigDecimal.ZERO);
-        BigDecimal xPercent = new BigDecimal(String.valueOf(baseSize)).multiply(positivePercentage, MATH_CONTEXT).divide(ONE_HUNDRED, MATH_CONTEXT);
+        BigDecimal xPercent = new BigDecimal(String.valueOf(baseSize)).multiply(positivePercentage, MATH_CONTEXT).divide(Constants.ONE_HUNDRED, MATH_CONTEXT);
         return xPercent.setScale(0, MATH_CONTEXT.getRoundingMode()).intValue();
     }
 }
