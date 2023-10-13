@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -107,14 +108,21 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
         try {
             String[] values = readColumnsFromCsv(csvInputFile);
             CsvColumn column = config.getMeasurement().getCsv().getColumns().get(0);
-            while (values.length < column.getIndex() + 1) {
-                System.out.printf("%s re-reading line since it did not contain column %s\n", DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()), column.getIndex());
+            int retryCount = 0;
+            while (values.length < column.getIndex() + 1 && retryCount++ < 3) {
+                System.err.printf("%s re-reading line since it did not contain column %s\n", DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()), column.getIndex());
+                TimeUnit.SECONDS.sleep(1L);
                 values = readColumnsFromCsv(csvInputFile);
+            }
+            if (values.length < column.getIndex() + 1) {
+                throw new JPowerMonitorException("File '" + csvInputFile.toAbsolutePath().normalize() + "' does not contain configured column " + column.getIndex());
             }
             BigDecimal value = parseBigDecimalFromColumnConfig(csvInputFile, values[column.getIndex()]);
             return new DataPoint(column.getName(), value, Unit.WATT, LocalDateTime.now(), null);
         } catch (IOException ex) {
             throw new JPowerMonitorException("Cannot read measurements from file '" + csvInputFile.toAbsolutePath().normalize() + "'");
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
