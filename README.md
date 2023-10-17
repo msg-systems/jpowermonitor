@@ -78,13 +78,15 @@ You may build the jpowermonitor fat jar using the build target `shadowJar` and t
 
 The add the test dependency to your gradle build (analogue for maven builds):
 ```
-testImplementation files('libs/jpowermonitor-1.0.1-all.jar')
+    testImplementation files('libs/jpowermonitor-1.0.1-all.jar')
 ```
 
 Alternatively you call the build target `publishLocal` in the jPowerMonitor project and publish the jar to your local maven repository.
 You then add the following test dependency to your build script:
 ```
-
+    testImplementation(
+        [group: 'group.msg', name: 'jpowermonitor', version: jPowerMonitorVersion],
+    )
 ```
 
 #### JUnit Tests
@@ -120,10 +122,6 @@ The result file can be configured under `csvRecording.resultCsv`. The summary of
 The headers of the csv output file are configured in the [csvExport.properties](src%2Fmain%2Fresources%2FcsvExport.properties) (default language English).
 The file currently is translated into German and French and is locale dependent.
 You may add your own locale and add the translated file to the classpath. You may set the language via JVM option e.g. `-Duser.language=es`.
-
-## Measure
-I got very good results after I calibrated the PC with the (deprecated and no longer supported) Microsoft tool Joulemeter (download e.g. here: https://www.chip.de/downloads/Microsoft-Joulemeter_79226593.html). After that, all current values went extremely down, the CPU temperature decreased massively (before around 98 C, afterwards around 55 C) and the results were much more comparable!
-
 
 #### Note
 This markdown can be converted to html with
