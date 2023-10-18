@@ -17,8 +17,9 @@ plugins {
     id 'org.cyclonedx.bom' version "1.7.4"
 }
 
-group = 'group.msg'
+group = 'io.github.msg-systems'
 version = rootProject.file('version.txt').text.trim()
+description='JUnit Extension and Java Agent for energy consumption measurement.'
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -48,7 +49,8 @@ dependencies {
 apply from: "gradle/test-config.gradle"
 apply from: "gradle/jar.gradle"
 apply from: "gradle/dependencyUpdates.gradle"
-apply from: "gradle/artifactory.gradle"
+apply from: "gradle/publish.gradle"
+apply from: "gradle/signing.gradle"
 apply from: "gradle/dist.gradle"
 
 // --------------------- shadowJar

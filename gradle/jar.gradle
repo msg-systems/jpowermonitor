@@ -28,14 +28,7 @@ jar {
     exclude("*.yaml")
 }
 
-tasks.register('sourcesJar', Jar) {
-    archiveClassifier.set('sources')
-    from sourceSets.main.allSource
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
-sourcesJar.dependsOn('classes')
-
-tasks.register('javadocJar', Jar) {
-    archiveClassifier.set('javadoc')
-    from sourceSets.main.allSource
-}
-javadocJar.dependsOn('javadoc')
