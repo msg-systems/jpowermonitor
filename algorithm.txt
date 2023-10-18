@@ -15,7 +15,7 @@ MEASUREMENT_INTERVAL
 		- gather power consumption
 		- aggregate method activity and power consumption to energy consumption per method
 	- POWER_TOTAL (W) - get current CPU power per MEASUREMENT_INTERVAL
-		- call e.g. OpenHardwareMonitor for current CPU power usage
+		- call e.g. Libre Hardware Monitor for current CPU power usage
 		- assume power was the same for the entirety of MEASUREMENT_INTERVAL
 	- get CPU times
 		- THREAD_TIME (ns) - total CPU time of each running threads -> should time since last measurement?
