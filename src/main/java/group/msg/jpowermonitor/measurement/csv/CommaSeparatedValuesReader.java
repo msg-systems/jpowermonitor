@@ -205,7 +205,7 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
 
     @Override
     public @NotNull List<String> configuredSensors() {
-        return config.getMeasurement().getCsv().getColumns().stream().map(CsvColumn::getName).collect(Collectors.toList()); // only ohm
+        return config.getMeasurement().getCsv().getColumns().stream().map(CsvColumn::getName).collect(Collectors.toList()); // only lhm
     }
 
     @Override

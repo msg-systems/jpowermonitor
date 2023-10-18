@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * Interface for different types of measuring the consumed energy.<br>
- * E.g. Open Hardware Monitor or HWiNFO.
+ * E.g Libre Hardware Monitor or HWiNFO.
  */
 public interface MeasureMethod {
     /**

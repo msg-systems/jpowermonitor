@@ -4,7 +4,7 @@ calmDownIntervalInMs: 1
 percentageOfSamplesAtBeginningToDiscard: 1
 samplingIntervalInMs: 1
 measurement:
-  # Specify which measurement method to use. Possible values: ohm, csv
+  # Specify which measurement method to use. Possible values: lhm, csv
   method: 'csv'
   # Configuration for reading from csv file. E.g. output from HWInfo
   csv:
@@ -19,8 +19,8 @@ measurement:
     encoding: 'UTF-8'
     # Delimiter to use for separating the columns in the csv input file
     delimiter: ','
-  # Configuration for reading from open hardware monitor
-  ohm:
+  # Configuration for reading from Libre Hardware Monitor
+  lhm:
     url: 'some.test.url'
     paths:
       - { path: [ 'pc', 'cpu', 'path1', 'path2' ], energyInIdleMode: }

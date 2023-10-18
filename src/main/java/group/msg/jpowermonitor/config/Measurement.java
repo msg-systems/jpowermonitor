@@ -6,11 +6,11 @@ import lombok.Data;
  * Data class for measurement method.
  *
  * @see CsvMeasurementCfg
- * @see OpenHardwareMonitorCfg
+ * @see LibreHardwareMonitorCfg
  */
 @Data
 public class Measurement {
     private String method;
     private CsvMeasurementCfg csv;
-    private OpenHardwareMonitorCfg ohm;
+    private LibreHardwareMonitorCfg lhm;
 }
