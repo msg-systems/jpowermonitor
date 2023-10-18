@@ -22,8 +22,8 @@ The result of the measurement is the energy consumption in watt hours or joule.
 - Tool HWiNFO could be used alternatively, __measurement -> method__ must be set to 'csv' and Logging to CSV in HWiNFO must be active: https://www.hwinfo.com/
 
 ### Java Agent
-- For testing call with `java -javaagent:.\build\libs\jpowermonitor-1.0.3-SNAPSHOT-all.jar[=path-to-jpowermonitor.yaml] -jar .\build\libs\jpowermonitor-1.0.3-SNAPSHOT-all.jar [runtimeSeconds] [cpuThreads]`
-- .\build\libs\jpowermonitor-1.0.3-SNAPSHOT-all.jar is just an example and can be replaced by any *.jar of your choice
+- For testing call with `java -javaagent:.\build\libs\jpowermonitor-1.0.2-SNAPSHOT-all.jar[=path-to-jpowermonitor.yaml] -jar .\build\libs\jpowermonitor-1.0.2-SNAPSHOT-all.jar [runtimeSeconds] [cpuThreads]`
+- .\build\libs\jpowermonitor-1.0.2-SNAPSHOT-all.jar is just an example and can be replaced by any *.jar of your choice
 - For starting the agent with Spring Boot, Servlet-Container etc. please consult the respective documentation for adding a java agent.
 
 ### Limitations
@@ -78,7 +78,7 @@ You may build the jpowermonitor fat jar using the build target `shadowJar` and t
 
 The add the test dependency to your gradle build (analogue for maven builds):
 ```
-    testImplementation files('libs/jpowermonitor-1.0.3-all.jar')
+    testImplementation files('libs/jpowermonitor-1.0.2-all.jar')
 ```
 
 Alternatively you call the build target `publishLocal` in the jPowerMonitor project and publish the jar to your local maven repository.

@@ -18,7 +18,7 @@ import static group.msg.jpowermonitor.agent.ResultsWriter.SEPARATOR;
  * Implements java agent to introspect power consumption of any java application.
  * <br><br>
  * Usage:<br>
- * <code>java -javaagent:jpowermonitor-1.0.3-SNAPSHOT-all.jar[=path-to-jpowermonitor.yaml] -jar MyApp.jar [args]</code>
+ * <code>java -javaagent:jpowermonitor-1.0.2-SNAPSHOT-all.jar[=path-to-jpowermonitor.yaml] -jar MyApp.jar [args]</code>
  *
  * @author deinerj
  */
