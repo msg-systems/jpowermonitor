@@ -1,4 +1,4 @@
-# Number of initial calls to open hardware monitor for measuring the power consumption in idle mode (without running any tests)
+# Number of initial calls to Libre Hardware Monitor for measuring the power consumption in idle mode (without running any tests)
 initCycles: 10
 # Sampling interval in milliseconds for the initialization period. This is the interval the data source for the sensor values is questioned for new values while measuring idle energy.
 # Should be set longer than the normal sampling interval! Too short intervals also affect the energy consumption!
@@ -15,8 +15,8 @@ samplingIntervalInMs: 300
 carbonDioxideEmissionFactor: 485
 
 measurement:
-  # Specify which measurement method to use. Possible values: ohm, csv
-  method: 'ohm'
+  # Specify which measurement method to use. Possible values: lhm, csv
+  method: 'lhm'
   # Configuration for reading from csv file. E.g. output from HWInfo
   csv:
     # Path to csv file to read measure values from
@@ -30,11 +30,11 @@ measurement:
     encoding: 'UTF-8'
     # Delimiter to use for separating the columns in the csv input file
     delimiter: ','
-  # Configuration for reading from open hardware monitor
-  ohm:
-    # URL to open hardware monitor (** started in administrator mode **)
+  # Configuration for reading from Libre Hardware Monitor
+  lhm:
+    # URL to Libre Hardware Monitor (** started in administrator mode **)
     url: 'http://localhost:8085'
-    # The paths define the path to the leaf node underneath the root 'Sensor' node in Open Hardware Monitor to access and store with every sample.
+    # The paths define the path to the leaf node underneath the root 'Sensor' node in Libre Hardware Monitor to access and store with every sample.
     # The more paths defined (no more than about 10), the greater the impact on power consumption, since the values must be extracted from the json data.
     paths:
       - { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Package' ], energyInIdleMode: } # if energyInIdleMode is specified, it does not need to be measured before each test.

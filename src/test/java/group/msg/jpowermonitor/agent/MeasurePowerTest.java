@@ -16,7 +16,7 @@ class MeasurePowerTest {
 
     /**
      * Steps down wait interval (in 50ms steps) between measurements until implemented/configured MeasureMethod delivers the same value again.
-     * -> e. g. for OpenHardwareMonitor between 750-850ms seems to be the minimal possible interval to get updatet values
+     * -> e. g. for Libre Hardware Monitor between 750-850ms seems to be the minimal possible interval to get updatet values
      */
     @Disabled("Use this test to find the minimum viable measurement interval for your platform and your configured measure method")
     void findReasonableMeasurementIntervalForMeasureMethodTest() {

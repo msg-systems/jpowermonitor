@@ -6,12 +6,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * Data element for open hardware monitor config.
+ * Data element for Libre Hardware Monitor config.
  *
  * @see PathElement
  */
 @Data
-public class OpenHardwareMonitorCfg {
+public class LibreHardwareMonitorCfg {
     @Nullable
     private String url;
     @Nullable

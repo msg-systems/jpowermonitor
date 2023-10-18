@@ -32,12 +32,12 @@ public class JPowerMonitorConfig {
         if (measurement == null || measurement.getMethod() == null) {
             throw new JPowerMonitorException("A measuring method must be defined!");
         }
-        if ("ohm".equals(measurement.getMethod())) {
-            if (measurement.getOhm() == null || measurement.getOhm().getUrl() == null) {
-                throw new JPowerMonitorException("OpenHardwareMonitor REST endpoint URL must be configured");
+        if ("lhm".equals(measurement.getMethod())) {
+            if (measurement.getLhm() == null || measurement.getLhm().getUrl() == null) {
+                throw new JPowerMonitorException("Libre Hardware Monitor REST endpoint URL must be configured");
             }
-            measurement.getOhm().setUrl(measurement.getOhm().getUrl() + "/data.json");
-            List<PathElement> pathElems = measurement.getOhm().getPaths();
+            measurement.getLhm().setUrl(measurement.getLhm().getUrl() + "/data.json");
+            List<PathElement> pathElems = measurement.getLhm().getPaths();
             if (pathElems == null
                 || pathElems.isEmpty()
                 || pathElems.get(0) == null

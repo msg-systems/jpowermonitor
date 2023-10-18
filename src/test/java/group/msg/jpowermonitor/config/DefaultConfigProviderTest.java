@@ -31,14 +31,14 @@ class DefaultConfigProviderTest {
         expected.setCarbonDioxideEmissionFactor(new BigDecimal("777"));
 
         Measurement measurement = new Measurement();
-        measurement.setMethod("ohm");
+        measurement.setMethod("lhm");
 
-        OpenHardwareMonitorCfg ohm = new OpenHardwareMonitorCfg();
+        LibreHardwareMonitorCfg lhm = new LibreHardwareMonitorCfg();
         PathElement pe = new PathElement();
         pe.path = List.of("pc", "cpu", "path1", "path2");
-        ohm.setPaths(List.of(pe));
-        ohm.setUrl("some.test.url" + "/data.json"); // /data.json is internally added
-        measurement.setOhm(ohm);
+        lhm.setPaths(List.of(pe));
+        lhm.setUrl("some.test.url" + "/data.json"); // /data.json is internally added
+        measurement.setLhm(lhm);
 
         CsvMeasurementCfg csv = new CsvMeasurementCfg();
         csv.setInputFile("mycsv.csv");

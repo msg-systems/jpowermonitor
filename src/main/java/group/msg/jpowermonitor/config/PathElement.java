@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Data class for path element for open hardware monitor path.
+ * Data class for path element for Libre Hardware Monitor path.
  */
 @Data
 public class PathElement {

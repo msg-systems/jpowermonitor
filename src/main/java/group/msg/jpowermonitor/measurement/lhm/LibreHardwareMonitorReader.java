@@ -1,11 +1,11 @@
-package group.msg.jpowermonitor.measurement.ohm;
+package group.msg.jpowermonitor.measurement.lhm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
-import group.msg.jpowermonitor.config.OpenHardwareMonitorCfg;
+import group.msg.jpowermonitor.config.LibreHardwareMonitorCfg;
 import group.msg.jpowermonitor.config.PathElement;
 import group.msg.jpowermonitor.dto.DataPoint;
 import lombok.NonNull;
@@ -29,19 +29,19 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of the Open Hardware Monitor measure method.
+ * Implementation of the Libre Hardware Monitor measure method.
  *
  * @see MeasureMethod
  */
-public class OpenHardwareMonitorReader implements MeasureMethod {
+public class LibreHardwareMonitorReader implements MeasureMethod {
     HttpClient client;
     JPowerMonitorConfig config;
-    OpenHardwareMonitorCfg ohmConfig;
+    LibreHardwareMonitorCfg lhmConfig;
 
-    public OpenHardwareMonitorReader(JPowerMonitorConfig config) {
+    public LibreHardwareMonitorReader(JPowerMonitorConfig config) {
         this.config = config;
-        Objects.requireNonNull(config.getMeasurement().getOhm(), "Open hardware monitor config must be set!");
-        this.ohmConfig = config.getMeasurement().getOhm();
+        Objects.requireNonNull(config.getMeasurement().getLhm(), "Libre Hardware Monitor config must be set!");
+        this.lhmConfig = config.getMeasurement().getLhm();
         this.client = HttpClientBuilder.create().build();
     }
 
@@ -49,17 +49,17 @@ public class OpenHardwareMonitorReader implements MeasureMethod {
     public @NotNull List<DataPoint> measure() throws JPowerMonitorException {
         try {
             LocalDateTime time = LocalDateTime.now();
-            HttpResponse response = client.execute(new HttpGet(ohmConfig.getUrl()));
+            HttpResponse response = client.execute(new HttpGet(lhmConfig.getUrl()));
             ObjectMapper objectMapper = new ObjectMapper();
             DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
             List<DataPoint> result = new ArrayList<>();
-            for (PathElement pathElement : ohmConfig.getPaths()) {
+            for (PathElement pathElement : lhmConfig.getPaths()) {
                 DataPoint dp = createDataPoint(root, pathElement, time);
                 result.add(dp);
             }
             return result;
         } catch (IOException e) {
-            throw new JPowerMonitorException("Unable to reach hardware monitor at url: " + ohmConfig.getUrl() + "!", e);
+            throw new JPowerMonitorException("Unable to reach Libre Hardware Monitor at url: " + lhmConfig.getUrl() + "!", e);
         }
     }
 
@@ -67,14 +67,14 @@ public class OpenHardwareMonitorReader implements MeasureMethod {
     public @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException {
         try {
             LocalDateTime time = LocalDateTime.now();
-            HttpResponse response = client.execute(new HttpGet(ohmConfig.getUrl()));
+            HttpResponse response = client.execute(new HttpGet(lhmConfig.getUrl()));
             ObjectMapper objectMapper = new ObjectMapper();
             DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
             // config assures that getPaths is not null and has at least one element!
-            PathElement pathElement = ohmConfig.getPaths().get(0);
+            PathElement pathElement = lhmConfig.getPaths().get(0);
             return createDataPoint(root, pathElement, time);
         } catch (IOException e) {
-            throw new JPowerMonitorException("Unable to reach hardware monitor at url: " + ohmConfig.getUrl() + "!", e);
+            throw new JPowerMonitorException("Unable to reach Libre Hardware Monitor at url: " + lhmConfig.getUrl() + "!", e);
         }
     }
 
@@ -92,7 +92,7 @@ public class OpenHardwareMonitorReader implements MeasureMethod {
 
     @Override
     public @NotNull List<String> configuredSensors() {
-        return ohmConfig.getPaths()
+        return lhmConfig.getPaths()
             .stream()
             .map(p -> String.join("->", p.getPath()))
             .collect(Collectors.toList());
@@ -101,7 +101,7 @@ public class OpenHardwareMonitorReader implements MeasureMethod {
     @Override
     public @NotNull Map<String, BigDecimal> defaultEnergyInIdleModeForMeasuredSensors() {
         Map<String, BigDecimal> energyInIdleModeForMeasuredSensors = new HashMap<>();
-        ohmConfig.getPaths().stream()
+        lhmConfig.getPaths().stream()
             .filter(x -> x.getEnergyInIdleMode() != null)
             .forEach(p -> energyInIdleModeForMeasuredSensors.put(String.join("->", p.getPath()), p.getEnergyInIdleMode()));
         return energyInIdleModeForMeasuredSensors;

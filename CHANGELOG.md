@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - no infinite loop on misconfigured csv delimiter, 
     - fix NaN on first measurements with zero duration.
 - upgrade dependencies
+- replace discontinued Open Hardware Monitor by fork Libre Hardware Monitor
 
 ## 2023-03-07
 - refactoring and release 1.0.0
