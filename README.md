@@ -8,28 +8,24 @@ The Java agent collects the activity of the application to be measured at regula
 The CPU usage of the program and the current power consumption are aggregated to energy consumption per method over runtime and written into a CSV file.
 The result of the measurement is the energy consumption in watt hours or joule.
 
-### Prerequisites
-- Tool Libre Hardware Monitor is installed: https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
-- Libre Hardware Monitor is configured to start a web server:
-  ![Webserver aktivieren](docs/lhm-webserver.png)
-- If necessary, an alternative port (default is 8085) can be also activated there.
-- __IMPORTANT: To start the web server, Libre Hardware Monitor may have to be started as administrator.__
-- After that the tool is also accessible in the browser: http://localhost:8085/.
-- The JUnit extension internally reads the json document, which can be retrieved at http://localhost:8085/data.json.
-- __To start the Java agent, the "fat jar" (incl. dependencies) first must be built using the Gradle task "shadowJar"__.
-- __Copy "src/main/resources/jpowermonitor-template.yaml" to the execution directory and rename to "./jpowermonitor.yaml"__.
-- __Configure (at least) measurement -> lhm -> paths -> path to fit your machine__.
-- Tool HWiNFO could be used alternatively, __measurement -> method__ must be set to 'csv' and Logging to CSV in HWiNFO must be active: https://www.hwinfo.com/
+### Quick Start
+- Install and configure Tool __Libre Hardware Monitor__: https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
+  - Configure Libre Hardware Monitor to start a web server:
+      ![Webserver aktivieren](docs/lhm-webserver.png)
+  - If necessary, an alternative port (default port is 8085) can be also activated there.
+  - __IMPORTANT: To start the web server, Libre Hardware Monitor may have to be started as administrator.__
+  - After that the tool is also accessible in your browser: http://localhost:8085/.
+  - The jPowerMonitor JUnit extension and the Java Agent internally read the json document, which can be retrieved at http://localhost:8085/data.json.
+- The tool __HWiNFO__ or __another tool that writes sensor values to a CSV file__ could be used alternatively, __measurement -> method__ must be set to 'csv' and Logging to CSV in HWiNFO must be active: https://www.hwinfo.com/
+  - Configure HWiNFO to log the values of the power sensors to the CSV file.
+  - Start the logging in HWiNFO to a file e.g. in your project directory. 
+- To start the __Java agent__, the "fat jar" (incl. dependencies, with name `jpowermonitor-<version>-all.jar`) must be __downloaded from mvn central [here](https://repo.maven.apache.org/maven2/io/github/msg-systems/jpowermonitor/)__ or __must first be built__ with the Gradle task `shadowJar`.
+- __Copy `src/main/resources/jpowermonitor-template.yaml` to the execution directory and rename it to `./jpowermonitor.yaml`__.
+- __Configure (at least) measurement -> lhm -> paths -> path to match your machine__ for using Libre Hardware Monitor, or __the CSV section__ to use HWiNFO or __another tool that writes sensor values to a CSV file__.
+- For using the __JUnit Extension__ see below section __[JUnit Tests](#JunitTests)__
+- For more configuration settings see below section __[Configuration](#Configuration)__.
 
-### Java Agent
-- For testing call with `java -javaagent:.\build\libs\jpowermonitor-1.0.2-SNAPSHOT-all.jar[=path-to-jpowermonitor.yaml] -jar .\build\libs\jpowermonitor-1.0.2-SNAPSHOT-all.jar [runtimeSeconds] [cpuThreads]`
-- .\build\libs\jpowermonitor-1.0.2-SNAPSHOT-all.jar is just an example and can be replaced by any *.jar of your choice
-- For starting the agent with Spring Boot, Servlet-Container etc. please consult the respective documentation for adding a java agent.
-
-### Limitations
-- The tool currently only works with German locale setting.
-
-### Configuration
+### Configuration<span id="Configuration"><span>
 The configuration is done via a YAML file. Normally this would be `jpowermonitor.yaml`. The agent
 has multiple ways of getting this configuration:
 1. You can pass it as a programm argument, see section above. If not, it will simply assume the name
@@ -72,24 +68,24 @@ For the configuration of the JUnit extension a yaml file with the name of the ex
 If no base load (`energyInIdleMode`) is specified for a path, this is measured before each test. So a mixed operation between configuration of the base load and measurement is also possible and the results can be compared (some sensors provide very similar values).
 For non current measuring sensors (e.g. temperature) the base load is not calculated extra and also not subtracted from the measured value! It is only output if a base load must also be calculated for a current-measuring sensor because this is not specified in the configuration.
 
-### Integration into own project
-#### Gradle
-You may build the jpowermonitor fat jar using the build target `shadowJar` and the copy the `-all.jar` into a folder of your project.
+### Integration into your own project
+#### Java Agent
+- You may build the jpowermonitor fat jar using the build target `shadowJar` and the copy the `-all.jar` into a folder of your project.
+- You can use this jar for the java agent. Alternatively you may download the fat jar from mvn central [here](https://repo.maven.apache.org/maven2/io/github/msg-systems/jpowermonitor/).
+- For testing call with `java -javaagent:.\build\libs\jpowermonitor-<version>-all.jar[=path-to-jpowermonitor.yaml] -jar .\build\libs\jpowermonitor-<version>-all.jar [runtimeSeconds] [cpuThreads]`
+- The second `.\build\libs\jpowermonitor-<version>-all.jar` is just an example and can be replaced by any `jar` of your choice
+- The configuration can be passed as a parameter using the `=` sign! If nothing is passed, the default configuration file `jpowermonitor.yaml` is searched.
+- For starting the agent with Spring Boot, Servlet-Container etc. please consult the respective documentation for adding a java agent.
 
+
+#### JUnit Tests<span id="JunitTests"><span>
 The add the test dependency to your gradle build (analogue for maven builds):
 ```
-    testImplementation files('libs/jpowermonitor-1.0.2-all.jar')
-```
-
-Alternatively you call the build target `publishLocal` in the jPowerMonitor project and publish the jar to your local maven repository.
-You then add the following test dependency to your build script:
-```
     testImplementation(
-        [group: 'group.msg', name: 'jpowermonitor', version: jPowerMonitorVersion],
+        [group: 'io.github.msg-systems', name: 'jpowermonitor', version: jPowerMonitorVersion],
     )
 ```
 
-#### JUnit Tests
 The extension is designed for JUnit 5 (jupiter) tests and is included into your test class as follows:
 ```
 @ExtendWith({JPowerMonitorExtension.class})
@@ -122,6 +118,9 @@ The result file can be configured under `csvRecording.resultCsv`. The summary of
 The headers of the csv output file are configured in the [csvExport.properties](src%2Fmain%2Fresources%2FcsvExport.properties) (default language English).
 The file currently is translated into German and French and is locale dependent.
 You may add your own locale and add the translated file to the classpath. You may set the language via JVM option e.g. `-Duser.language=es`.
+
+### Limitations
+- There are currently no known limitations.
 
 #### Note
 This markdown can be converted to html with
