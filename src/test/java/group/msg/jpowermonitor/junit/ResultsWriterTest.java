@@ -5,6 +5,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,13 +22,13 @@ class ResultsWriterTest {
     static Stream<Arguments> l10nTestConstructorValues() {
         return Stream.of(
             arguments(new Locale("en", "US"),
-                "Time,Name,Sensor,Value,Unit,Baseload,Unit,Value+Baseload,Unit,Energy(Value),Unit,Energy(Value+Baseload),Unit",
+                "Time,Name,Sensor,Value,Unit,Baseload,Unit,Value+Baseload,Unit,Energy(Value),Unit,Energy(Value+Baseload),Unit,CO2 Value,Unit",
                 "Time,Name,Sensor,Value,Unit"),
             arguments(new Locale("de", "DE"),
-                "Uhrzeit;Name;Sensor;Wert;Einheit;Grundlast;Einheit;Wert+Grundlast;Einheit;Energie(Wert);Einheit;Energie(Wert+Grundlast);Einheit",
+                "Uhrzeit;Name;Sensor;Wert;Einheit;Grundlast;Einheit;Wert+Grundlast;Einheit;Energie(Wert);Einheit;Energie(Wert+Grundlast);Einheit;CO2 Wert;Einheit",
                 "Uhrzeit;Name;Sensor;Wert;Einheit"),
             arguments(new Locale("fr", "FR"),
-                "Heure,Nom,D\u00E9tecteur,Valeur,Unit\u00E9,Grundlast,Unit\u00E9,Valeur+charge de base,Unit\u00E9,Energie(valeur),Unit\u00E9,Energie(valeur+charge de base),Unit\u00E9",
+                "Heure,Nom,D\u00E9tecteur,Valeur,Unit\u00E9,Grundlast,Unit\u00E9,Valeur+charge de base,Unit\u00E9,Energie(valeur),Unit\u00E9,Energie(valeur+charge de base),Unit\u00E9,CO2 Valeur,Unit\u00E9",
                 "Heure,Nom,D\u00E9tecteur,Valeur,Unit\u00E9")
         );
     }
@@ -43,7 +44,7 @@ class ResultsWriterTest {
         Locale.setDefault(currentLocale);
         ResultsWriter.setLocaleDependentValues();
         // Act
-        new ResultsWriter(pathToResultCsv, pathToMeasurementCsv);
+        new ResultsWriter(pathToResultCsv, pathToMeasurementCsv, new BigDecimal("485"));
         // Assert
         assertThat(Files.readString(pathToResultCsv, StandardCharsets.UTF_8)).isEqualTo(expContentResultCsv + NEW_LINE); // trim carriage-return
         assertThat(Files.readString(pathToMeasurementCsv, StandardCharsets.UTF_8)).isEqualTo(expContentMeasurementCsv + NEW_LINE); // trim carriage-return

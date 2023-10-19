@@ -10,14 +10,17 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
 import static group.msg.jpowermonitor.util.Constants.APP_TITLE;
-import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
+import static group.msg.jpowermonitor.util.Constants.DATE_TIME_FORMATTER;
+import static group.msg.jpowermonitor.util.Constants.NEW_LINE;
+import static group.msg.jpowermonitor.util.Converter.convertJouleToCarbonDioxideGrams;
+import static group.msg.jpowermonitor.util.Converter.convertJouleToKiloWattHours;
+import static group.msg.jpowermonitor.util.Converter.convertJouleToWattHours;
 
 /**
  * Write power and energy measurement results to CSV files at application shutdown.
@@ -25,12 +28,9 @@ import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
  * @author deinerj
  */
 public class ResultsWriter implements Runnable {
-    private static final String NEW_LINE = System.getProperty("line.separator");
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd'T'HH:mm:ss-SSS");
     private static final DecimalFormat DECIMAL_FORMAT;
     private static final String dataPointFormatCsv;
     private static final String dataPointFormatEnergyConsumptionCsv;
-    private static final String UNIT_GRAMS_CO2 = "gCO2";
 
     static {
         dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s%s";
@@ -38,15 +38,12 @@ public class ResultsWriter implements Runnable {
         DECIMAL_FORMAT = new DecimalFormat("###0.#####", DecimalFormatSymbols.getInstance(Locale.getDefault()));
     }
 
-    private static final BigDecimal JOULE_TO_WATT_HOURS_FACTOR = new BigDecimal("3600");
-    private static final BigDecimal WATT_HOURS_TO_KWH_FACTOR = new BigDecimal("1000");
     protected static final String FILE_NAME_PREFIX = APP_TITLE + "_";
     protected static final String SEPARATOR = "-----------------------------------------------------------------------------------------";
 
     private final PowerStatistics powerStatistics;
     private final boolean doWriteStatistics;
     private final BigDecimal carbonDioxideEmissionFactor;
-
     private String energyConsumptionPerMethodFileName;
     private String energyConsumptionPerFilteredMethodFileName;
     private String powerConsumptionPerMethodFileName;
@@ -131,7 +128,7 @@ public class ResultsWriter implements Runnable {
     protected String createCsvEntryForDataPoint(@NotNull DataPoint dp) {
         if (Unit.JOULE == dp.getUnit()) {
             return String.format(dataPointFormatEnergyConsumptionCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(),
-                DECIMAL_FORMAT.format(convertJouleToCarbonDioxideGrams(dp.getValue(), carbonDioxideEmissionFactor)), UNIT_GRAMS_CO2, NEW_LINE);
+                DECIMAL_FORMAT.format(convertJouleToCarbonDioxideGrams(dp.getValue(), carbonDioxideEmissionFactor)), Unit.GRAMS_CO2.getAbbreviation(), NEW_LINE);
         }
         return String.format(dataPointFormatCsv, DATE_TIME_FORMATTER.format(dp.getTime()), dp.getThreadName(), dp.getName(), DECIMAL_FORMAT.format(dp.getValue()), dp.getUnit(), NEW_LINE);
     }
@@ -147,22 +144,6 @@ public class ResultsWriter implements Runnable {
             System.err.println(ex.getLocalizedMessage());
             ex.printStackTrace();
         }
-    }
-
-    protected BigDecimal convertJouleToWattHours(BigDecimal joule) {
-        return joule.divide(JOULE_TO_WATT_HOURS_FACTOR, MATH_CONTEXT);
-    }
-
-    protected BigDecimal convertJouleToKiloWattHours(BigDecimal joule) {
-        return convertJouleToWattHours(joule).divide(WATT_HOURS_TO_KWH_FACTOR, MATH_CONTEXT);
-    }
-
-    protected BigDecimal convertKiloWattHoursToCarbonDioxideGrams(BigDecimal kWh, BigDecimal energyMix) {
-        return kWh.multiply(energyMix, MATH_CONTEXT);
-    }
-
-    protected BigDecimal convertJouleToCarbonDioxideGrams(BigDecimal joule, BigDecimal energyMix) {
-        return convertKiloWattHoursToCarbonDioxideGrams(convertJouleToKiloWattHours(joule), energyMix);
     }
 
 }
