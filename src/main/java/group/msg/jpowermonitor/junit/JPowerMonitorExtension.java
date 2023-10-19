@@ -56,7 +56,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         String configFile = context.getTestClass().map(c -> c.getSimpleName() + ".yaml").orElse(null);
         JPowerMonitorConfig config = new DefaultConfigProvider().readConfig(configFile);
         measureMethod = MeasureMethodProvider.resolveMeasureMethod(config);
-        resultsWriter = new ResultsWriter(measureMethod.getPathToResultCsv(), measureMethod.getPathToMeasurementCsv());
+        resultsWriter = new ResultsWriter(measureMethod.getPathToResultCsv(), measureMethod.getPathToMeasurementCsv(), config.getCarbonDioxideEmissionFactor());
         energyInIdleMode = measureIdleMode();
     }
 

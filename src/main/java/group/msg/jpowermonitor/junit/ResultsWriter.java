@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor.junit;
 
 import group.msg.jpowermonitor.JPowerMonitorException;
+import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.SensorValue;
 import org.jetbrains.annotations.NotNull;
@@ -14,10 +15,14 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
+import static group.msg.jpowermonitor.util.Constants.DATE_TIME_FORMATTER;
+import static group.msg.jpowermonitor.util.Constants.NEW_LINE;
+import static group.msg.jpowermonitor.util.Converter.convertJouleToCarbonDioxideGrams;
+import static group.msg.jpowermonitor.util.Converter.convertWattHoursToJoule;
 
 /**
  * Result writer for the JUnit extension.
@@ -27,31 +32,38 @@ public class ResultsWriter {
         setLocaleDependentValues();
     }
 
-    private static final String NEW_LINE = System.getProperty("line.separator");
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd'T'HH:mm:ss-SSS");
     private static DecimalFormat DECIMAL_FORMAT;
     private final Path pathToMeasurementCsv, pathToResultCsv;
+    private final BigDecimal carbonDioxideEmissionFactor;
     private static ResourceBundle labels;
-    private static String dataPointFormatCsv, sensorValueFormatCsv, powerSensorValueFormatCsv, SEP;
+    private static String dataPointFormatCsv, nonPowerSensorResultFormatCsv, powerSensorResultFormatCsv, SEP;
+    private static final String DATA_POINT_FORMAT = "%s;%s;%s;%s;%s%s";
+    private static final String NON_POWER_SENSOR_RESULT_FORMAT = "%s;%s;%s;%s;%s;%s";
+    private static final String POWER_SENSOR_RESULT_FORMAT = "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s";
 
     public static void setLocaleDependentValues() {
         labels = ResourceBundle.getBundle("csvExport", Locale.getDefault());
         SEP = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? ";" : ",";
-        dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s%s";
-        sensorValueFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s" : "%s,%s,%s,%s,%s,%s";
-        powerSensorValueFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s" : "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s";
+        dataPointFormatCsv = setCorrectDelimiter(DATA_POINT_FORMAT);
+        nonPowerSensorResultFormatCsv = setCorrectDelimiter(NON_POWER_SENSOR_RESULT_FORMAT);
+        powerSensorResultFormatCsv = setCorrectDelimiter(POWER_SENSOR_RESULT_FORMAT);
         DECIMAL_FORMAT = new DecimalFormat("###0.#####", DecimalFormatSymbols.getInstance(Locale.getDefault()));
     }
 
-    public ResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv) {
+    private static String setCorrectDelimiter(String format) {
+        return Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? format : format.replace(';', ',');
+    }
+
+    public ResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv, @Nullable BigDecimal carbonDioxideEmissionFactor) {
         this.pathToResultCsv = pathToResultCsv;
         this.pathToMeasurementCsv = pathToMeasurementCsv;
+        this.carbonDioxideEmissionFactor = carbonDioxideEmissionFactor;
         if (pathToResultCsv != null && !pathToResultCsv.toFile().exists()) {
             createFile(pathToResultCsv);
             String headings = labels.getString("measureTime") + SEP + labels.getString("measureName") + SEP + labels.getString("sensorName") + SEP + labels.getString("sensorValue") + SEP
                 + labels.getString("sensorValueUnit") + SEP + labels.getString("baseLoad") + SEP + labels.getString("baseLoadUnit") + SEP + labels.getString("valuePlusBaseLoad")
                 + SEP + labels.getString("valuePlusBaseLoadUnit") + SEP + labels.getString("energyOfValue") + SEP + labels.getString("energyOfValueUnit") + SEP
-                + labels.getString("energyOfValuePlusBaseLoad") + SEP + labels.getString("energyOfValuePlusBaseLoadUnit");
+                + labels.getString("energyOfValuePlusBaseLoad") + SEP + labels.getString("energyOfValuePlusBaseLoadUnit") + SEP + labels.getString("co2Value") + SEP + labels.getString("co2Unit");
             appendToFile(pathToResultCsv, headings + NEW_LINE);
         }
         if (pathToMeasurementCsv != null && !pathToMeasurementCsv.toFile().exists()) {
@@ -110,16 +122,28 @@ public class ResultsWriter {
     private String createCsvEntryForSensorValue(String testName, SensorValue sensorValue) {
         String csvEntry;
         if (sensorValue.isPowerSensor()) { // only power values=>
-            csvEntry = String.format(powerSensorValueFormatCsv, DATE_TIME_FORMATTER.format(sensorValue.getExecutionTime()), testName,
+            BigDecimal valueWithoutIdlePowerJ = convertWattHoursToJoule(sensorValue.getValueWithoutIdlePowerPerHour());
+            BigDecimal valueWithIdlePowerJ = convertWattHoursToJoule(sensorValue.getValueWithIdlePowerPerHour());
+            BigDecimal co2Equivalent = convertJouleToCarbonDioxideGrams(sensorValue.getValueWithIdlePowerPerHour(), carbonDioxideEmissionFactor);
+            csvEntry = String.format(powerSensorResultFormatCsv,
+                DATE_TIME_FORMATTER.format(sensorValue.getExecutionTime()),
+                testName,
                 sensorValue.getName(),
-                formatNumber(sensorValue.getValue()), sensorValue.getUnit(),
-                formatNumber(sensorValue.getPowerInIdleMode()), sensorValue.getUnit(),
-                formatNumber(sensorValue.getValue().add(sensorValue.getPowerInIdleMode())), sensorValue.getUnit(),
-                formatNumber(sensorValue.getValueWithoutIdlePowerPerHour()), sensorValue.getUnit() + "h",
-                formatNumber(sensorValue.getValueWithIdlePowerPerHour()), sensorValue.getUnit() + "h",
+                formatNumber(sensorValue.getValue()),
+                sensorValue.getUnit(),
+                formatNumber(sensorValue.getPowerInIdleMode()),
+                sensorValue.getUnit(),
+                formatNumber(sensorValue.getValue().add(sensorValue.getPowerInIdleMode())),
+                sensorValue.getUnit(),
+                formatNumber(valueWithoutIdlePowerJ),
+                Unit.JOULE.getAbbreviation(),
+                formatNumber(valueWithIdlePowerJ),
+                Unit.JOULE.getAbbreviation(),
+                formatNumber(co2Equivalent),
+                Unit.GRAMS_CO2.getAbbreviation(),
                 NEW_LINE);
         } else {
-            csvEntry = String.format(sensorValueFormatCsv, DATE_TIME_FORMATTER.format(sensorValue.getExecutionTime()), testName,
+            csvEntry = String.format(nonPowerSensorResultFormatCsv, DATE_TIME_FORMATTER.format(sensorValue.getExecutionTime()), testName,
                 sensorValue.getName(), formatNumber(sensorValue.getValue()), sensorValue.getUnit(), NEW_LINE);
         }
         return csvEntry;

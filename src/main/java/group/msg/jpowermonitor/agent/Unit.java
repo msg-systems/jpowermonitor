@@ -3,15 +3,15 @@ package group.msg.jpowermonitor.agent;
 import lombok.Getter;
 
 /**
- * Unit of a sensor value.
+ * Units used in jPowerMonitor (sensor values and outputs).
  *
  * @see group.msg.jpowermonitor.dto.Quantity
  * @see group.msg.jpowermonitor.dto.DataPoint
  * @see group.msg.jpowermonitor.dto.PowerQuestionable
  */
+@Getter
 public enum Unit {
-    JOULE("J"), WATT("W"), WATTHOURS("Wh"), NONE("");
-    @Getter
+    JOULE("J"), WATT("W"), WATTHOURS("Wh"), KILOWATTHOURS("kWh"), GRAMS_CO2("gCO2"), NONE("");
     private final String abbreviation;
 
     Unit(String abbreviation) {
@@ -33,6 +33,10 @@ public enum Unit {
                 return Unit.WATT;
             case "Wh":
                 return Unit.WATTHOURS;
+            case "kWh":
+                return Unit.KILOWATTHOURS;
+            case "gCO2":
+                return Unit.GRAMS_CO2;
             default:
                 return Unit.NONE;
         }
