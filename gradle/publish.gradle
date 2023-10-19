@@ -34,8 +34,8 @@ publishing {
 
                 licenses {
                     license {
-                        name = 'The MIT License (MIT)'
-                        url = 'http://opensource.org/licenses/MIT'
+                        name = 'Apache License, Version 2.0 (Apache-2.0)'
+                        url = 'https://opensource.org/license/apache-2-0/'
                         distribution = 'repo'
                     }
                 }
