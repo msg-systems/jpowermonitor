@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [not yet released]
 - fix mvn central name and description
+- update carbon dioxide factor inf default configuration to latest published value for Germany (2022)
 
 ## 2023-10-19 - release 1.1.0
 - Make JUnit Extension write Joule instead of Wh in the energy column of the results csv.

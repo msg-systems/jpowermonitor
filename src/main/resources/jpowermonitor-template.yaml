@@ -11,8 +11,9 @@ percentageOfSamplesAtBeginningToDiscard: 20
 # Too short intervals also affect the energy consumption!
 samplingIntervalInMs: 300
 # Conversion factor to calculate approximated CO2 consumption in grams from energy consumption per kWh.
-# Depends on the energy mix of your location, for germany compare e. g. https://www.umweltbundesamt.de/themen/klima-energie/energieversorgung/strom-waermeversorgung-in-zahlen#Strommix
-carbonDioxideEmissionFactor: 485
+# Depends on the energy mix of your location, for Germany compare e.g. https://www.umweltbundesamt.de/themen/klima-energie/energieversorgung/strom-waermeversorgung-in-zahlen#Strommix
+# Value for year 2022: 498
+carbonDioxideEmissionFactor: 498
 
 measurement:
   # Specify which measurement method to use. Possible values: lhm, csv
