@@ -30,19 +30,19 @@ repositories {
 dependencies {
     implementation(
         [group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.3'],
-        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "2.15.2"],
+        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: "2.16.1"],
         [group: 'org.yaml', name: 'snakeyaml', version: "2.2"],
     )
     compileOnly(
-        [group: 'org.jetbrains', name: 'annotations', version: "24.0.1"],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.10.0"],
+        [group: 'org.jetbrains', name: 'annotations', version: "24.1.0"],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.10.1"],
     )
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
-        [group: 'org.slf4j', name: 'slf4j-api', version: "2.0.9"],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.10.0"],
-        [group: 'ch.qos.logback', name: 'logback-classic', version: '1.4.12'],
-        [group: 'org.assertj', name: 'assertj-core', version: "3.24.2"]
+        [group: 'org.slf4j', name: 'slf4j-api', version: "2.0.11"],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.10.1"],
+        [group: 'ch.qos.logback', name: 'logback-classic', version: '1.4.14'],
+        [group: 'org.assertj', name: 'assertj-core', version: "3.25.1"]
     )
 }
 

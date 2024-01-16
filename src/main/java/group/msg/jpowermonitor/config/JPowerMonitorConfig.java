@@ -46,7 +46,7 @@ public class JPowerMonitorConfig {
                 throw new JPowerMonitorException("At least one path to a sensor value must be configured under paths");
             }
         } else {
-            if (measurement.getCsv() == null || measurement.getCsv().getInputFile() == null || measurement.getCsv().getColumns() == null || measurement.getCsv().getColumns().size() == 0) {
+            if (measurement.getCsv() == null || measurement.getCsv().getInputFile() == null || measurement.getCsv().getColumns() == null || measurement.getCsv().getColumns().isEmpty()) {
                 throw new JPowerMonitorException("CSV input filepath and columns must be configured");
             }
         }

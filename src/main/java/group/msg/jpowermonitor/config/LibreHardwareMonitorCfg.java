@@ -12,8 +12,6 @@ import java.util.List;
  */
 @Data
 public class LibreHardwareMonitorCfg {
-    @Nullable
     private String url;
-    @Nullable
     private List<PathElement> paths;
 }
