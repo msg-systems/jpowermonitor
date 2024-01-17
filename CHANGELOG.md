@@ -6,7 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [not yet released]
-- no changes yet
+- upgrade httpclient to 5.3
+- upgrade logback to 1.4.14
+- upgrade ch.qos.logback:logback-classic to 1.4.14
+- upgrade com.fasterxml.jackson.datatype:jackson-datatype-jsr310 to 2.16.1
+- upgrade org.assertj:assertj-core to 3.25.1
+- upgrade org.jetbrains:annotations to 24.1.0
+- upgrade org.junit.jupiter:junit-jupiter to 5.10.1
+- upgrade org.slf4j:slf4j-api to 2.0.11
+- upgrade gradle to 8.5
 
 ## 2023-11-16 - release 1.1.1
 - fix mvn central name and description

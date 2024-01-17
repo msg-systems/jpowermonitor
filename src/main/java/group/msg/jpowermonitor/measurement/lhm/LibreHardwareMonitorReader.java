@@ -12,6 +12,7 @@ import lombok.NonNull;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,36 +45,41 @@ public class LibreHardwareMonitorReader implements MeasureMethod {
         this.client = HttpClientBuilder.create().build();
     }
 
+    @NotNull
+    private List<DataPoint> getDataPoints(ClassicHttpResponse response, List<PathElement> paths) throws IOException {
+        LocalDateTime time = LocalDateTime.now();
+        ObjectMapper objectMapper = new ObjectMapper();
+        DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
+        List<DataPoint> result = new ArrayList<>();
+        for (PathElement pathElement : paths) {
+            DataPoint dp = createDataPoint(root, pathElement, time);
+            result.add(dp);
+        }
+        return result;
+    }
+
     @Override
     public @NotNull List<DataPoint> measure() throws JPowerMonitorException {
         try {
-            LocalDateTime time = LocalDateTime.now();
-            return client.execute(new HttpGet(lhmConfig.getUrl()), response -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
-                List<DataPoint> result = new ArrayList<>();
-                for (PathElement pathElement : lhmConfig.getPaths()) {
-                    DataPoint dp = createDataPoint(root, pathElement, time);
-                    result.add(dp);
-                }
-                return result;
-            });
+            return client.execute(new HttpGet(lhmConfig.getUrl()), response -> getDataPoints(response, lhmConfig.getPaths()));
         } catch (IOException e) {
             throw new JPowerMonitorException("Unable to reach Libre Hardware Monitor at url: " + lhmConfig.getUrl() + "!", e);
         }
     }
 
+    @NotNull
+    private DataPoint getDataPoint(ClassicHttpResponse response, PathElement pathElement) throws IOException {
+        LocalDateTime time = LocalDateTime.now();
+        ObjectMapper objectMapper = new ObjectMapper();
+        DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
+        return createDataPoint(root, pathElement, time);
+    }
+
     @Override
     public @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException {
         try {
-            LocalDateTime time = LocalDateTime.now();
-            return client.execute(new HttpGet(lhmConfig.getUrl()), response -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
-                // config assures that getPaths is not null and has at least one element!
-                PathElement pathElement = lhmConfig.getPaths().get(0);
-                return createDataPoint(root, pathElement, time);
-            });
+            // the config assures that getPaths is not null and has at least one element!
+            return client.execute(new HttpGet(lhmConfig.getUrl()), response -> getDataPoint(response, lhmConfig.getPaths().get(0)));
         } catch (IOException e) {
             throw new JPowerMonitorException("Unable to reach Libre Hardware Monitor at url: " + lhmConfig.getUrl() + "!", e);
         }
