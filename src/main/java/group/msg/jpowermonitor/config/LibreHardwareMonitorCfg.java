@@ -1,8 +1,6 @@
 package group.msg.jpowermonitor.config;
 
 import lombok.Data;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 
 /**
