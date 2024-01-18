@@ -19,7 +19,7 @@ plugins {
 
 group = 'io.github.msg-systems'
 version = rootProject.file('version.txt').text.trim()
-description='JUnit Extension and Java Agent for energy consumption measurement. See also <a href="https://github.com/msg-systems/jpowermonitor">https://github.com/msg-systems/jpowermonitor</a>'
+description='JUnit Extension and Java Agent for energy consumption measurement. See also https://github.com/msg-systems/jpowermonitor'
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
