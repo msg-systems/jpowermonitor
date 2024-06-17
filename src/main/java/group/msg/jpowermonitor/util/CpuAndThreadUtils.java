@@ -1,4 +1,4 @@
-package group.msg.jpowermonitor.agent;
+package group.msg.jpowermonitor.util;
 
 import group.msg.jpowermonitor.dto.DataPoint;
 import org.jetbrains.annotations.NotNull;
@@ -19,23 +19,28 @@ import static group.msg.jpowermonitor.util.Constants.ONE_HUNDRED;
  * @author deinerj
  */
 public class CpuAndThreadUtils {
-    @NotNull
-    static ThreadMXBean initializeAndGetThreadMxBeanOrFailAndQuitApplication() {
-        ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
-        // Check if CPU Time measurement is supported by the JVM. Quit otherwise
-        if (!threadMxBean.isThreadCpuTimeSupported()) {
-            System.err.println("Thread CPU Time is not supported in this JVM, unable to measure energy consumption.");
-            System.exit(1);
-        }
 
-        // Enable CPU Time measurement if it is disabled
-        if (!threadMxBean.isThreadCpuTimeEnabled()) {
-            threadMxBean.setThreadCpuTimeEnabled(true);
+    private static ThreadMXBean threadMXBean;
+
+    @NotNull
+    public static ThreadMXBean initializeAndGetThreadMxBeanOrFailAndQuitApplication() {
+        if (threadMXBean == null)  {
+            threadMXBean = ManagementFactory.getThreadMXBean();
+            // Check if CPU Time measurement is supported by the JVM. Quit otherwise
+            if (!threadMXBean.isThreadCpuTimeSupported()) {
+                System.err.println("Thread CPU Time is not supported in this JVM, unable to measure energy consumption.");
+                System.exit(1);
+            }
+    
+            // Enable CPU Time measurement if it is disabled
+            if (!threadMXBean.isThreadCpuTimeEnabled()) {
+                threadMXBean.setThreadCpuTimeEnabled(true);
+            }
         }
-        return threadMxBean;
+        return threadMXBean;
     }
 
-    static long getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(ThreadMXBean threadMxBean, Map<String, Long> cpuTimePerApplicationThread, Set<Thread> applicationThreads) {
+    public static long getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(ThreadMXBean threadMxBean, Map<String, Long> cpuTimePerApplicationThread, Set<Thread> applicationThreads) {
         long totalApplicationCpuTime = 0;
         for (Thread t : applicationThreads) {
             long applicationThreadCpuTime = threadMxBean.getThreadCpuTime(t.getId());
@@ -52,7 +57,7 @@ public class CpuAndThreadUtils {
     }
 
     @NotNull
-    static Map<String, BigDecimal> calculatePowerPerApplicationThread(Map<String, Long> cpuTimePerApplicationThread, DataPoint currentPower, long totalApplicationCpuTime) {
+    public static Map<String, BigDecimal> calculatePowerPerApplicationThread(Map<String, Long> cpuTimePerApplicationThread, DataPoint currentPower, long totalApplicationCpuTime) {
         Map<String, BigDecimal> powerPerApplicationThread = new HashMap<>();
         for (Map.Entry<String, Long> entry : cpuTimePerApplicationThread.entrySet()) {
             BigDecimal percentageCpuTimePerApplicationThread =

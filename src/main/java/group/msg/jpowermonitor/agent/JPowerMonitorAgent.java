@@ -4,6 +4,7 @@ import group.msg.jpowermonitor.config.DefaultConfigProvider;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.config.JavaAgent;
 import group.msg.jpowermonitor.util.Constants;
+import group.msg.jpowermonitor.util.CpuAndThreadUtils;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ThreadMXBean;
