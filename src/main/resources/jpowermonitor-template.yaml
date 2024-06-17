@@ -16,7 +16,7 @@ samplingIntervalInMs: 300
 carbonDioxideEmissionFactor: 498
 
 measurement:
-  # Specify which measurement method to use. Possible values: lhm, csv
+  # Specify which measurement method to use. Possible values: lhm, csv, est
   method: 'lhm'
   # Configuration for reading from csv file. E.g. output from HWInfo
   csv:
@@ -42,6 +42,10 @@ measurement:
       #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Cores' ], energyInIdleMode: 9.5 }
       #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
       #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
+  est:
+    # Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours - defaults are the average values from AWS
+    cpuMinWatts: 0.74
+    cpuMaxWatts: 3.5
 
 # ------------------------------------------------
 # Recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
