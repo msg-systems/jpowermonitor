@@ -4,7 +4,6 @@ import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
 import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
 import group.msg.jpowermonitor.util.StressCpuExample;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +15,6 @@ import static group.msg.jpowermonitor.agent.Unit.WATT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith({JPowerMonitorExtension.class})
-@Slf4j
 public class EndlessLoopTest {
     @SensorValues
     private List<SensorValue> valueList;

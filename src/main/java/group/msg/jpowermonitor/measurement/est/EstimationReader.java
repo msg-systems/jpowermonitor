@@ -49,7 +49,9 @@ public class EstimationReader implements MeasureMethod {
     @Override
     public @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException {
         // Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours
-        BigDecimal value = BigDecimal.valueOf(estCfg.getCpuMinWatts() + (osBean != null ? osBean.getSystemLoadAverage() : EST_CPU_LOAD_FALLBACK * (estCfg.getCpuMaxWatts() - estCfg.getCpuMinWatts()))); 
+        final double cpuLoad = osBean != null && osBean.getSystemLoadAverage() > 0 ? osBean.getSystemLoadAverage() : EST_CPU_LOAD_FALLBACK;
+        BigDecimal value = BigDecimal.valueOf(estCfg.getCpuMinWatts() + (cpuLoad * (estCfg.getCpuMaxWatts() - estCfg.getCpuMinWatts())));
+        System.out.println("cpuLoad: " + cpuLoad + ", value: " + value + "W");
         return new DataPoint(ESTIMATED_CPU_WATTS, value, Unit.WATT, LocalDateTime.now(), Thread.currentThread().getName());
     }
 
