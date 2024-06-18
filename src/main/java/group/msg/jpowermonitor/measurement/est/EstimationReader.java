@@ -1,38 +1,35 @@
 package group.msg.jpowermonitor.measurement.est;
 
 import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.config.EstimationCfg;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
+import group.msg.jpowermonitor.measurement.AbstractCommonReader;
 import group.msg.jpowermonitor.util.CpuAndThreadUtils;
 
 /**
  * Implementation of the Estimation (compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours) measure method.
  *
  * @see MeasureMethod
+ * @see AbstractCommonReader
  */
-public class EstimationReader implements MeasureMethod {
+public class EstimationReader extends AbstractCommonReader {
 
     private static final String ESTIMATED_CPU_WATTS = "Estimated CPU Watts";
 
-    private final JPowerMonitorConfig config;
     private final EstimationCfg estCfg;
 
     public EstimationReader(JPowerMonitorConfig config) {
-        this.config = config;
+        super(config);
         Objects.requireNonNull(config.getMeasurement().getEst(), "Estimation config must be set!");
         this.estCfg = config.getMeasurement().getEst();
     }
@@ -60,42 +57,4 @@ public class EstimationReader implements MeasureMethod {
     public @NotNull Map<String, BigDecimal> defaultEnergyInIdleModeForMeasuredSensors() {
         return Map.of(ESTIMATED_CPU_WATTS, BigDecimal.valueOf(estCfg.getCpuMinWatts()));
     }
-
-    @Override
-    public int getSamplingInterval() {
-        return config.getSamplingIntervalInMs();
-    }
-
-    @Override
-    public int initCycles() {
-        return config.getInitCycles();
-    }
-
-    @Override
-    public int getSamplingIntervalForInit() {
-        return config.getInitCycles();
-    }
-
-    @Override
-    public int getCalmDownIntervalInMs() {
-        return config.getCalmDownIntervalInMs();
-    }
-
-    @Override
-    public @Nullable Path getPathToResultCsv() {
-        return config.getCsvRecording().getResultCsv() != null ? Paths.get(
-            config.getCsvRecording().getResultCsv()) : null;
-    }
-
-    @Override
-    public @Nullable Path getPathToMeasurementCsv() {
-        return config.getCsvRecording().getMeasurementCsv() != null ? Paths.get(
-            config.getCsvRecording().getMeasurementCsv()) : null;
-    }
-
-    @Override
-    public @NotNull BigDecimal getPercentageOfSamplesAtBeginningToDiscard() {
-        return config.getPercentageOfSamplesAtBeginningToDiscard();
-    }
-
 }

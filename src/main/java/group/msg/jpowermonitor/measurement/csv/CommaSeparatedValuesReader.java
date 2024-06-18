@@ -7,9 +7,9 @@ import group.msg.jpowermonitor.config.CsvColumn;
 import group.msg.jpowermonitor.config.CsvMeasurementCfg;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import group.msg.jpowermonitor.measurement.AbstractCommonReader;
 
+import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -35,12 +35,12 @@ import java.util.stream.Stream;
  * Implementation of the Comma separated value measure method. E.g. for HWiNFO or other CSV generating tools.
  *
  * @see MeasureMethod
+ * @see AbstractCommonReader
  */
-public class CommaSeparatedValuesReader implements MeasureMethod {
-    private final JPowerMonitorConfig config;
+public class CommaSeparatedValuesReader extends AbstractCommonReader {
 
     public CommaSeparatedValuesReader(JPowerMonitorConfig config) {
-        this.config = config;
+        super(config);
         initCsvConfig(config);
     }
 
@@ -215,42 +215,5 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
             .filter(x -> x.getEnergyInIdleMode() != null)
             .forEach(c -> energyInIdleModeForMeasuredSensors.put(c.getName(), c.getEnergyInIdleMode()));
         return energyInIdleModeForMeasuredSensors;
-    }
-
-    @Override
-    public int getSamplingInterval() {
-        return config.getSamplingIntervalInMs();
-    }
-
-    @Override
-    public int initCycles() {
-        return config.getInitCycles();
-    }
-
-    @Override
-    public int getSamplingIntervalForInit() {
-        return config.getSamplingIntervalForInitInMs();
-    }
-
-    @Override
-    public int getCalmDownIntervalInMs() {
-        return config.getCalmDownIntervalInMs();
-    }
-
-    @Override
-    public @Nullable Path getPathToResultCsv() {
-        return config.getCsvRecording().getResultCsv() != null ? Paths.get(
-            config.getCsvRecording().getResultCsv()) : null;
-    }
-
-    @Override
-    public @Nullable Path getPathToMeasurementCsv() {
-        return config.getCsvRecording().getMeasurementCsv() != null ? Paths.get(
-            config.getCsvRecording().getMeasurementCsv()) : null;
-    }
-
-    @Override
-    public @NotNull BigDecimal getPercentageOfSamplesAtBeginningToDiscard() {
-        return config.getPercentageOfSamplesAtBeginningToDiscard();
     }
 }
