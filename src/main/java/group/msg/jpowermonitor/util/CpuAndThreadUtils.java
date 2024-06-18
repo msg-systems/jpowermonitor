@@ -20,6 +20,7 @@ import static group.msg.jpowermonitor.util.Constants.ONE_HUNDRED;
  */
 public class CpuAndThreadUtils {
 
+    private static final double EST_CPU_USAGE_FALLBACK = 0.5;
     private static ThreadMXBean threadMXBean;
 
     @NotNull
@@ -43,7 +44,7 @@ public class CpuAndThreadUtils {
     public static long getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(ThreadMXBean threadMxBean, Map<String, Long> cpuTimePerApplicationThread, Set<Thread> applicationThreads) {
         long totalApplicationCpuTime = 0;
         for (Thread t : applicationThreads) {
-            long applicationThreadCpuTime = threadMxBean.getThreadCpuTime(t.getId());
+            long applicationThreadCpuTime = threadMxBean.getThreadCpuTime(t.threadId());
 
             // If thread already monitored, then calculate CPU time since last time
             if (cpuTimePerApplicationThread.containsKey(t.getName())) {
@@ -66,5 +67,45 @@ public class CpuAndThreadUtils {
             powerPerApplicationThread.put(entry.getKey(), applicationThreadPower);
         }
         return powerPerApplicationThread;
+    }
+
+    @NotNull
+    public static double getCpuUsage() {
+        double cpuUsage = EST_CPU_USAGE_FALLBACK; // Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours
+        long[] ids = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getAllThreadIds();
+        
+        // Startzeit CPU-Zeit
+        long startTime = System.nanoTime();
+        long startCpuTime = 0;
+        for (long id : ids) {
+            startCpuTime += CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getThreadCpuTime(id);
+        }
+        
+        // Wartezeit
+        try {
+            // 100 Millisekunden
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } 
+        
+        // Endzeit CPU-Zeit
+        long endTime = System.nanoTime();
+        long endCpuTime = 0;
+        for (long id : ids) {
+            endCpuTime += CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getThreadCpuTime(id);
+        }
+        
+        // Berechnung der CPU-Auslastung
+        long elapsedCpu = endCpuTime - startCpuTime;
+        long elapsedTime = endTime - startTime;
+        cpuUsage = (double) elapsedCpu / elapsedTime;
+
+        if (cpuUsage <= 0) { // Fallback to 0.5 if CPU usage is negative or zero
+            cpuUsage = EST_CPU_USAGE_FALLBACK;
+        } else if (cpuUsage > 1) { // Fallback to 1 if CPU usage is greater than 1 - more than 100% is not possible ;)
+            cpuUsage = 1;
+        }
+        return cpuUsage;
     }
 }

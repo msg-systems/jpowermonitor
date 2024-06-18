@@ -21,13 +21,13 @@ class ResultsWriterTest {
 
     static Stream<Arguments> l10nTestConstructorValues() {
         return Stream.of(
-            arguments(new Locale("en", "US"),
+            arguments(new Locale.Builder().setLanguage("en").setRegion("US").build(),
                 "Time,Name,Sensor,Value,Unit,Baseload,Unit,Value+Baseload,Unit,Energy(Value),Unit,Energy(Value+Baseload),Unit,CO2 Value,Unit",
                 "Time,Name,Sensor,Value,Unit"),
-            arguments(new Locale("de", "DE"),
+            arguments(new Locale.Builder().setLanguage("de").setRegion("DE").build(),
                 "Uhrzeit;Name;Sensor;Wert;Einheit;Grundlast;Einheit;Wert+Grundlast;Einheit;Energie(Wert);Einheit;Energie(Wert+Grundlast);Einheit;CO2 Wert;Einheit",
                 "Uhrzeit;Name;Sensor;Wert;Einheit"),
-            arguments(new Locale("fr", "FR"),
+            arguments(new Locale.Builder().setLanguage("fr").setRegion("FR").build(),
                 "Heure,Nom,D\u00E9tecteur,Valeur,Unit\u00E9,Grundlast,Unit\u00E9,Valeur+charge de base,Unit\u00E9,Energie(valeur),Unit\u00E9,Energie(valeur+charge de base),Unit\u00E9,CO2 Valeur,Unit\u00E9",
                 "Heure,Nom,D\u00E9tecteur,Valeur,Unit\u00E9")
         );

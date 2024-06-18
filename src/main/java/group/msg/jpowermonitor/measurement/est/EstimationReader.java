@@ -1,7 +1,5 @@
 package group.msg.jpowermonitor.measurement.est;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,6 +17,7 @@ import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.config.EstimationCfg;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
+import group.msg.jpowermonitor.util.CpuAndThreadUtils;
 
 /**
  * Implementation of the Estimation (compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours) measure method.
@@ -27,18 +26,15 @@ import group.msg.jpowermonitor.dto.DataPoint;
  */
 public class EstimationReader implements MeasureMethod {
 
-    private static final double EST_CPU_LOAD_FALLBACK = 0.5;
     private static final String ESTIMATED_CPU_WATTS = "Estimated CPU Watts";
 
     private final JPowerMonitorConfig config;
     private final EstimationCfg estCfg;
-    private final OperatingSystemMXBean osBean;
 
     public EstimationReader(JPowerMonitorConfig config) {
         this.config = config;
         Objects.requireNonNull(config.getMeasurement().getEst(), "Estimation config must be set!");
         this.estCfg = config.getMeasurement().getEst();
-        osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
     }
 
     @Override
@@ -49,9 +45,9 @@ public class EstimationReader implements MeasureMethod {
     @Override
     public @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException {
         // Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours
-        final double cpuLoad = osBean != null && osBean.getSystemLoadAverage() > 0 ? osBean.getSystemLoadAverage() : EST_CPU_LOAD_FALLBACK;
-        BigDecimal value = BigDecimal.valueOf(estCfg.getCpuMinWatts() + (cpuLoad * (estCfg.getCpuMaxWatts() - estCfg.getCpuMinWatts())));
-        System.out.println("cpuLoad: " + cpuLoad + ", value: " + value + "W");
+        final double cpuUsage = CpuAndThreadUtils.getCpuUsage();
+        BigDecimal value = BigDecimal.valueOf(estCfg.getCpuMinWatts() + (cpuUsage * (estCfg.getCpuMaxWatts() - estCfg.getCpuMinWatts())));
+        //System.out.println("cpuUsage: " + cpuUsage + ", value: " + value + "W"); // DEBUG
         return new DataPoint(ESTIMATED_CPU_WATTS, value, Unit.WATT, LocalDateTime.now(), Thread.currentThread().getName());
     }
 
