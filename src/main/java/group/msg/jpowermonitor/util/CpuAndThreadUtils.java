@@ -74,34 +74,33 @@ public class CpuAndThreadUtils {
         double cpuUsage = EST_CPU_USAGE_FALLBACK; // Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours
         long[] ids = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getAllThreadIds();
         
-        // Startzeit CPU-Zeit
+        // Init measurement start time and CPU time
         long startTime = System.nanoTime();
         long startCpuTime = 0;
         for (long id : ids) {
             startCpuTime += CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getThreadCpuTime(id);
         }
         
-        // Wartezeit
+        // Wait for 100ms
         try {
-            // 100 Millisekunden
             Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } 
         
-        // Endzeit CPU-Zeit
+        // End measurement and add CPU time of all threads
         long endTime = System.nanoTime();
         long endCpuTime = 0;
         for (long id : ids) {
             endCpuTime += CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getThreadCpuTime(id);
         }
         
-        // Berechnung der CPU-Auslastung
+        // Calculate approximated CPU usage in the last 100ms
         long elapsedCpu = endCpuTime - startCpuTime;
         long elapsedTime = endTime - startTime;
         cpuUsage = (double) elapsedCpu / elapsedTime;
 
-        if (cpuUsage <= 0) { // Fallback to 0.5 if CPU usage is negative or zero
+        if (cpuUsage <= 0) { // Fallback to 0.5 (50%) if CPU usage is negative or zero
             cpuUsage = EST_CPU_USAGE_FALLBACK;
         } else if (cpuUsage > 1) { // Fallback to 1 if CPU usage is greater than 1 - more than 100% is not possible ;)
             cpuUsage = 1;
