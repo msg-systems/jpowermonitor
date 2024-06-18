@@ -44,7 +44,7 @@ public class CpuAndThreadUtils {
     public static long getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(ThreadMXBean threadMxBean, Map<String, Long> cpuTimePerApplicationThread, Set<Thread> applicationThreads) {
         long totalApplicationCpuTime = 0;
         for (Thread t : applicationThreads) {
-            long applicationThreadCpuTime = threadMxBean.getThreadCpuTime(t.threadId());
+            long applicationThreadCpuTime = threadMxBean.getThreadCpuTime(t.getId());
 
             // If thread already monitored, then calculate CPU time since last time
             if (cpuTimePerApplicationThread.containsKey(t.getName())) {
