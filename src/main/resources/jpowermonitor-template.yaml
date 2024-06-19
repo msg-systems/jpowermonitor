@@ -43,7 +43,11 @@ measurement:
       #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
       #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
   est:
-    # Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours - defaults are the average values from AWS
+    # Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours 
+    # Defaults are the average values from AWS: 0.74 - 3.5
+    # Find the values for your VM here: https://github.com/cloud-carbon-footprint/cloud-carbon-coefficients/tree/main/data
+    #                          or here: https://github.com/re-cinq/emissions-data/tree/main/data/v2
+    # Determine AWS instance type in terminal: ´curl http://169.254.169.254/latest/meta-data/instance-type´
     cpuMinWatts: 0.74
     cpuMaxWatts: 3.5
 
