@@ -1,6 +1,5 @@
 package group.msg.jpowermonitor.util;
 
-import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.LongAdder;
@@ -101,7 +100,6 @@ public class StressCpuExample {
     /**
      * Run single endless loop CPU stress test sequentially
      * 
-     * @see EndlessLoopTest#endlessLoopCPUStressTest()
      * @param secondsToRun seconds to run
      * @param factor       factor to multiply secondsToRun
      * @param runWorkload  workload to run
@@ -116,7 +114,6 @@ public class StressCpuExample {
     /**
      * Run endless loop CPU stress test in parallel
      *
-     * @see EndlessLoopTest#parallelEndlessLoopCpuStressTest())
      * @param parallelThreads number of parallel threads
      * @param secondsToRun    seconds to run
      * @return sum of all loop counters
@@ -220,11 +217,5 @@ public class StressCpuExample {
             loopCounter++;
         }
         return loopCounter;
-    }
-
-    @Data
-    private static class CmdLineArgs {
-        private short secondsToRun;
-        private int cpuThreads;
     }
 }
