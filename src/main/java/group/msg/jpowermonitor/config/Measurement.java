@@ -7,10 +7,12 @@ import lombok.Data;
  *
  * @see CsvMeasurementCfg
  * @see LibreHardwareMonitorCfg
+ * @see EstimationCfg
  */
 @Data
 public class Measurement {
     private String method;
     private CsvMeasurementCfg csv;
     private LibreHardwareMonitorCfg lhm;
+    private EstimationCfg est;
 }

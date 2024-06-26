@@ -4,6 +4,7 @@ import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.MethodActivity;
 import group.msg.jpowermonitor.dto.Quantity;
+import group.msg.jpowermonitor.util.CpuAndThreadUtils;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 

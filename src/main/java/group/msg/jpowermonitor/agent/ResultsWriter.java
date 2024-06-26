@@ -2,6 +2,8 @@ package group.msg.jpowermonitor.agent;
 
 import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
+import group.msg.jpowermonitor.util.StressCpuExample;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
@@ -10,6 +12,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
@@ -105,6 +108,13 @@ public class ResultsWriter implements Runnable {
             , convertJouleToWattHours(powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue())
             , convertJouleToKiloWattHours(powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue())
             , convertJouleToCarbonDioxideGrams(powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue(), carbonDioxideEmissionFactor)));
+        if (StressCpuExample.isBenchmarkRun()) {
+            prioritizedLogger.accept(
+                    "Benchmark result efficiency factor (sum of all loop counters / energyConsumptionTotal): *** "
+                            + NumberFormat.getNumberInstance(Locale.GERMANY).format((long) StressCpuExample.getBenchmarkResult()
+                                    / powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue().longValue())
+                            + " *** jPMarks");
+        }
         prioritizedLogger.accept("Energy consumption per method and filtered methods written to '" + energyConsumptionPerMethodFileName + "' / '" + energyConsumptionPerFilteredMethodFileName + "'");
         prioritizedLogger.accept(SEPARATOR);
     }
