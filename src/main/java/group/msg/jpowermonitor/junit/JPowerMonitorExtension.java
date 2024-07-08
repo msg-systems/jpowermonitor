@@ -19,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +46,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     private Timer timer;
     private TimerTask timedMeasurement;
     private long timeBeforeTest;
+    private JPowerMonitorConfig config;
     private MeasureMethod measureMethod;
     private Map<String, BigDecimal> energyInIdleMode;
     private ResultsWriter resultsWriter;
@@ -54,9 +57,11 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         DefaultConfigProvider.invalidateCachedConfig();
 
         String configFile = context.getTestClass().map(c -> c.getSimpleName() + ".yaml").orElse(null);
-        JPowerMonitorConfig config = new DefaultConfigProvider().readConfig(configFile);
+        config = new DefaultConfigProvider().readConfig(configFile);
         measureMethod = MeasureMethodProvider.resolveMeasureMethod(config);
-        resultsWriter = new ResultsWriter(measureMethod.getPathToResultCsv(), measureMethod.getPathToMeasurementCsv(), config.getCarbonDioxideEmissionFactor());
+        final Path pathToResultCsv = config.getCsvRecording().getResultCsv() != null ? Paths.get(config.getCsvRecording().getResultCsv()) : null;
+        final Path pathToMeasurementCsv = config.getCsvRecording().getMeasurementCsv() != null ? Paths.get(config.getCsvRecording().getMeasurementCsv()) : null;
+        resultsWriter = new ResultsWriter(pathToResultCsv, pathToMeasurementCsv, config.getCarbonDioxideEmissionFactor());
         energyInIdleMode = measureIdleMode();
     }
 
@@ -64,8 +69,8 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     public void beforeEach(ExtensionContext context) throws Exception {
         powerMeasurements.clear();
         measureMethod.configuredSensors().forEach(k -> powerMeasurements.put(k, new ArrayList<>())); // init result map with configured keys
-        System.out.println("sleeping for " + measureMethod.getCalmDownIntervalInMs() + "ms in order to calm down");
-        TimeUnit.MILLISECONDS.sleep(measureMethod.getCalmDownIntervalInMs());
+        System.out.println("sleeping for " + config.getCalmDownIntervalInMs() + "ms in order to calm down");
+        TimeUnit.MILLISECONDS.sleep(config.getCalmDownIntervalInMs());
         timer = new Timer();
         timedMeasurement = new TimerTask() {
             @Override
@@ -74,7 +79,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
                 dataPoints.forEach(dp -> powerMeasurements.get(dp.getName()).add(dp));
             }
         };
-        timer.schedule(timedMeasurement, measureMethod.getSamplingInterval(), measureMethod.getSamplingInterval());
+        timer.schedule(timedMeasurement, config.getSamplingIntervalInMs(), config.getSamplingIntervalInMs());
         timeBeforeTest = System.nanoTime();
     }
 
@@ -90,7 +95,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         for (Map.Entry<String, List<DataPoint>> entry : powerMeasurements.entrySet()) {
             List<DataPoint> dataPoints = new ArrayList<>(entry.getValue()); // clone list in order to avoid ConcurrentModification
             // cut off the first x% measurements
-            List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size(), measureMethod.getPercentageOfSamplesAtBeginningToDiscard()), dataPoints.size());
+            List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size(), config.getPercentageOfSamplesAtBeginningToDiscard()), dataPoints.size());
             DataPoint average = calculateAvg(dataPointsToConsider);
             SensorValue sensorValue = calculateResult(timeTaken, energyInIdleMode.get(entry.getKey()), average);
             sensorValues.add(sensorValue);
@@ -180,8 +185,8 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         }
 
         long timeBeforeTest = System.nanoTime();
-        for (int i = 0; i < measureMethod.initCycles(); i++) {
-            if (sleep(measureMethod.getSamplingIntervalForInit())) {  // first sleep, then measure.
+        for (int i = 0; i < config.getInitCycles(); i++) {
+            if (sleep(config.getSamplingIntervalForInitInMs())) {  // first sleep, then measure.
                 break;
             }
             List<DataPoint> dataPoints = measureMethod.measure();
@@ -195,7 +200,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     private void fillDefaultMeasurements(Map<String, BigDecimal> defaults, Map<String, List<DataPoint>> measurements) {
         for (Map.Entry<String, List<DataPoint>> entry : measurements.entrySet()) {
             List<DataPoint> dataPoints = new ArrayList<>(entry.getValue()); // clone list in order to avoid ConcurrentModification
-            List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size(), measureMethod.getPercentageOfSamplesAtBeginningToDiscard()), dataPoints.size());  // cut off the first x% measurements
+            List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size(), config.getPercentageOfSamplesAtBeginningToDiscard()), dataPoints.size());  // cut off the first x% measurements
             DataPoint average = calculateAvg(dataPointsToConsider);
             resultsWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
             BigDecimal prev = defaults.putIfAbsent(entry.getKey(), average.isPowerSensor() ? average.getValue() : BigDecimal.ZERO); // add zero, if not a power sensor!
