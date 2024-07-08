@@ -8,7 +8,6 @@ import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.config.LibreHardwareMonitorCfg;
 import group.msg.jpowermonitor.config.PathElement;
 import group.msg.jpowermonitor.dto.DataPoint;
-import group.msg.jpowermonitor.measurement.AbstractCommonReader;
 import lombok.NonNull;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -29,14 +28,14 @@ import java.util.stream.Collectors;
  * Implementation of the Libre Hardware Monitor measure method.
  *
  * @see MeasureMethod
- * @see AbstractCommonReader
  */
-public class LibreHardwareMonitorReader extends AbstractCommonReader {
+public class LibreHardwareMonitorReader implements MeasureMethod {
     HttpClient client;
+    private final JPowerMonitorConfig config;
     LibreHardwareMonitorCfg lhmConfig;
 
     public LibreHardwareMonitorReader(JPowerMonitorConfig config) {
-        super(config);
+        this.config = config;
         Objects.requireNonNull(config.getMeasurement().getLhm(), "Libre Hardware Monitor config must be set!");
         this.lhmConfig = config.getMeasurement().getLhm();
         this.client = HttpClientBuilder.create().build();

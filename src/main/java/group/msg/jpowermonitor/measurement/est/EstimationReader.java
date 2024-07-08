@@ -13,23 +13,20 @@ import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.config.EstimationCfg;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
-import group.msg.jpowermonitor.measurement.AbstractCommonReader;
 import group.msg.jpowermonitor.util.CpuAndThreadUtils;
 
 /**
  * Implementation of the Estimation (compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours) measure method.
  *
  * @see MeasureMethod
- * @see AbstractCommonReader
  */
-public class EstimationReader extends AbstractCommonReader {
+public class EstimationReader implements MeasureMethod {
 
     private static final String ESTIMATED_CPU_WATTS = "Estimated CPU Watts";
 
     private final EstimationCfg estCfg;
 
     public EstimationReader(JPowerMonitorConfig config) {
-        super(config);
         Objects.requireNonNull(config.getMeasurement().getEst(), "Estimation config must be set!");
         this.estCfg = config.getMeasurement().getEst();
     }

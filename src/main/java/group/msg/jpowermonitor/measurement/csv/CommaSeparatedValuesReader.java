@@ -7,7 +7,6 @@ import group.msg.jpowermonitor.config.CsvColumn;
 import group.msg.jpowermonitor.config.CsvMeasurementCfg;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
-import group.msg.jpowermonitor.measurement.AbstractCommonReader;
 
 import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
@@ -35,12 +34,13 @@ import java.util.stream.Stream;
  * Implementation of the Comma separated value measure method. E.g. for HWiNFO or other CSV generating tools.
  *
  * @see MeasureMethod
- * @see AbstractCommonReader
  */
-public class CommaSeparatedValuesReader extends AbstractCommonReader {
+public class CommaSeparatedValuesReader implements MeasureMethod {
+
+    private final JPowerMonitorConfig config;
 
     public CommaSeparatedValuesReader(JPowerMonitorConfig config) {
-        super(config);
+        this.config = config;
         initCsvConfig(config);
     }
 
