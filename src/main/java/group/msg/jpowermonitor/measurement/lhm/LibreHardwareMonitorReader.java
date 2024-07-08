@@ -30,12 +30,10 @@ import java.util.stream.Collectors;
  * @see MeasureMethod
  */
 public class LibreHardwareMonitorReader implements MeasureMethod {
-    HttpClient client;
-    private final JPowerMonitorConfig config;
+    HttpClient client;;
     LibreHardwareMonitorCfg lhmConfig;
 
     public LibreHardwareMonitorReader(JPowerMonitorConfig config) {
-        this.config = config;
         Objects.requireNonNull(config.getMeasurement().getLhm(), "Libre Hardware Monitor config must be set!");
         this.lhmConfig = config.getMeasurement().getLhm();
         this.client = HttpClientBuilder.create().build();
