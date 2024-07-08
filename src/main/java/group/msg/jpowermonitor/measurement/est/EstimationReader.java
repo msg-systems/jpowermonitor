@@ -32,11 +32,6 @@ public class EstimationReader implements MeasureMethod {
     }
 
     @Override
-    public @NotNull List<DataPoint> measure() throws JPowerMonitorException {
-        return List.of(measureFirstConfiguredPath());
-    }
-
-    @Override
     public @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException {
         // Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours
         final double cpuUsage = CpuAndThreadUtils.getCpuUsage();

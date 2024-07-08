@@ -17,7 +17,9 @@ public interface MeasureMethod {
      * @return all data point for the configured paths.
      * @throws JPowerMonitorException if measurement tool is not available.
      */
-    @NotNull List<DataPoint> measure() throws JPowerMonitorException;
+    @NotNull default List<DataPoint> measure() throws JPowerMonitorException {
+        return List.of(measureFirstConfiguredPath());
+    }
 
     /**
      * Measure only the first configured path.

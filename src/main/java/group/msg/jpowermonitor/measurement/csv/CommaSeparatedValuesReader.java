@@ -98,11 +98,6 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
     }
 
     @Override
-    public @NotNull List<DataPoint> measure() throws JPowerMonitorException {
-        return List.of(measureFirstConfiguredPath());
-    }
-
-    @Override
     public @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException {
         Path csvInputFile = config.getMeasurement().getCsv().getInputFileAsPath();
         try {
