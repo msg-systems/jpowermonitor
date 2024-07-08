@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * @see MeasureMethod
  */
 public class LibreHardwareMonitorReader implements MeasureMethod {
-    HttpClient client;;
+    HttpClient client;
     LibreHardwareMonitorCfg lhmConfig;
 
     public LibreHardwareMonitorReader(JPowerMonitorConfig config) {
