@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
 import static group.msg.jpowermonitor.util.Constants.ONE_HUNDRED;
@@ -19,20 +20,18 @@ import static group.msg.jpowermonitor.util.Constants.ONE_HUNDRED;
  * @author deinerj
  */
 public class CpuAndThreadUtils {
-
     private static final double EST_CPU_USAGE_FALLBACK = 0.5;
     private static ThreadMXBean threadMXBean;
 
     @NotNull
     public static ThreadMXBean initializeAndGetThreadMxBeanOrFailAndQuitApplication() {
-        if (threadMXBean == null)  {
+        if (threadMXBean == null) {
             threadMXBean = ManagementFactory.getThreadMXBean();
             // Check if CPU Time measurement is supported by the JVM. Quit otherwise
             if (!threadMXBean.isThreadCpuTimeSupported()) {
                 System.err.println("Thread CPU Time is not supported in this JVM, unable to measure energy consumption.");
                 System.exit(1);
             }
-    
             // Enable CPU Time measurement if it is disabled
             if (!threadMXBean.isThreadCpuTimeEnabled()) {
                 threadMXBean.setThreadCpuTimeEnabled(true);
@@ -42,7 +41,7 @@ public class CpuAndThreadUtils {
     }
 
     public static long getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(ThreadMXBean threadMxBean, Map<String, Long> cpuTimePerApplicationThread, Set<Thread> applicationThreads) {
-        long totalApplicationCpuTime = 0;
+        long totalApplicationCpuTime = 0L;
         for (Thread t : applicationThreads) {
             long applicationThreadCpuTime = threadMxBean.getThreadCpuTime(t.getId());
 
@@ -69,41 +68,40 @@ public class CpuAndThreadUtils {
         return powerPerApplicationThread;
     }
 
-    @NotNull
     public static double getCpuUsage() {
-        double cpuUsage = EST_CPU_USAGE_FALLBACK; // Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours
+        // see https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours
         long[] ids = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getAllThreadIds();
-        
+
         // Init measurement start time and CPU time
         long startTime = System.nanoTime();
-        long startCpuTime = 0;
+        long startCpuTime = 0L;
         for (long id : ids) {
             startCpuTime += CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getThreadCpuTime(id);
         }
-        
+
         // Wait for 100ms
         try {
-            Thread.sleep(100);
+            TimeUnit.MILLISECONDS.sleep(100);
         } catch (InterruptedException e) {
-            e.printStackTrace();
-        } 
-        
+            System.err.println("Sleep was interrupted, ignoring");
+        }
+
         // End measurement and add CPU time of all threads
         long endTime = System.nanoTime();
-        long endCpuTime = 0;
+        long endCpuTime = 0L;
         for (long id : ids) {
             endCpuTime += CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getThreadCpuTime(id);
         }
-        
+
         // Calculate approximated CPU usage in the last 100ms
         long elapsedCpu = endCpuTime - startCpuTime;
         long elapsedTime = endTime - startTime;
-        cpuUsage = (double) elapsedCpu / elapsedTime;
+        double cpuUsage = (double) elapsedCpu / elapsedTime;
 
         if (cpuUsage <= 0) { // Fallback to 0.5 (50%) if CPU usage is negative or zero
-            cpuUsage = EST_CPU_USAGE_FALLBACK;
+            return EST_CPU_USAGE_FALLBACK;
         } else if (cpuUsage > 1) { // Fallback to 1 if CPU usage is greater than 1 - more than 100% is not possible ;)
-            cpuUsage = 1;
+            return 1;
         }
         return cpuUsage;
     }
