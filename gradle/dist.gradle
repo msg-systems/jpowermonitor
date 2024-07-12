@@ -8,18 +8,18 @@ javadoc {
 tasks.register('copyJavadocToDist', Copy) {
     includeEmptyDirs = false
     from javadoc
-    into "${buildDir}/${project.name}/doc"
+    into "${layout.buildDirectory.get()}/${project.name}/doc"
     dependsOn javadoc
 }
 tasks.register('copyDocAndConfigFilesToDist', Copy) {
     includeEmptyDirs = false
     from('src/main/resources') { include '*-template.yaml' }
     from('.') { include 'README.md' }
-    into "${buildDir}/${project.name}"
+    into "${layout.buildDirectory.get()}/${project.name}"
 }
 tasks.register('copySbomToDist', Copy) {
     from('build/reports') { include 'bom.*' }
-    into "${buildDir}/${project.name}/sbom"
+    into "${layout.buildDirectory.get()}/${project.name}/sbom"
     dependsOn cyclonedxBom
 }
 tasks.register('copyLibsToDist', Copy) {
@@ -28,7 +28,7 @@ tasks.register('copyLibsToDist', Copy) {
     include '**/*.jar'
     exclude "${project.name}*.jar"
     from sourceSets.main.runtimeClasspath
-    into "${buildDir}/${project.name}/lib"
+    into "${layout.buildDirectory.get()}/${project.name}/lib"
     dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist, copySbomToDist
 }
 tasks.register('copyMainLibToDist', Copy) {
@@ -36,16 +36,16 @@ tasks.register('copyMainLibToDist', Copy) {
     from jar
     include "${project.name}*.jar"
     from sourceSets.main.runtimeClasspath
-    into "${buildDir}/${project.name}"
+    into "${layout.buildDirectory.get()}/${project.name}"
     dependsOn jar, copyDocAndConfigFilesToDist, copyJavadocToDist, copySbomToDist
 }
 tasks.register('dist', Zip) {
     group = 'build'
     description("Creates the ${project.name}.zip with all jars")
-    from("${buildDir}") {
+    from("${layout.buildDirectory.get()}") {
         include "${project.name}/**"
     }
-    archiveFileName = "${buildDir}/${project.name}.zip"
+    archiveFileName = "${layout.buildDirectory.get()}/${project.name}.zip"
     dependsOn copyLibsToDist, copyMainLibToDist, copyDocAndConfigFilesToDist, copyJavadocToDist, copySbomToDist
 }
 

@@ -3,7 +3,6 @@ package group.msg.jpowermonitor.config;
 import group.msg.jpowermonitor.JPowerMonitorException;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -22,8 +21,8 @@ public class JPowerMonitorConfig {
     private Integer samplingIntervalForInitInMs;
     private Integer initCycles;
     private Integer calmDownIntervalInMs;
-    private BigDecimal percentageOfSamplesAtBeginningToDiscard;
-    private BigDecimal carbonDioxideEmissionFactor;
+    private Double percentageOfSamplesAtBeginningToDiscard;
+    private Double carbonDioxideEmissionFactor;
     private Measurement measurement;
     private CsvRecording csvRecording;
     private JavaAgent javaAgent;
@@ -54,8 +53,8 @@ public class JPowerMonitorConfig {
         setDefaultIfNotSet(samplingIntervalForInitInMs, this::setSamplingIntervalForInitInMs, 1000);
         setDefaultIfNotSet(initCycles, this::setInitCycles, 10);
         setDefaultIfNotSet(calmDownIntervalInMs, this::setCalmDownIntervalInMs, 1000);
-        setDefaultIfNotSet(percentageOfSamplesAtBeginningToDiscard, this::setPercentageOfSamplesAtBeginningToDiscard, new BigDecimal("15"));
-        setDefaultIfNotSet(carbonDioxideEmissionFactor, this::setCarbonDioxideEmissionFactor, new BigDecimal("485"));
+        setDefaultIfNotSet(percentageOfSamplesAtBeginningToDiscard, this::setPercentageOfSamplesAtBeginningToDiscard, 15.0);
+        setDefaultIfNotSet(carbonDioxideEmissionFactor, this::setCarbonDioxideEmissionFactor, 485.0);
         setDefaultIfNotSet(javaAgent, this::setJavaAgent, new JavaAgent());
         setDefaultIfNotSet(javaAgent.getPackageFilter(), javaAgent::setPackageFilter, Collections.emptySet());
     }

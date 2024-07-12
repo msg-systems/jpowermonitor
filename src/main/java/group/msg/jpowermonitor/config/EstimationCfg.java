@@ -7,6 +7,6 @@ import lombok.Data;
  */
 @Data
 public class EstimationCfg {
-    private float cpuMinWatts;
-    private float cpuMaxWatts;
+    private Double cpuMinWatts;
+    private Double cpuMaxWatts;
 }

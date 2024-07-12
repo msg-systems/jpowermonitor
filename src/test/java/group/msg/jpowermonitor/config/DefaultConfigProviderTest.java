@@ -3,7 +3,6 @@ package group.msg.jpowermonitor.config;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -26,9 +25,9 @@ class DefaultConfigProviderTest {
         expected.setInitCycles(7);
         expected.setSamplingIntervalForInitInMs(8);
         expected.setCalmDownIntervalInMs(9);
-        expected.setPercentageOfSamplesAtBeginningToDiscard(new BigDecimal("3"));
+        expected.setPercentageOfSamplesAtBeginningToDiscard(3.0);
         expected.setSamplingIntervalInMs(4);
-        expected.setCarbonDioxideEmissionFactor(new BigDecimal("777"));
+        expected.setCarbonDioxideEmissionFactor(777.0);
 
         Measurement measurement = new Measurement();
         measurement.setMethod("lhm");

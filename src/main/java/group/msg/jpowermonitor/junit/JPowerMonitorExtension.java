@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -33,7 +32,6 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
 
 /**
  * JUnit Extension for measuring energy.
@@ -48,7 +46,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     private long timeBeforeTest;
     private JPowerMonitorConfig config;
     private MeasureMethod measureMethod;
-    private Map<String, BigDecimal> energyInIdleMode;
+    private Map<String, Double> energyInIdleMode;
     private ResultsWriter resultsWriter;
 
     @Override
@@ -146,14 +144,12 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         return sensorValueFields;
     }
 
-    private SensorValue calculateResult(long timeTaken, BigDecimal powerInIdleMode, DataPoint dp) {
-        BigDecimal valueWithoutIdlePower = dp.getValue().subtract(powerInIdleMode);
-        BigDecimal valuePerHour = dp.isPowerSensor() ?
-            valueWithoutIdlePower.multiply(HumanReadableTime.nanosToHours(timeTaken), MATH_CONTEXT).setScale(5, MATH_CONTEXT.getRoundingMode())
-            : BigDecimal.ZERO;
-        BigDecimal valueWithIdlePowerPerHour = dp.isPowerSensor() ?
-            dp.getValue().multiply(HumanReadableTime.nanosToHours(timeTaken), MATH_CONTEXT).setScale(5, MATH_CONTEXT.getRoundingMode())
-            : BigDecimal.ZERO;
+    private SensorValue calculateResult(long timeTaken, double powerInIdleMode, DataPoint dp) {
+        double valueWithoutIdlePower = dp.getValue() - powerInIdleMode;
+        double valuePerHour = dp.isPowerSensor() ?
+            valueWithoutIdlePower * roundScale5(HumanReadableTime.nanosToHours(timeTaken))
+            : 0.0;
+        double valueWithIdlePowerPerHour = dp.isPowerSensor() ? dp.getValue() * roundScale5(HumanReadableTime.nanosToHours(timeTaken)) : 0.0;
         return SensorValue.builder().name(dp.getName())
             .value(valueWithoutIdlePower)
             .unit(dp.getUnit())
@@ -165,8 +161,8 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             .build();
     }
 
-    private Map<String, BigDecimal> measureIdleMode() {
-        Map<String, BigDecimal> defaults = measureMethod.defaultEnergyInIdleModeForMeasuredSensors();
+    private Map<String, Double> measureIdleMode() {
+        Map<String, Double> defaults = measureMethod.defaultEnergyInIdleModeForMeasuredSensors();
         defaults.forEach((k, v) -> System.out.printf("(configured) energy consumption in idle mode for %s is %s%n", k, v));
         if (defaults.size() == measureMethod.configuredSensors().size()) {
             return defaults; // then we are done
@@ -180,7 +176,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         Set<String> defaultsNames = defaults.keySet();
         if (powerSensorNames.equals(defaultsNames)) {
             Set<String> nonPowerSensorNames = dataPointsSample.stream().filter(x -> !x.isPowerSensor()).map(DataPoint::getName).collect(Collectors.toSet());
-            nonPowerSensorNames.forEach(x -> defaults.putIfAbsent(x, BigDecimal.ZERO)); // add zero, if not a power sensor otherwise the value is not initialized in the map!
+            nonPowerSensorNames.forEach(x -> defaults.putIfAbsent(x, 0.0)); // add zero, if not a power sensor otherwise the value is not initialized in the map!
             return defaults; // then we are done
         }
 
@@ -197,13 +193,13 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         return defaults;
     }
 
-    private void fillDefaultMeasurements(Map<String, BigDecimal> defaults, Map<String, List<DataPoint>> measurements) {
+    private void fillDefaultMeasurements(Map<String, Double> defaults, Map<String, List<DataPoint>> measurements) {
         for (Map.Entry<String, List<DataPoint>> entry : measurements.entrySet()) {
             List<DataPoint> dataPoints = new ArrayList<>(entry.getValue()); // clone list in order to avoid ConcurrentModification
             List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size(), config.getPercentageOfSamplesAtBeginningToDiscard()), dataPoints.size());  // cut off the first x% measurements
             DataPoint average = calculateAvg(dataPointsToConsider);
             resultsWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
-            BigDecimal prev = defaults.putIfAbsent(entry.getKey(), average.isPowerSensor() ? average.getValue() : BigDecimal.ZERO); // add zero, if not a power sensor!
+            Double prev = defaults.putIfAbsent(entry.getKey(), average.isPowerSensor() ? average.getValue() : 0.0); // add zero, if not a power sensor!
             if (prev == null) { // then the key was not present in the map => log entry.
                 System.out.printf("(measured) %s in idle mode for %s is %s%n", average.isPowerSensor() ? "energy consumption" : "sensor value", entry.getKey(), average.getValue());
             }
@@ -222,15 +218,11 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
 
     private DataPoint calculateAvg(@NotNull List<DataPoint> dataPoints) {
         if (dataPoints.isEmpty()) {
-            return new DataPoint("No Datapoints for Average", BigDecimal.ZERO, Unit.NONE, LocalDateTime.now(), null);
+            return new DataPoint("No Datapoints for Average", 0.0, Unit.NONE, LocalDateTime.now(), null);
         }
         DataPoint reference = dataPoints.get(0);
-        BigDecimal avg = dataPoints.stream()
-            .map(DataPoint::getValue)
-            .reduce(BigDecimal.ZERO, BigDecimal::add)
-            .divide(new BigDecimal(dataPoints.size()), MATH_CONTEXT)
-            .setScale(2, MATH_CONTEXT.getRoundingMode());
-        return new DataPoint(reference.getName(), avg, reference.getUnit(), LocalDateTime.now(), reference.getThreadName());
+        double avg = dataPoints.stream().mapToDouble(DataPoint::getValue).average().orElse(0.0);
+        return new DataPoint(reference.getName(), roundScale2(avg), reference.getUnit(), LocalDateTime.now(), reference.getThreadName());
     }
 
     private String getTestName(ExtensionContext context) {
@@ -246,13 +238,24 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
 
     /**
      * Calculates the first x percent of an integer value.
-     * @param baseSize the base size
+     *
+     * @param baseSize   the base size
      * @param percentage the percent value to be used. For negative percentages return 0.
      * @return the first percentage % of size.
      */
-    int firstXPercent(int baseSize, BigDecimal percentage) {
-        BigDecimal positivePercentage = percentage.max(BigDecimal.ZERO);
-        BigDecimal xPercent = new BigDecimal(String.valueOf(baseSize)).multiply(positivePercentage, MATH_CONTEXT).divide(Constants.ONE_HUNDRED, MATH_CONTEXT);
-        return xPercent.setScale(0, MATH_CONTEXT.getRoundingMode()).intValue();
+    int firstXPercent(int baseSize, double percentage) {
+        double positivePercentage = Math.max(0.0, percentage);
+        double xPercent = baseSize * positivePercentage / Constants.ONE_HUNDRED;
+        return (int) xPercent;
     }
+
+    double roundScale2(double toBeRounded) {
+        return (int) (toBeRounded * 100 + 0.5) / 100.0;
+    }
+
+    double roundScale5(double toBeRounded) {
+        return (int) (toBeRounded * 100000 + 0.5) / 100000.0;
+    }
+
+
 }

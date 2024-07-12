@@ -9,12 +9,12 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ThreadMXBean;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static group.msg.jpowermonitor.agent.MeasurePower.getCurrentCpuPowerInWatts;
-import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
 import static group.msg.jpowermonitor.util.Constants.ONE_THOUSAND;
 
 /**
@@ -38,12 +37,12 @@ public class PowerStatistics extends TimerTask {
      */
     @Getter
     private final AtomicReference<DataPoint> energyConsumptionTotalInJoule =
-        new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", BigDecimal.ZERO, Unit.JOULE, LocalDateTime.now(), null));
+        new AtomicReference<>(new DataPoint("energyConsumptionTotalInJoule", 0.0, Unit.JOULE, LocalDateTime.now(), null));
     private final Map<String, Long> threadsCpuTime = new HashMap<>();
     private final Map<String, DataPoint> energyConsumptionPerMethod = new ConcurrentHashMap<>();
     private final long measurementInterval;
     private final long gatherStatisticsInterval;
-    private final BigDecimal activityToEnergyRatio;
+    private final double activityToEnergyRatio;
     /**
      * Process id.
      */
@@ -55,9 +54,8 @@ public class PowerStatistics extends TimerTask {
     public PowerStatistics(long measurementInterval, long gatherStatisticsInterval, long pid, ThreadMXBean threadMXBean, Set<String> packageFilter) {
         this.measurementInterval = measurementInterval;
         this.gatherStatisticsInterval = gatherStatisticsInterval;
-        this.activityToEnergyRatio = measurementInterval > 0 ?
-            new BigDecimal(this.gatherStatisticsInterval).divide(new BigDecimal(this.measurementInterval), MATH_CONTEXT) :
-            BigDecimal.ZERO;
+        // cast gatherStatisticsInterval to double in order to get double values.
+        this.activityToEnergyRatio = measurementInterval > 0 ? (double) this.gatherStatisticsInterval / this.measurementInterval : 0.0;
         this.pid = pid;
         this.threadMXBean = threadMXBean;
         PowerStatistics.packageFilter = packageFilter;
@@ -74,25 +72,24 @@ public class PowerStatistics extends TimerTask {
         while (duration < measurementInterval) {
             gatherMethodActivityPerThread(methodActivityPerThread, threads);
             duration += gatherStatisticsInterval;
-            // Sleep for statisticsInterval, e. g. 10 ms
+            // Sleep for statisticsInterval, e.g. 10 ms
             try {
                 TimeUnit.MILLISECONDS.sleep(gatherStatisticsInterval);
             } catch (InterruptedException ex) {
                 System.err.println(ex.getLocalizedMessage());
-                ex.printStackTrace();
             }
         }
 
         // Adds current power to total energy consumption of application
         // It's fine to treat power and energy as equal here because power is measured each second (1 joule = 1 watt / second)
-        //TODO proper conversion
+        // TODO proper conversion
         DataPoint currentPower = getCurrentCpuPowerInWatts();
         DataPoint currentEnergy = cloneDataPointWithNewUnit(currentPower, Unit.JOULE);
         energyConsumptionTotalInJoule.getAndAccumulate(currentEnergy, this::addDataPoint);
 
         // CPU time for each thread
         long totalApplicationCpuTime = CpuAndThreadUtils.getTotalApplicationCpuTimeAndCalculateCpuTimePerApplicationThread(threadMXBean, threadsCpuTime, threads);
-        Map<String, BigDecimal> powerPerThread = CpuAndThreadUtils.calculatePowerPerApplicationThread(threadsCpuTime, currentPower, totalApplicationCpuTime);
+        Map<String, Double> powerPerThread = CpuAndThreadUtils.calculatePowerPerApplicationThread(threadsCpuTime, currentPower, totalApplicationCpuTime);
 
         // Now we have power for each thread, and stats for methods in each thread
         // We allocated power to each method based on activity
@@ -141,18 +138,14 @@ public class PowerStatistics extends TimerTask {
             .anyMatch(method::startsWith);
     }
 
-    private void allocateEnergyUsageToActivity(Map<String, Set<MethodActivity>> methodActivityPerThread, Map<String, BigDecimal> powerPerApplicationThread) {
+    private void allocateEnergyUsageToActivity(Map<String, Set<MethodActivity>> methodActivityPerThread, Map<String, Double> powerPerApplicationThread) {
         for (Map.Entry<String, Set<MethodActivity>> entry : methodActivityPerThread.entrySet()) {
             String threadName = entry.getKey();
 
             for (MethodActivity activity : entry.getValue()) {
-                Quantity methodPower = Quantity.of(powerPerApplicationThread.get(threadName).multiply(activityToEnergyRatio, MATH_CONTEXT), Unit.WATT);
-                Quantity methodEnergy = Quantity.of(
-                    methodPower.getValue().multiply(BigDecimal.valueOf(measurementInterval), MATH_CONTEXT).divide(ONE_THOUSAND, MATH_CONTEXT),
-                    Unit.JOULE
-                );
-
-                if (methodEnergy.getValue().signum() > 0) {
+                Quantity methodPower = Quantity.of(powerPerApplicationThread.get(threadName) * activityToEnergyRatio, Unit.WATT);
+                Quantity methodEnergy = Quantity.of(methodPower.getValue() * measurementInterval / ONE_THOUSAND, Unit.JOULE);
+                if (methodEnergy.getValue() > 0) {
                     activity.setRepresentedQuantity(methodEnergy);
                     appendEnergyUsage(activity);
                     activity.setRepresentedQuantity(methodPower);
@@ -174,11 +167,13 @@ public class PowerStatistics extends TimerTask {
     }
 
     private void writePowerMeasurementsToCsvFiles(Map<String, Set<MethodActivity>> methodActivityPerThread) {
-        new ResultsWriter(this, false, BigDecimal.ZERO).createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(
-            methodActivityPerThread.values().stream()
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList())
-        );
+        List<Activity> activities = methodActivityPerThread
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+        new ResultsWriter(this, false, 0.0)
+            .createPowerConsumptionPerMethodCsvAndWriteToFiles(activities);
     }
 
     public Map<String, DataPoint> getEnergyConsumptionPerMethod(boolean asFiltered) {
@@ -263,8 +258,9 @@ public class PowerStatistics extends TimerTask {
             throw new IllegalArgumentException("dataPoints must contain at least two elements!");
         }
         DataPoint reference = dataPoints[0];
-        AtomicReference<BigDecimal> sum = new AtomicReference<>(BigDecimal.ZERO);
-        Arrays.stream(dataPoints).filter(dp -> areDataPointsAddable(reference, dp)).forEach(dp -> sum.getAndAccumulate(dp.getValue(), BigDecimal::add));
+        AtomicReference<Double> sum = new AtomicReference<>(0.0);
+        Arrays.stream(dataPoints).filter(dp -> areDataPointsAddable(reference, dp))
+            .forEach(dp -> sum.getAndAccumulate(dp.getValue(), Double::sum));
         return new DataPoint(reference.getName(), sum.get(), reference.getUnit(), LocalDateTime.now(), reference.getThreadName());
     }
 

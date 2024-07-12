@@ -3,13 +3,11 @@ package group.msg.jpowermonitor.agent;
 import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.util.StressCpuExample;
-
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -46,7 +44,7 @@ public class ResultsWriter implements Runnable {
 
     private final PowerStatistics powerStatistics;
     private final boolean doWriteStatistics;
-    private final BigDecimal carbonDioxideEmissionFactor;
+    private final double carbonDioxideEmissionFactor;
     private String energyConsumptionPerMethodFileName;
     private String energyConsumptionPerFilteredMethodFileName;
     private String powerConsumptionPerMethodFileName;
@@ -59,7 +57,7 @@ public class ResultsWriter implements Runnable {
      * @param doWriteStatistics           set 'true' if this is shutdown hook - logs some statistics
      * @param carbonDioxideEmissionFactor conversion factor to calculate CO2 usage from energy usage
      */
-    public ResultsWriter(PowerStatistics powerStatistics, boolean doWriteStatistics, BigDecimal carbonDioxideEmissionFactor) {
+    public ResultsWriter(PowerStatistics powerStatistics, boolean doWriteStatistics, double carbonDioxideEmissionFactor) {
         this.powerStatistics = powerStatistics;
         this.doWriteStatistics = doWriteStatistics;
         this.carbonDioxideEmissionFactor = carbonDioxideEmissionFactor;
@@ -84,8 +82,8 @@ public class ResultsWriter implements Runnable {
     }
 
     private void writeEnergyConsumptionToCsv() {
-        createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(powerStatistics.getEnergyConsumptionPerMethod(false), energyConsumptionPerMethodFileName);
-        createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(powerStatistics.getEnergyConsumptionPerMethod(true), energyConsumptionPerFilteredMethodFileName);
+        createPowerConsumptionPerMethodCsvAndWriteToFiles(powerStatistics.getEnergyConsumptionPerMethod(false), energyConsumptionPerMethodFileName);
+        createPowerConsumptionPerMethodCsvAndWriteToFiles(powerStatistics.getEnergyConsumptionPerMethod(true), energyConsumptionPerFilteredMethodFileName);
     }
 
     private void logStatistics() {
@@ -110,21 +108,20 @@ public class ResultsWriter implements Runnable {
             , convertJouleToCarbonDioxideGrams(powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue(), carbonDioxideEmissionFactor)));
         if (StressCpuExample.isBenchmarkRun()) {
             prioritizedLogger.accept(
-                    "Benchmark result efficiency factor (sum of all loop counters / energyConsumptionTotal): *** "
-                            + NumberFormat.getNumberInstance(Locale.GERMANY).format((long) StressCpuExample.getBenchmarkResult()
-                                    / powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue().longValue())
-                            + " *** jPMarks");
+                "Benchmark result efficiency factor (sum of all loop counters / energyConsumptionTotal): *** "
+                + NumberFormat.getNumberInstance(Locale.GERMANY)
+                    .format(StressCpuExample.getBenchmarkResult() / powerStatistics.getEnergyConsumptionTotalInJoule().get().getValue().longValue())
+                + " *** jPMarks");
         }
         prioritizedLogger.accept("Energy consumption per method and filtered methods written to '" + energyConsumptionPerMethodFileName + "' / '" + energyConsumptionPerFilteredMethodFileName + "'");
         prioritizedLogger.accept(SEPARATOR);
     }
 
-
-    public void createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(Map<String, DataPoint> measurements, String fileName) {
+    public void createPowerConsumptionPerMethodCsvAndWriteToFiles(Map<String, DataPoint> measurements, String fileName) {
         writeToFile(createCsv(measurements), fileName);
     }
 
-    public void createUnfilteredAndFilteredPowerConsumptionPerMethodCsvAndWriteToFiles(Collection<Activity> measurements) {
+    public void createPowerConsumptionPerMethodCsvAndWriteToFiles(Collection<Activity> measurements) {
         writeToFile(createCsv(powerStatistics.aggregateActivityToDataPoints(measurements, false)), powerConsumptionPerMethodFileName, true);
         writeToFile(createCsv(powerStatistics.aggregateActivityToDataPoints(measurements, true)), powerConsumptionPerFilteredMethodFileName, true);
     }

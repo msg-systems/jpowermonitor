@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +33,7 @@ public class ResultsWriter {
 
     private static DecimalFormat DECIMAL_FORMAT;
     private final Path pathToMeasurementCsv, pathToResultCsv;
-    private final BigDecimal carbonDioxideEmissionFactor;
+    private final Double carbonDioxideEmissionFactor;
     private static ResourceBundle labels;
     private static String dataPointFormatCsv, nonPowerSensorResultFormatCsv, powerSensorResultFormatCsv, SEP;
     private static final String DATA_POINT_FORMAT = "%s;%s;%s;%s;%s%s";
@@ -54,22 +53,22 @@ public class ResultsWriter {
         return Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? format : format.replace(';', ',');
     }
 
-    public ResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv, @Nullable BigDecimal carbonDioxideEmissionFactor) {
+    public ResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv, @Nullable Double carbonDioxideEmissionFactor) {
         this.pathToResultCsv = pathToResultCsv;
         this.pathToMeasurementCsv = pathToMeasurementCsv;
         this.carbonDioxideEmissionFactor = carbonDioxideEmissionFactor;
         if (pathToResultCsv != null && !pathToResultCsv.toFile().exists()) {
             createFile(pathToResultCsv);
             String headings = labels.getString("measureTime") + SEP + labels.getString("measureName") + SEP + labels.getString("sensorName") + SEP + labels.getString("sensorValue") + SEP
-                + labels.getString("sensorValueUnit") + SEP + labels.getString("baseLoad") + SEP + labels.getString("baseLoadUnit") + SEP + labels.getString("valuePlusBaseLoad")
-                + SEP + labels.getString("valuePlusBaseLoadUnit") + SEP + labels.getString("energyOfValue") + SEP + labels.getString("energyOfValueUnit") + SEP
-                + labels.getString("energyOfValuePlusBaseLoad") + SEP + labels.getString("energyOfValuePlusBaseLoadUnit") + SEP + labels.getString("co2Value") + SEP + labels.getString("co2Unit");
+                              + labels.getString("sensorValueUnit") + SEP + labels.getString("baseLoad") + SEP + labels.getString("baseLoadUnit") + SEP + labels.getString("valuePlusBaseLoad")
+                              + SEP + labels.getString("valuePlusBaseLoadUnit") + SEP + labels.getString("energyOfValue") + SEP + labels.getString("energyOfValueUnit") + SEP
+                              + labels.getString("energyOfValuePlusBaseLoad") + SEP + labels.getString("energyOfValuePlusBaseLoadUnit") + SEP + labels.getString("co2Value") + SEP + labels.getString("co2Unit");
             appendToFile(pathToResultCsv, headings + NEW_LINE);
         }
         if (pathToMeasurementCsv != null && !pathToMeasurementCsv.toFile().exists()) {
             createFile(pathToMeasurementCsv);
             String headings = labels.getString("measureTime") + SEP + labels.getString("measureName") + SEP + labels.getString("sensorName") + SEP + labels.getString("sensorValue") + SEP
-                + labels.getString("sensorValueUnit");
+                              + labels.getString("sensorValueUnit");
             appendToFile(pathToMeasurementCsv, headings + NEW_LINE);
         }
     }
@@ -122,9 +121,9 @@ public class ResultsWriter {
     private String createCsvEntryForSensorValue(String testName, SensorValue sensorValue) {
         String csvEntry;
         if (sensorValue.isPowerSensor()) { // only power values=>
-            BigDecimal valueWithoutIdlePowerJ = convertWattHoursToJoule(sensorValue.getValueWithoutIdlePowerPerHour());
-            BigDecimal valueWithIdlePowerJ = convertWattHoursToJoule(sensorValue.getValueWithIdlePowerPerHour());
-            BigDecimal co2Equivalent = convertJouleToCarbonDioxideGrams(sensorValue.getValueWithIdlePowerPerHour(), carbonDioxideEmissionFactor);
+            double valueWithoutIdlePowerJ = convertWattHoursToJoule(sensorValue.getValueWithoutIdlePowerPerHour());
+            double valueWithIdlePowerJ = convertWattHoursToJoule(sensorValue.getValueWithIdlePowerPerHour());
+            double co2Equivalent = convertJouleToCarbonDioxideGrams(sensorValue.getValueWithIdlePowerPerHour(), carbonDioxideEmissionFactor);
             csvEntry = String.format(powerSensorResultFormatCsv,
                 DATE_TIME_FORMATTER.format(sensorValue.getExecutionTime()),
                 testName,
@@ -133,7 +132,7 @@ public class ResultsWriter {
                 sensorValue.getUnit(),
                 formatNumber(sensorValue.getPowerInIdleMode()),
                 sensorValue.getUnit(),
-                formatNumber(sensorValue.getValue().add(sensorValue.getPowerInIdleMode())),
+                formatNumber(sensorValue.getValue() + sensorValue.getPowerInIdleMode()),
                 sensorValue.getUnit(),
                 formatNumber(valueWithoutIdlePowerJ),
                 Unit.JOULE.getAbbreviation(),
@@ -150,7 +149,7 @@ public class ResultsWriter {
     }
 
     @NotNull
-    private String formatNumber(BigDecimal val) {
+    private String formatNumber(double val) {
         return DECIMAL_FORMAT.format(val);
     }
 

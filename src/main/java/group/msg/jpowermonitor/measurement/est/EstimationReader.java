@@ -1,12 +1,5 @@
 package group.msg.jpowermonitor.measurement.est;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.jetbrains.annotations.NotNull;
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.agent.Unit;
@@ -14,6 +7,12 @@ import group.msg.jpowermonitor.config.EstimationCfg;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.util.CpuAndThreadUtils;
+import org.jetbrains.annotations.NotNull;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implementation of the Estimation (see
@@ -34,7 +33,7 @@ public class EstimationReader implements MeasureMethod {
     @Override
     public @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException {
         final double cpuUsage = CpuAndThreadUtils.getCpuUsage();
-        BigDecimal value = BigDecimal.valueOf(estCfg.getCpuMinWatts() + (cpuUsage * (estCfg.getCpuMaxWatts() - estCfg.getCpuMinWatts())));
+        double value = estCfg.getCpuMinWatts() + (cpuUsage * (estCfg.getCpuMaxWatts() - estCfg.getCpuMinWatts()));
         return new DataPoint(ESTIMATED_CPU_WATTS, value, Unit.WATT, LocalDateTime.now(), Thread.currentThread().getName());
     }
 
@@ -44,7 +43,7 @@ public class EstimationReader implements MeasureMethod {
     }
 
     @Override
-    public @NotNull Map<String, BigDecimal> defaultEnergyInIdleModeForMeasuredSensors() {
-        return Map.of(ESTIMATED_CPU_WATTS, BigDecimal.valueOf(estCfg.getCpuMinWatts()));
+    public @NotNull Map<String, Double> defaultEnergyInIdleModeForMeasuredSensors() {
+        return Map.of(ESTIMATED_CPU_WATTS, estCfg.getCpuMinWatts());
     }
 }

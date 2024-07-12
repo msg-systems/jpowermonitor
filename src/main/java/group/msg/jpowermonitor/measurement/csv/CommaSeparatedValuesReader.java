@@ -7,12 +7,11 @@ import group.msg.jpowermonitor.config.CsvColumn;
 import group.msg.jpowermonitor.config.CsvMeasurementCfg;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
-
 import org.jetbrains.annotations.NotNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -112,7 +111,7 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
             if (values.length < column.getIndex() + 1) {
                 throw new JPowerMonitorException("File '" + csvInputFile.toAbsolutePath().normalize() + "' does not contain configured column " + column.getIndex());
             }
-            BigDecimal value = parseBigDecimalFromColumnConfig(csvInputFile, values[column.getIndex()]);
+            Double value = parseDoubleFromColumnConfig(csvInputFile, values[column.getIndex()]);
             return new DataPoint(column.getName(), value, Unit.WATT, LocalDateTime.now(), null);
         } catch (IOException ex) {
             throw new JPowerMonitorException("Cannot read measurements from file '" + csvInputFile.toAbsolutePath().normalize() + "'");
@@ -130,12 +129,12 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
     }
 
     @NotNull
-    private BigDecimal parseBigDecimalFromColumnConfig(Path csvInputFile, String value) {
+    private Double parseDoubleFromColumnConfig(Path csvInputFile, String value) {
         try {
-            return new BigDecimal(value);
+            return Double.valueOf(value);
         } catch (NumberFormatException ex) {
             throw new JPowerMonitorException("Cannot read measurements from file '" + csvInputFile.toAbsolutePath().normalize() +
-                "'. Unable to parse '" + value + "' as a number!");
+                                             "'. Unable to parse '" + value + "' as a number!");
         }
     }
 
@@ -204,8 +203,8 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
     }
 
     @Override
-    public @NotNull Map<String, BigDecimal> defaultEnergyInIdleModeForMeasuredSensors() {
-        Map<String, BigDecimal> energyInIdleModeForMeasuredSensors = new HashMap<>();
+    public @NotNull Map<String, Double> defaultEnergyInIdleModeForMeasuredSensors() {
+        Map<String, Double> energyInIdleModeForMeasuredSensors = new HashMap<>();
         config.getMeasurement().getCsv().getColumns().stream()
             .filter(x -> x.getEnergyInIdleMode() != null)
             .forEach(c -> energyInIdleModeForMeasuredSensors.put(c.getName(), c.getEnergyInIdleMode()));

@@ -43,8 +43,8 @@ public class MyTest {
         //
         // as we use a fix csv file, the outcome is fix for this test:
         sensorValueList.forEach(x -> {
-            assertThat(x.getValue()).isEqualTo(new BigDecimal("5.06"));
-            assertThat(x.getPowerInIdleMode()).isEqualTo(new BigDecimal("2.0"));
+            assertThat(x.getValue()).isEqualTo(5.06);
+            assertThat(x.getPowerInIdleMode()).isEqualTo(2.0);
             assertThat(x.getName()).isEqualTo("CPU Power");
             assertThat(x.getUnit()).isEqualTo(WATT);
         });

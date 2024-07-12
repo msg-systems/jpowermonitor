@@ -2,7 +2,7 @@ package group.msg.jpowermonitor;
 
 import group.msg.jpowermonitor.dto.DataPoint;
 import org.jetbrains.annotations.NotNull;
-import java.math.BigDecimal;
+
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +17,8 @@ public interface MeasureMethod {
      * @return all data point for the configured paths.
      * @throws JPowerMonitorException if measurement tool is not available.
      */
-    @NotNull default List<DataPoint> measure() throws JPowerMonitorException {
+    @NotNull
+    default List<DataPoint> measure() throws JPowerMonitorException {
         return List.of(measureFirstConfiguredPath());
     }
 
@@ -27,12 +28,14 @@ public interface MeasureMethod {
      * @return the first data point in the configured paths.
      * @throws JPowerMonitorException if measurement tool is not available.
      */
-    @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException;
+    @NotNull
+    DataPoint measureFirstConfiguredPath() throws JPowerMonitorException;
 
     /**
      * @return list of configured sensor paths.
      */
-    @NotNull List<String> configuredSensors();
+    @NotNull
+    List<String> configuredSensors();
 
     /**
      * The map of configured sensor paths with their configured default energy.
@@ -41,5 +44,6 @@ public interface MeasureMethod {
      *
      * @return Map of paths with default energy in idle mode (from config).
      */
-    @NotNull Map<String, BigDecimal> defaultEnergyInIdleModeForMeasuredSensors();
+    @NotNull
+    Map<String, Double> defaultEnergyInIdleModeForMeasuredSensors();
 }

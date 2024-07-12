@@ -14,8 +14,8 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +30,8 @@ import java.util.stream.Collectors;
  * @see MeasureMethod
  */
 public class LibreHardwareMonitorReader implements MeasureMethod {
-    HttpClient client;
-    LibreHardwareMonitorCfg lhmConfig;
+    private final HttpClient client;
+    private final LibreHardwareMonitorCfg lhmConfig;
 
     public LibreHardwareMonitorReader(JPowerMonitorConfig config) {
         Objects.requireNonNull(config.getMeasurement().getLhm(), "Libre Hardware Monitor config must be set!");
@@ -86,7 +86,7 @@ public class LibreHardwareMonitorReader implements MeasureMethod {
             throw new JPowerMonitorException("Unable to find element for path " + pathElement.getPath() + "!");
         }
         String[] valueAndUnit = elem.getValue().split("\\s+");// (( "5,4 W" ))
-        BigDecimal value = new BigDecimal(valueAndUnit[0].replace(',', '.').trim());
+        Double value = Double.valueOf(valueAndUnit[0].replace(',', '.').trim());
         Unit unit = Unit.fromAbbreviation(valueAndUnit[1].trim());
         return new DataPoint(String.join("->", pathElement.getPath()), value, unit, time, null);
     }
@@ -100,8 +100,8 @@ public class LibreHardwareMonitorReader implements MeasureMethod {
     }
 
     @Override
-    public @NotNull Map<String, BigDecimal> defaultEnergyInIdleModeForMeasuredSensors() {
-        Map<String, BigDecimal> energyInIdleModeForMeasuredSensors = new HashMap<>();
+    public @NotNull Map<String, Double> defaultEnergyInIdleModeForMeasuredSensors() {
+        Map<String, Double> energyInIdleModeForMeasuredSensors = new HashMap<>();
         lhmConfig.getPaths().stream()
             .filter(x -> x.getEnergyInIdleMode() != null)
             .forEach(p -> energyInIdleModeForMeasuredSensors.put(String.join("->", p.getPath()), p.getEnergyInIdleMode()));

@@ -99,7 +99,7 @@ public class StressCpuExample {
 
     /**
      * Run single endless loop CPU stress test sequentially
-     * 
+     *
      * @param secondsToRun seconds to run
      * @param factor       factor to multiply secondsToRun
      * @param runWorkload  workload to run
@@ -129,7 +129,7 @@ public class StressCpuExample {
     /**
      * Baseline for percentaged and parallel workload, runs 100% CPU load
      * sequentially for given time
-     * 
+     *
      * @param runUntil run until this time
      * @return loop counter
      */

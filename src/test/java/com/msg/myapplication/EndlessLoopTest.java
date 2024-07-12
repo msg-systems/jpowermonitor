@@ -4,11 +4,11 @@ import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
 import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
 import group.msg.jpowermonitor.util.StressCpuExample;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static group.msg.jpowermonitor.agent.Unit.WATT;
@@ -25,8 +25,8 @@ public class EndlessLoopTest {
         //
         // as we use a fix csv file, the outcome is fix for this test:
         valueList.forEach(x -> {
-            assertThat(x.getValue()).isEqualTo(new BigDecimal("5.05"));
-            assertThat(x.getPowerInIdleMode()).isEqualTo(new BigDecimal("2.01"));
+            assertThat(x.getValue()).isCloseTo(5.05, Offset.offset(0.01));
+            assertThat(x.getPowerInIdleMode()).isEqualTo(2.01);
             assertThat(x.getName()).isEqualTo("CPU Power");
             assertThat(x.getUnit()).isEqualTo(WATT);
         });

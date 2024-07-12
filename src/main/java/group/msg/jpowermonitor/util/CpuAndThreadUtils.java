@@ -5,13 +5,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static group.msg.jpowermonitor.util.Constants.MATH_CONTEXT;
 import static group.msg.jpowermonitor.util.Constants.ONE_HUNDRED;
 
 /**
@@ -57,12 +55,11 @@ public class CpuAndThreadUtils {
     }
 
     @NotNull
-    public static Map<String, BigDecimal> calculatePowerPerApplicationThread(Map<String, Long> cpuTimePerApplicationThread, DataPoint currentPower, long totalApplicationCpuTime) {
-        Map<String, BigDecimal> powerPerApplicationThread = new HashMap<>();
+    public static Map<String, Double> calculatePowerPerApplicationThread(Map<String, Long> cpuTimePerApplicationThread, DataPoint currentPower, long totalApplicationCpuTime) {
+        Map<String, Double> powerPerApplicationThread = new HashMap<>();
         for (Map.Entry<String, Long> entry : cpuTimePerApplicationThread.entrySet()) {
-            BigDecimal percentageCpuTimePerApplicationThread =
-                totalApplicationCpuTime > 0 ? new BigDecimal(entry.getValue()).multiply(ONE_HUNDRED, MATH_CONTEXT).divide(new BigDecimal(totalApplicationCpuTime), MATH_CONTEXT) : BigDecimal.ZERO;
-            BigDecimal applicationThreadPower = currentPower.getValue().multiply(percentageCpuTimePerApplicationThread.divide(ONE_HUNDRED, MATH_CONTEXT), MATH_CONTEXT);
+            Double percentageCpuTimePerApplicationThread = totalApplicationCpuTime > 0 ? entry.getValue() * ONE_HUNDRED / totalApplicationCpuTime : 0.0;
+            Double applicationThreadPower = currentPower.getValue() * percentageCpuTimePerApplicationThread / ONE_HUNDRED;
             powerPerApplicationThread.put(entry.getKey(), applicationThreadPower);
         }
         return powerPerApplicationThread;
@@ -100,9 +97,8 @@ public class CpuAndThreadUtils {
 
         if (cpuUsage <= 0) { // Fallback to 0.5 (50%) if CPU usage is negative or zero
             return EST_CPU_USAGE_FALLBACK;
-        } else if (cpuUsage > 1) { // Fallback to 1 if CPU usage is greater than 1 - more than 100% is not possible ;)
-            return 1;
         }
-        return cpuUsage;
+        // Fallback to 1 if CPU usage is greater than 1 - more than 100% is not possible ;)
+        return Math.min(cpuUsage, 1);
     }
 }
