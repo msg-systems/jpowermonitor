@@ -6,7 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [not yet released]
-- no changes yet
+- add cloud toolkit estimation
+- use double/Double instead of BigDecimal
+- refactoring of MeasureMethod hierarchy
+- upgrade com.fasterxml.jackson.datatype:jackson-datatype-jsr310 to 2.17.2
+- org.junit.jupiter:junit-jupiter to 5.10.3
+- upgrade org.assertj:assertj-core to 3.26.3
+- upgrade gradle to 8.9
 
 ## 2024-01-17 - release 1.1.2
 - upgrade httpclient to 5.3

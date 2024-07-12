@@ -8,12 +8,10 @@ import group.msg.jpowermonitor.config.CsvMeasurementCfg;
 import group.msg.jpowermonitor.config.JPowerMonitorConfig;
 import group.msg.jpowermonitor.dto.DataPoint;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -37,6 +35,7 @@ import java.util.stream.Stream;
  * @see MeasureMethod
  */
 public class CommaSeparatedValuesReader implements MeasureMethod {
+
     private final JPowerMonitorConfig config;
 
     public CommaSeparatedValuesReader(JPowerMonitorConfig config) {
@@ -98,11 +97,6 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
     }
 
     @Override
-    public @NotNull List<DataPoint> measure() throws JPowerMonitorException {
-        return List.of(measureFirstConfiguredPath());
-    }
-
-    @Override
     public @NotNull DataPoint measureFirstConfiguredPath() throws JPowerMonitorException {
         Path csvInputFile = config.getMeasurement().getCsv().getInputFileAsPath();
         try {
@@ -117,7 +111,7 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
             if (values.length < column.getIndex() + 1) {
                 throw new JPowerMonitorException("File '" + csvInputFile.toAbsolutePath().normalize() + "' does not contain configured column " + column.getIndex());
             }
-            BigDecimal value = parseBigDecimalFromColumnConfig(csvInputFile, values[column.getIndex()]);
+            Double value = parseDoubleFromColumnConfig(csvInputFile, values[column.getIndex()]);
             return new DataPoint(column.getName(), value, Unit.WATT, LocalDateTime.now(), null);
         } catch (IOException ex) {
             throw new JPowerMonitorException("Cannot read measurements from file '" + csvInputFile.toAbsolutePath().normalize() + "'");
@@ -135,12 +129,12 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
     }
 
     @NotNull
-    private BigDecimal parseBigDecimalFromColumnConfig(Path csvInputFile, String value) {
+    private Double parseDoubleFromColumnConfig(Path csvInputFile, String value) {
         try {
-            return new BigDecimal(value);
+            return Double.valueOf(value);
         } catch (NumberFormatException ex) {
             throw new JPowerMonitorException("Cannot read measurements from file '" + csvInputFile.toAbsolutePath().normalize() +
-                "'. Unable to parse '" + value + "' as a number!");
+                                             "'. Unable to parse '" + value + "' as a number!");
         }
     }
 
@@ -209,48 +203,11 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
     }
 
     @Override
-    public @NotNull Map<String, BigDecimal> defaultEnergyInIdleModeForMeasuredSensors() {
-        Map<String, BigDecimal> energyInIdleModeForMeasuredSensors = new HashMap<>();
+    public @NotNull Map<String, Double> defaultEnergyInIdleModeForMeasuredSensors() {
+        Map<String, Double> energyInIdleModeForMeasuredSensors = new HashMap<>();
         config.getMeasurement().getCsv().getColumns().stream()
             .filter(x -> x.getEnergyInIdleMode() != null)
             .forEach(c -> energyInIdleModeForMeasuredSensors.put(c.getName(), c.getEnergyInIdleMode()));
         return energyInIdleModeForMeasuredSensors;
-    }
-
-    @Override
-    public int getSamplingInterval() {
-        return config.getSamplingIntervalInMs();
-    }
-
-    @Override
-    public int initCycles() {
-        return config.getInitCycles();
-    }
-
-    @Override
-    public int getSamplingIntervalForInit() {
-        return config.getSamplingIntervalForInitInMs();
-    }
-
-    @Override
-    public int getCalmDownIntervalInMs() {
-        return config.getCalmDownIntervalInMs();
-    }
-
-    @Override
-    public @Nullable Path getPathToResultCsv() {
-        return config.getCsvRecording().getResultCsv() != null ? Paths.get(
-            config.getCsvRecording().getResultCsv()) : null;
-    }
-
-    @Override
-    public @Nullable Path getPathToMeasurementCsv() {
-        return config.getCsvRecording().getMeasurementCsv() != null ? Paths.get(
-            config.getCsvRecording().getMeasurementCsv()) : null;
-    }
-
-    @Override
-    public @NotNull BigDecimal getPercentageOfSamplesAtBeginningToDiscard() {
-        return config.getPercentageOfSamplesAtBeginningToDiscard();
     }
 }

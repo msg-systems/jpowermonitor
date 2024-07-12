@@ -1,6 +1,5 @@
 package group.msg.jpowermonitor.util;
 
-import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Collections;
@@ -16,11 +15,11 @@ public class HumanReadableTime {
     private static final Map<TimeUnit, String> TIME_UNITS_NANOS = timeUnitsToNanos();
     private static final Map<TimeUnit, String> TIME_UNITS_MILLIS = timeUnitsToMillis();
 
-    private static final BigDecimal factorNanosToHours = new BigDecimal("3600000000000");
+    private static final double factorNanosToHours = 3600000000000.0;
     private static final MathContext mc = new MathContext(50, RoundingMode.HALF_UP);
 
-    public static BigDecimal nanosToHours(long nanos) {
-        return new BigDecimal(nanos).divide(factorNanosToHours, mc).setScale(20, RoundingMode.HALF_UP);
+    public static double nanosToHours(long nanos) {
+        return nanos / factorNanosToHours;
     }
 
     static Map<TimeUnit, String> timeUnitsToNanos() {

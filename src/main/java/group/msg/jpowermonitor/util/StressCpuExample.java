@@ -1,6 +1,5 @@
 package group.msg.jpowermonitor.util;
 
-import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.LongAdder;
@@ -16,25 +15,28 @@ public class StressCpuExample {
 
     public static final short DEFAULT_SECONDS_TO_RUN = 15;
 
+    private static CmdLineArgs cmdLineArgs;
+    private static long sequentialLoopCounter = 0;
+    private static long percentagedLoopCounter = 0;
+    private static long parallelLoopCounter = 0;
+
     public static void main(String[] args) {
-        CmdLineArgs cmdLineArgs = parseCmdLineArgs(args);
-        long sequentialLoopCounter = runSequentialEnergyMeasurementAndBenchmarkUsingOneCpuThread(cmdLineArgs);
-        runPercentagedEnergyMeasurementAndBenchmarkUsingOneCpuThread(cmdLineArgs, sequentialLoopCounter);
-        runParallelEnergyMeasurementAndBenchmarkUsingMultipleCpuThreads(cmdLineArgs, sequentialLoopCounter);
+        cmdLineArgs = parseCmdLineArgs(args);
+        runSequentialEnergyMeasurementAndBenchmarkUsingOneCpuThread();
+        runPercentagedEnergyMeasurementAndBenchmarkUsingOneCpuThread();
+        runParallelEnergyMeasurementAndBenchmarkUsingMultipleCpuThreads();
         System.exit(0); // Important to exit properly since JavaAgent will not exit gracefully without
     }
 
-    private static long runSequentialEnergyMeasurementAndBenchmarkUsingOneCpuThread(CmdLineArgs cmdLineArgs) {
+    private static void runSequentialEnergyMeasurementAndBenchmarkUsingOneCpuThread() {
         long start = System.currentTimeMillis();
         logStart("sequential  ", cmdLineArgs.getSecondsToRun(), 1);
-        long sequentialLoopCounter = runMeasurement(cmdLineArgs.getSecondsToRun(), 1, StressCpuExample::iAm100Percent);
+        sequentialLoopCounter = runMeasurement(cmdLineArgs.getSecondsToRun(), 1, StressCpuExample::iAm100Percent);
         logEnd("End   sequential  ", start, sequentialLoopCounter, sequentialLoopCounter);
-        return sequentialLoopCounter;
     }
 
-    private static void runPercentagedEnergyMeasurementAndBenchmarkUsingOneCpuThread(CmdLineArgs cmdLineArgs, long sequentialLoopCounter) {
-        logStart("percentaged ", cmdLineArgs.getSecondsToRun(), 1);
-        long percentagedLoopCounter = 0;
+    private static void runPercentagedEnergyMeasurementAndBenchmarkUsingOneCpuThread() {
+        logStart("percentaged  ", cmdLineArgs.getSecondsToRun(), 1);
         long start = System.currentTimeMillis();
         percentagedLoopCounter += runMeasurement(cmdLineArgs.getSecondsToRun(), 0.5f, StressCpuExample::iNeed50Percent);
         logEnd("50%   percentaged ", start, percentagedLoopCounter, sequentialLoopCounter);
@@ -52,10 +54,10 @@ public class StressCpuExample {
         logEnd("End   percentaged ", start, percentagedLoopCounter, sequentialLoopCounter);
     }
 
-    private static void runParallelEnergyMeasurementAndBenchmarkUsingMultipleCpuThreads(CmdLineArgs cmdLineArgs, long sequentialLoopCounter) {
-        logStart("parallel    ", cmdLineArgs.getSecondsToRun(), cmdLineArgs.getCpuThreads());
+    private static void runParallelEnergyMeasurementAndBenchmarkUsingMultipleCpuThreads() {
+        logStart("parallel     ", cmdLineArgs.getSecondsToRun(), cmdLineArgs.getCpuThreads());
         long start = System.currentTimeMillis();
-        long parallelLoopCounter = runParallelEndlessLoopCpuStressTest(cmdLineArgs.getCpuThreads(), cmdLineArgs.getSecondsToRun());
+        parallelLoopCounter = runParallelEndlessLoopCpuStressTest(cmdLineArgs.getCpuThreads(), cmdLineArgs.getSecondsToRun());
         logEnd("End   parallel    ", start, parallelLoopCounter, sequentialLoopCounter);
     }
 
@@ -84,7 +86,7 @@ public class StressCpuExample {
     }
 
     private static void logEnd(String logPrefix, long start, long loopCounter, long sequentialLoopCounter) {
-        System.out.printf("%s EndlessLoopCpuStressTest, took %s seconds, ran loop %s times, %s %% of sequential%n", logPrefix, calcDurationSec(start), loopCounter, calcProgressPercentaged(loopCounter, sequentialLoopCounter));
+        System.out.printf("%s EndlessLoopCpuStressTest, took %s seconds, ran loop %,d times, %s %% of sequential%n", logPrefix, calcDurationSec(start), loopCounter, calcProgressPercentaged(loopCounter, sequentialLoopCounter));
     }
 
     private static long calcDurationSec(long start) {
@@ -95,12 +97,27 @@ public class StressCpuExample {
         return (short) ((double) actual / benchmark * 100);
     }
 
+    /**
+     * Run single endless loop CPU stress test sequentially
+     *
+     * @param secondsToRun seconds to run
+     * @param factor       factor to multiply secondsToRun
+     * @param runWorkload  workload to run
+     * @return loop counter
+     */
     public static long runMeasurement(short secondsToRun, float factor, Function<Long, Long> runWorkload) {
         float secondsProportionally = secondsToRun * factor;
         long runUntil = System.currentTimeMillis() + (long) (secondsProportionally * 1000);
         return runWorkload.apply(runUntil);
     }
 
+    /**
+     * Run endless loop CPU stress test in parallel
+     *
+     * @param parallelThreads number of parallel threads
+     * @param secondsToRun    seconds to run
+     * @return sum of all loop counters
+     */
     public static long runParallelEndlessLoopCpuStressTest(int parallelThreads, short secondsToRun) {
         LongAdder sumLoopCounter = new LongAdder();
         IntStream.range(0, parallelThreads)
@@ -109,7 +126,14 @@ public class StressCpuExample {
         return sumLoopCounter.longValue();
     }
 
-    public static long iAm100PercentParallel(long runUntil) {
+    /**
+     * Baseline for percentaged and parallel workload, runs 100% CPU load
+     * sequentially for given time
+     *
+     * @param runUntil run until this time
+     * @return loop counter
+     */
+    public static long iAm100Percent(long runUntil) {
         long loopCounter = 0;
         while (System.currentTimeMillis() < runUntil) {
             loopCounter++;
@@ -117,7 +141,21 @@ public class StressCpuExample {
         return loopCounter;
     }
 
-    public static long iAm100Percent(long runUntil) {
+    /**
+     * @return true if this is a benchmark run
+     */
+    public static boolean isBenchmarkRun() {
+        return sequentialLoopCounter > 0 || percentagedLoopCounter > 0 || parallelLoopCounter > 0;
+    }
+
+    /**
+     * @return sum of all loop counters
+     */
+    public static long getBenchmarkResult() {
+        return sequentialLoopCounter + percentagedLoopCounter + parallelLoopCounter;
+    }
+
+    private static long iAm100PercentParallel(long runUntil) {
         long loopCounter = 0;
         while (System.currentTimeMillis() < runUntil) {
             loopCounter++;
@@ -179,11 +217,5 @@ public class StressCpuExample {
             loopCounter++;
         }
         return loopCounter;
-    }
-
-    @Data
-    private static class CmdLineArgs {
-        private short secondsToRun;
-        private int cpuThreads;
     }
 }

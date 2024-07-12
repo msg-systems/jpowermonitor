@@ -4,7 +4,6 @@ import group.msg.jpowermonitor.ConfigProviderForTests;
 import group.msg.jpowermonitor.JPowerMonitorException;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -76,7 +75,7 @@ public class JPowerMonitorConfigTest {
         assertThat(config.getSamplingIntervalForInitInMs()).isEqualTo(1000);
         assertThat(config.getInitCycles()).isEqualTo(10);
         assertThat(config.getCalmDownIntervalInMs()).isEqualTo(1000);
-        assertThat(config.getPercentageOfSamplesAtBeginningToDiscard()).isEqualTo(BigDecimal.valueOf(15));
+        assertThat(config.getPercentageOfSamplesAtBeginningToDiscard()).isEqualTo(15.0);
         assertThat(config.getJavaAgent()).isNotNull();
         assertThat(config.getJavaAgent().getPackageFilter()).isNotNull();
         assertThat(config.getJavaAgent().getPackageFilter().isEmpty()).isTrue();

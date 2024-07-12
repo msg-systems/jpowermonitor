@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor.config;
 
 import lombok.Data;
+
 import java.util.List;
 
 /**

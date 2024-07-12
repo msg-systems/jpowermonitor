@@ -4,6 +4,8 @@ import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
 import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
 import lombok.extern.slf4j.Slf4j;
+
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -43,8 +45,8 @@ public class MyTest {
         //
         // as we use a fix csv file, the outcome is fix for this test:
         sensorValueList.forEach(x -> {
-            assertThat(x.getValue()).isEqualTo(new BigDecimal("5.06"));
-            assertThat(x.getPowerInIdleMode()).isEqualTo(new BigDecimal("2.0"));
+            assertThat(x.getValue()).isCloseTo(5.05, Offset.offset(0.01));
+            assertThat(x.getPowerInIdleMode()).isEqualTo(2.0);
             assertThat(x.getName()).isEqualTo("CPU Power");
             assertThat(x.getUnit()).isEqualTo(WATT);
         });
