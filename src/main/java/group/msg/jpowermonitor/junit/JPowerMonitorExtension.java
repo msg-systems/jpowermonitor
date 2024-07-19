@@ -4,7 +4,7 @@ import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.MeasureMethodProvider;
 import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.config.DefaultConfigProvider;
-import group.msg.jpowermonitor.config.JPowerMonitorConfig;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.PowerQuestionable;
 import group.msg.jpowermonitor.dto.SensorValue;
@@ -44,10 +44,10 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
     private Timer timer;
     private TimerTask timedMeasurement;
     private long timeBeforeTest;
-    private JPowerMonitorConfig config;
+    private JPowerMonitorCfg config;
     private MeasureMethod measureMethod;
     private Map<String, Double> energyInIdleMode;
-    private ResultsWriter resultsWriter;
+    private JUnitResultsWriter JUnitResultsWriter;
 
     @Override
     public void beforeAll(ExtensionContext context) {
@@ -59,7 +59,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
         measureMethod = MeasureMethodProvider.resolveMeasureMethod(config);
         final Path pathToResultCsv = config.getCsvRecording().getResultCsv() != null ? Paths.get(config.getCsvRecording().getResultCsv()) : null;
         final Path pathToMeasurementCsv = config.getCsvRecording().getMeasurementCsv() != null ? Paths.get(config.getCsvRecording().getMeasurementCsv()) : null;
-        resultsWriter = new ResultsWriter(pathToResultCsv, pathToMeasurementCsv, config.getCarbonDioxideEmissionFactor());
+        JUnitResultsWriter = new JUnitResultsWriter(pathToResultCsv, pathToMeasurementCsv, config.getCarbonDioxideEmissionFactor());
         energyInIdleMode = measureIdleMode();
     }
 
@@ -98,8 +98,8 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             SensorValue sensorValue = calculateResult(timeTaken, energyInIdleMode.get(entry.getKey()), average);
             sensorValues.add(sensorValue);
             logSensorValue(testName, sensorValue);
-            resultsWriter.writeToMeasurementCsv(testName, dataPointsToConsider);
-            resultsWriter.writeToResultCsv(testName, sensorValue);
+            JUnitResultsWriter.writeToMeasurementCsv(testName, dataPointsToConsider);
+            JUnitResultsWriter.writeToResultCsv(testName, sensorValue);
         }
         setSensorValueIntoAnnotatedFields(context, sensorValues);
     }
@@ -198,7 +198,7 @@ public class JPowerMonitorExtension implements BeforeAllCallback, BeforeEachCall
             List<DataPoint> dataPoints = new ArrayList<>(entry.getValue()); // clone list in order to avoid ConcurrentModification
             List<DataPoint> dataPointsToConsider = dataPoints.subList(firstXPercent(dataPoints.size(), config.getPercentageOfSamplesAtBeginningToDiscard()), dataPoints.size());  // cut off the first x% measurements
             DataPoint average = calculateAvg(dataPointsToConsider);
-            resultsWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
+            JUnitResultsWriter.writeToMeasurementCsv("Initialize", dataPointsToConsider, "(measure idle power)");
             Double prev = defaults.putIfAbsent(entry.getKey(), average.isPowerSensor() ? average.getValue() : 0.0); // add zero, if not a power sensor!
             if (prev == null) { // then the key was not present in the map => log entry.
                 System.out.printf("(measured) %s in idle mode for %s is %s%n", average.isPowerSensor() ? "energy consumption" : "sensor value", entry.getKey(), average.getValue());

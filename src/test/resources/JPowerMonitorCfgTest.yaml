@@ -39,7 +39,7 @@ measurement:
       #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
       #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
 # ------------------------------------------------
-# Recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
+# Only JUnit Extension: Recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
 csvRecording:
   # If specified, the results for every test are appended to a csv file.
   # On Windows: the file must not be opened in Excel in parallel!

@@ -1,7 +1,7 @@
 package group.msg.jpowermonitor.measurement.est;
 
 import group.msg.jpowermonitor.config.DefaultConfigProvider;
-import group.msg.jpowermonitor.config.JPowerMonitorConfig;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import group.msg.jpowermonitor.config.JPowerMonitorConfigProvider;
 import group.msg.jpowermonitor.dto.DataPoint;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +51,7 @@ class EstimationReaderTest {
     }
 
     private Callable<String> createMeasureThread(JPowerMonitorConfigProvider configProvider) {
-        JPowerMonitorConfig config = configProvider.getCachedConfig();
+        JPowerMonitorCfg config = configProvider.getCachedConfig();
         EstimationReader cmr = new EstimationReader(config);
         return () -> {
             try {

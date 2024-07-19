@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor.config;
 
 import group.msg.jpowermonitor.JPowerMonitorException;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 
 /**
  * Interface for reading JPowerMonitor configuration.
@@ -10,7 +11,7 @@ import group.msg.jpowermonitor.JPowerMonitorException;
  */
 public interface JPowerMonitorConfigProvider {
 
-    JPowerMonitorConfig getCachedConfig() throws JPowerMonitorException;
+    JPowerMonitorCfg getCachedConfig() throws JPowerMonitorException;
 
     /**
      * Reads a JPowerMonitor configuration using the given source.
@@ -20,7 +21,7 @@ public interface JPowerMonitorConfigProvider {
      * @return a valid configuration
      * @throws JPowerMonitorException On any error that occurs during reading the configuration
      */
-    JPowerMonitorConfig readConfig(String source) throws JPowerMonitorException;
+    JPowerMonitorCfg readConfig(String source) throws JPowerMonitorException;
 
     /**
      * Checks wether the given source name is a valid configuration source.

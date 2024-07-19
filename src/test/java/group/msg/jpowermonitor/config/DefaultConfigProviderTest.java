@@ -1,5 +1,15 @@
 package group.msg.jpowermonitor.config;
 
+import group.msg.jpowermonitor.config.dto.CsvColumnCfg;
+import group.msg.jpowermonitor.config.dto.CsvMeasurementCfg;
+import group.msg.jpowermonitor.config.dto.CsvRecordingCfg;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
+import group.msg.jpowermonitor.config.dto.JavaAgentCfg;
+import group.msg.jpowermonitor.config.dto.LibreHardwareMonitorCfg;
+import group.msg.jpowermonitor.config.dto.MeasurementCfg;
+import group.msg.jpowermonitor.config.dto.MonitoringCfg;
+import group.msg.jpowermonitor.config.dto.PathElementCfg;
+import group.msg.jpowermonitor.config.dto.PrometheusCfg;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,10 +28,10 @@ class DefaultConfigProviderTest {
 
     @Test
     public void readConfig_fromResourceIfNoFile() {
-        JPowerMonitorConfig cfg = new DefaultConfigProvider().readConfig("DefaultConfigProviderTest.yaml");
+        JPowerMonitorCfg cfg = new DefaultConfigProvider().readConfig("DefaultConfigProviderTest.yaml");
         assertThat(cfg).isNotNull();
 
-        JPowerMonitorConfig expected = new JPowerMonitorConfig();
+        JPowerMonitorCfg expected = new JPowerMonitorCfg();
         expected.setInitCycles(7);
         expected.setSamplingIntervalForInitInMs(8);
         expected.setCalmDownIntervalInMs(9);
@@ -29,12 +39,12 @@ class DefaultConfigProviderTest {
         expected.setSamplingIntervalInMs(4);
         expected.setCarbonDioxideEmissionFactor(777.0);
 
-        Measurement measurement = new Measurement();
+        MeasurementCfg measurement = new MeasurementCfg();
         measurement.setMethod("lhm");
 
         LibreHardwareMonitorCfg lhm = new LibreHardwareMonitorCfg();
-        PathElement pe = new PathElement();
-        pe.path = List.of("pc", "cpu", "path1", "path2");
+        PathElementCfg pe = new PathElementCfg();
+        pe.setPath(List.of("pc", "cpu", "path1", "path2"));
         lhm.setPaths(List.of(pe));
         lhm.setUrl("some.test.url" + "/data.json"); // /data.json is internally added
         measurement.setLhm(lhm);
@@ -42,7 +52,7 @@ class DefaultConfigProviderTest {
         CsvMeasurementCfg csv = new CsvMeasurementCfg();
         csv.setInputFile("mycsv.csv");
         csv.setLineToRead("first");
-        CsvColumn csvColumn = new CsvColumn();
+        CsvColumnCfg csvColumn = new CsvColumnCfg();
         csvColumn.setIndex(42);
         csvColumn.setName("CPU Power");
         csv.setColumns(List.of(csvColumn));
@@ -51,17 +61,22 @@ class DefaultConfigProviderTest {
         measurement.setCsv(csv);
         expected.setMeasurement(measurement);
 
-        CsvRecording csvRecording = new CsvRecording();
+        CsvRecordingCfg csvRecording = new CsvRecordingCfg();
         csvRecording.setMeasurementCsv("test_measurement.csv");
         csvRecording.setResultCsv("test_energyconsumption.csv");
         expected.setCsvRecording(csvRecording);
 
-        JavaAgent javaAgent = new JavaAgent();
-        javaAgent.setMeasurementIntervalInMs(2);
-        javaAgent.setGatherStatisticsIntervalInMs(3);
-        javaAgent.setWriteEnergyMeasurementsToCsvIntervalInS(4);
-        javaAgent.setPackageFilter(Set.of("com.something", "com.anything"));
-        expected.setJavaAgent(javaAgent);
+        MonitoringCfg monitoringCfg = new MonitoringCfg();
+        PrometheusCfg prometheusCfg = new PrometheusCfg();
+        prometheusCfg.setHttpPort(1234); // Default
+        prometheusCfg.setWriteEnergyIntervalInS(30L); // Default
+        monitoringCfg.setPrometheus(prometheusCfg);
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(Set.of("com.something", "com.anything"),
+            2,
+            3,
+            4,
+            monitoringCfg);
+        expected.setJavaAgent(javaAgentCfg);
 
         assertThat(cfg).usingRecursiveComparison().isEqualTo(expected);
     }
@@ -69,9 +84,9 @@ class DefaultConfigProviderTest {
     @Test
     public void readConfig_usesCaching() {
         JPowerMonitorConfigProvider provider = new DefaultConfigProvider();
-        JPowerMonitorConfig first = provider.readConfig("DefaultConfigProviderTest.yaml");
+        JPowerMonitorCfg first = provider.readConfig("DefaultConfigProviderTest.yaml");
         assertThat(first).isNotNull();
-        JPowerMonitorConfig second = provider.readConfig("something.else");
+        JPowerMonitorCfg second = provider.readConfig("something.else");
         assertSame(first, second);
     }
 

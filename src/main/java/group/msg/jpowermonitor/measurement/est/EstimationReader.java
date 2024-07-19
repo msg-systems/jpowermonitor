@@ -3,8 +3,8 @@ package group.msg.jpowermonitor.measurement.est;
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.agent.Unit;
-import group.msg.jpowermonitor.config.EstimationCfg;
-import group.msg.jpowermonitor.config.JPowerMonitorConfig;
+import group.msg.jpowermonitor.config.dto.EstimationCfg;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.util.CpuAndThreadUtils;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ public class EstimationReader implements MeasureMethod {
     private static final String ESTIMATED_CPU_WATTS = "Estimated CPU Watts";
     private final EstimationCfg estCfg;
 
-    public EstimationReader(JPowerMonitorConfig config) {
+    public EstimationReader(JPowerMonitorCfg config) {
         Objects.requireNonNull(config.getMeasurement().getEst(), "Estimation config must be set!");
         this.estCfg = config.getMeasurement().getEst();
     }

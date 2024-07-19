@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.agent.Unit;
-import group.msg.jpowermonitor.config.JPowerMonitorConfig;
-import group.msg.jpowermonitor.config.LibreHardwareMonitorCfg;
-import group.msg.jpowermonitor.config.PathElement;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
+import group.msg.jpowermonitor.config.dto.LibreHardwareMonitorCfg;
+import group.msg.jpowermonitor.config.dto.PathElementCfg;
 import group.msg.jpowermonitor.dto.DataPoint;
 import lombok.NonNull;
 import org.apache.hc.client5.http.classic.HttpClient;
@@ -33,19 +33,19 @@ public class LibreHardwareMonitorReader implements MeasureMethod {
     private final HttpClient client;
     private final LibreHardwareMonitorCfg lhmConfig;
 
-    public LibreHardwareMonitorReader(JPowerMonitorConfig config) {
+    public LibreHardwareMonitorReader(JPowerMonitorCfg config) {
         Objects.requireNonNull(config.getMeasurement().getLhm(), "Libre Hardware Monitor config must be set!");
         this.lhmConfig = config.getMeasurement().getLhm();
         this.client = HttpClientBuilder.create().build();
     }
 
     @NotNull
-    private List<DataPoint> getDataPoints(ClassicHttpResponse response, List<PathElement> paths) throws IOException {
+    private List<DataPoint> getDataPoints(ClassicHttpResponse response, List<PathElementCfg> paths) throws IOException {
         LocalDateTime time = LocalDateTime.now();
         ObjectMapper objectMapper = new ObjectMapper();
         DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
         List<DataPoint> result = new ArrayList<>();
-        for (PathElement pathElement : paths) {
+        for (PathElementCfg pathElement : paths) {
             DataPoint dp = createDataPoint(root, pathElement, time);
             result.add(dp);
         }
@@ -62,7 +62,7 @@ public class LibreHardwareMonitorReader implements MeasureMethod {
     }
 
     @NotNull
-    private DataPoint getDataPoint(ClassicHttpResponse response, PathElement pathElement) throws IOException {
+    private DataPoint getDataPoint(ClassicHttpResponse response, PathElementCfg pathElement) throws IOException {
         LocalDateTime time = LocalDateTime.now();
         ObjectMapper objectMapper = new ObjectMapper();
         DataElem root = objectMapper.readValue(response.getEntity().getContent(), DataElem.class);
@@ -80,7 +80,7 @@ public class LibreHardwareMonitorReader implements MeasureMethod {
     }
 
     @NotNull
-    private DataPoint createDataPoint(DataElem root, PathElement pathElement, LocalDateTime time) {
+    private DataPoint createDataPoint(DataElem root, PathElementCfg pathElement, LocalDateTime time) {
         DataElem elem = findElement(root, pathElement.getPath().toArray());
         if (elem == null) {
             throw new JPowerMonitorException("Unable to find element for path " + pathElement.getPath() + "!");

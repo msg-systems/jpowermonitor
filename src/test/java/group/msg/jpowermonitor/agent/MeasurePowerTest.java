@@ -16,7 +16,7 @@ class MeasurePowerTest {
 
     /**
      * Steps down wait interval (in 50ms steps) between measurements until implemented/configured MeasureMethod delivers the same value again.
-     * -> e. g. for Libre Hardware Monitor between 750-850ms seems to be the minimal possible interval to get updatet values
+     * -> e.g. for Libre Hardware Monitor between 750-850ms seems to be the minimal possible interval to get updatet values
      */
     @Disabled("Use this test to find the minimum viable measurement interval for your platform and your configured measure method")
     void findReasonableMeasurementIntervalForMeasureMethodTest() {
@@ -24,13 +24,13 @@ class MeasurePowerTest {
         for (int intervalInMs = 1000; intervalInMs >= REASONABLE_MEASUREMENT_INTERVAL_MS; intervalInMs -= 50) {
             log.info("Interval {}ms, loopCount {}", intervalInMs, loopCount);
             loopCount = 0;
-            DataPoint dp = MeasurePower.getCurrentCpuPowerInWatts();
+            DataPoint dp = PowerMeasurementCollector.getCurrentCpuPowerInWatts();
             log.debug("{}", dp);
             long busyWaitUntil = System.currentTimeMillis() + intervalInMs;
             while (System.currentTimeMillis() <= busyWaitUntil) {
                 loopCount++;
             }
-            DataPoint dp2 = MeasurePower.getCurrentCpuPowerInWatts();
+            DataPoint dp2 = PowerMeasurementCollector.getCurrentCpuPowerInWatts();
             log.debug("{}", dp2);
             assertThat(dp.getUnit()).isEqualTo(dp2.getUnit());
             assertThat(dp.getTime()).isNotEqualTo(dp2.getTime());
@@ -45,14 +45,14 @@ class MeasurePowerTest {
         for (int i = 0; i < 25; i++) {
             log.info("Interval {}ms, loopCount {}, run {}", intervalInMs, loopCount, i);
             loopCount = 0;
-            DataPoint dp = MeasurePower.getCurrentCpuPowerInWatts();
+            DataPoint dp = PowerMeasurementCollector.getCurrentCpuPowerInWatts();
             log.debug("{}", dp);
             long busyWaitUntil = System.currentTimeMillis() + intervalInMs;
             while (System.currentTimeMillis() <= busyWaitUntil) {
                 loopCount++;
             }
             Thread.sleep(intervalInMs);
-            DataPoint dp2 = MeasurePower.getCurrentCpuPowerInWatts();
+            DataPoint dp2 = PowerMeasurementCollector.getCurrentCpuPowerInWatts();
             log.debug("{}", dp2);
             assertThat(dp.getUnit()).isEqualTo(dp2.getUnit());
             assertThat(dp.getTime()).isNotEqualTo(dp2.getTime());

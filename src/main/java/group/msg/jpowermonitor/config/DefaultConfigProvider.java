@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor.config;
 
 import group.msg.jpowermonitor.JPowerMonitorException;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
@@ -17,6 +18,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static group.msg.jpowermonitor.util.Constants.APP_TITLE;
+import static group.msg.jpowermonitor.util.Constants.LOG_PREFIX;
 
 /**
  * Default configuration provider preferring file system to resources.
@@ -37,14 +39,14 @@ import static group.msg.jpowermonitor.util.Constants.APP_TITLE;
 public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     private static final String DEFAULT_CONFIG = APP_TITLE + ".yaml";
     private final Charset yamlFileEncoding;
-    private static JPowerMonitorConfig cachedConfig = null;
+    private static JPowerMonitorCfg cachedConfig = null;
 
     public DefaultConfigProvider() {
         this.yamlFileEncoding = StandardCharsets.UTF_8;
     }
 
     @Override
-    public synchronized JPowerMonitorConfig getCachedConfig() throws JPowerMonitorException {
+    public synchronized JPowerMonitorCfg getCachedConfig() throws JPowerMonitorException {
         if (cachedConfig == null) {
             cachedConfig = acquireConfigFromSource(DEFAULT_CONFIG);
         }
@@ -52,7 +54,7 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     }
 
     @Override
-    public synchronized JPowerMonitorConfig readConfig(String source) throws JPowerMonitorException {
+    public synchronized JPowerMonitorCfg readConfig(String source) throws JPowerMonitorException {
         if (cachedConfig == null) {
             cachedConfig = acquireConfigFromSource(isValidSource(source) ? source : DEFAULT_CONFIG);
         }
@@ -60,38 +62,38 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     }
 
     @NotNull
-    private JPowerMonitorConfig acquireConfigFromSource(String source) {
-        JPowerMonitorConfig cfg = Stream.of(
-                (Supplier<JPowerMonitorConfig>) () -> this.tryReadingFromFileSystem(source),
-                () -> this.tryReadingFromResources(source),
-                () -> {
-                    Path conf = findFileIgnoringCase(Path.of("."), DEFAULT_CONFIG);
-                    return this.readConfigFromPath(conf);
-                })
-            .map(Supplier::get)
-            .filter(Objects::nonNull)
-            .findFirst()
-            .orElseThrow(() -> new JPowerMonitorException(String.format("Unable to read %s configuration from source '%s'", APP_TITLE, source)));
+    private JPowerMonitorCfg acquireConfigFromSource(String source) {
+        JPowerMonitorCfg cfg = Stream.of(
+                        (Supplier<JPowerMonitorCfg>) () -> this.tryReadingFromFileSystem(source),
+                        () -> this.tryReadingFromResources(source),
+                        () -> {
+                            Path conf = findFileIgnoringCase(Path.of("."), DEFAULT_CONFIG);
+                            return this.readConfigFromPath(conf);
+                        })
+                .map(Supplier::get)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(() -> new JPowerMonitorException(String.format("Unable to read %s configuration from source '%s'", APP_TITLE, source)));
         cfg.initializeConfiguration();
         return cfg;
     }
 
     public Path findFileIgnoringCase(Path path, String fileName) {
-        System.out.println("Reading " + APP_TITLE + " configuration from given source '" + fileName + "' on path " + path);
+        System.out.println(LOG_PREFIX + "Reading " + APP_TITLE + " configuration from given source '" + fileName + "' on path " + path);
         if (!Files.isDirectory(path)) {
             throw new IllegalArgumentException("Path must be a directory!");
         }
         try (Stream<Path> walk = Files.walk(path)) {
             return walk
-                .filter(Files::isReadable)
-                .filter(Files::isRegularFile)
-                .filter(p -> p.getFileName().toString().equalsIgnoreCase(fileName)).findFirst().orElse(null);
+                    .filter(Files::isReadable)
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.getFileName().toString().equalsIgnoreCase(fileName)).findFirst().orElse(null);
         } catch (IOException e) {
             return null;
         }
     }
 
-    private JPowerMonitorConfig tryReadingFromFileSystem(String source) {
+    private JPowerMonitorCfg tryReadingFromFileSystem(String source) {
         System.out.println("Reading " + APP_TITLE + " configuration from filesystem: '" + source + "'");
         Path path = Paths.get(source);
         if (!Files.isRegularFile(path)) {
@@ -101,16 +103,16 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         return readConfigFromPath(path);
     }
 
-    private JPowerMonitorConfig readConfigFromPath(Path path) {
+    private JPowerMonitorCfg readConfigFromPath(Path path) {
         try (Reader reader = Files.newBufferedReader(path, yamlFileEncoding)) {
-            return new Yaml().loadAs(reader, JPowerMonitorConfig.class);
+            return new Yaml().loadAs(reader, JPowerMonitorCfg.class);
         } catch (Exception e) {
             System.err.println("Cannot read '" + path + "' from filesystem: " + e.getMessage());
         }
         return null;
     }
 
-    private JPowerMonitorConfig tryReadingFromResources(String source) {
+    private JPowerMonitorCfg tryReadingFromResources(String source) {
         System.out.println("Reading " + APP_TITLE + " configuration from resources: '" + source + "'");
         if (DefaultConfigProvider.class.getClassLoader().getResource(source) == null) {
             System.out.println("'" + source + "' is not available as resource");
@@ -119,9 +121,9 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         return readConfigFromResource(source);
     }
 
-    private JPowerMonitorConfig readConfigFromResource(String source) {
+    private JPowerMonitorCfg readConfigFromResource(String source) {
         try (InputStream input = DefaultConfigProvider.class.getClassLoader().getResourceAsStream(source)) {
-            return new Yaml().loadAs(input, JPowerMonitorConfig.class);
+            return new Yaml().loadAs(input, JPowerMonitorCfg.class);
         } catch (Exception exc) {
             System.out.println("Cannot read '" + source + "' from resources:" + exc.getMessage());
         }

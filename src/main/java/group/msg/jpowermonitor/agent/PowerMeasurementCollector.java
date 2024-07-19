@@ -1,5 +1,12 @@
 package group.msg.jpowermonitor.agent;
 
+import group.msg.jpowermonitor.MeasureMethod;
+import group.msg.jpowermonitor.MeasureMethodProvider;
+import group.msg.jpowermonitor.agent.export.csv.CsvResultsWriter;
+import group.msg.jpowermonitor.agent.export.prometheus.PrometheusWriter;
+import group.msg.jpowermonitor.config.DefaultConfigProvider;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
+import group.msg.jpowermonitor.config.dto.JavaAgentCfg;
 import group.msg.jpowermonitor.dto.Activity;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.MethodActivity;
@@ -22,15 +29,25 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static group.msg.jpowermonitor.agent.MeasurePower.getCurrentCpuPowerInWatts;
 import static group.msg.jpowermonitor.util.Constants.ONE_THOUSAND;
 
 /**
  * Thread for collecting power statistics.
  */
-public class PowerStatistics extends TimerTask {
+public class PowerMeasurementCollector extends TimerTask {
+    /**
+     * Power measurement method.
+     */
+    private static final MeasureMethod measureMethod;
+
+    static {
+        JPowerMonitorCfg config = new DefaultConfigProvider().readConfig(null);
+        measureMethod = MeasureMethodProvider.resolveMeasureMethod(config);
+    }
+
     private static final String CLASS_METHOD_SEPARATOR = ".";
     /**
      * Total energy consumption of application.
@@ -50,28 +67,36 @@ public class PowerStatistics extends TimerTask {
     private final long pid;
     private final ThreadMXBean threadMXBean;
     private static Set<String> packageFilter;
+    private PrometheusWriter prometheusWriter;
+    private final CsvResultsWriter csvResultsWriter;
 
-    public PowerStatistics(long measurementInterval, long gatherStatisticsInterval, long pid, ThreadMXBean threadMXBean, Set<String> packageFilter) {
-        this.measurementInterval = measurementInterval;
-        this.gatherStatisticsInterval = gatherStatisticsInterval;
+
+    public PowerMeasurementCollector(long pid, ThreadMXBean threadMXBean, JavaAgentCfg javaAgentCfg) {
+        this.measurementInterval = javaAgentCfg.getMeasurementIntervalInMs();
+        this.gatherStatisticsInterval = javaAgentCfg.getGatherStatisticsIntervalInMs();
         // cast gatherStatisticsInterval to double in order to get double values.
         this.activityToEnergyRatio = measurementInterval > 0 ? (double) this.gatherStatisticsInterval / this.measurementInterval : 0.0;
         this.pid = pid;
+
         this.threadMXBean = threadMXBean;
-        PowerStatistics.packageFilter = packageFilter;
+        PowerMeasurementCollector.packageFilter = javaAgentCfg.getPackageFilter();
+        if (javaAgentCfg.getMonitoring().getPrometheus().isEnabled()) {
+            this.prometheusWriter = new PrometheusWriter(javaAgentCfg.getMonitoring().getPrometheus());
+        }
+        this.csvResultsWriter = new CsvResultsWriter();
     }
 
     @Override
     public void run() {
-        Thread.currentThread().setName(PowerStatistics.class.getSimpleName() + " Thread");
+        Thread.currentThread().setName(PowerMeasurementCollector.class.getSimpleName() + "_Thread");
 
         Map<String, Set<MethodActivity>> methodActivityPerThread = new HashMap<>();
         Set<Thread> threads = Thread.getAllStackTraces().keySet();
 
         long duration = 0;
-        while (duration < measurementInterval) {
+        while (duration < measurementInterval) { // 1 sec
             gatherMethodActivityPerThread(methodActivityPerThread, threads);
-            duration += gatherStatisticsInterval;
+            duration += gatherStatisticsInterval; // 10 ms
             // Sleep for statisticsInterval, e.g. 10 ms
             try {
                 TimeUnit.MILLISECONDS.sleep(gatherStatisticsInterval);
@@ -81,10 +106,12 @@ public class PowerStatistics extends TimerTask {
         }
 
         // Adds current power to total energy consumption of application
-        // It's fine to treat power and energy as equal here because power is measured each second (1 joule = 1 watt / second)
-        // TODO proper conversion
         DataPoint currentPower = getCurrentCpuPowerInWatts();
-        DataPoint currentEnergy = cloneDataPointWithNewUnit(currentPower, Unit.JOULE);
+
+        // If the measurementInterval is 1000 ms = 1 sec, then it's fine to treat power and energy as equal here since power is measured each second and 1 joule = 1 watt / second.
+        // If the interval is different from 1000 ms = 1 sec, then the power will be multiplied with the measurementInterval in order to get the energy over the interval.
+        // It is assumed that the power is staying the same value for the whole interval.
+        DataPoint currentEnergy = cloneAndCalculateDataPoint(currentPower, Unit.JOULE, val -> measurementInterval != 1000L ? val * measurementInterval : val);
         energyConsumptionTotalInJoule.getAndAccumulate(currentEnergy, this::addDataPoint);
 
         // CPU time for each thread
@@ -95,7 +122,29 @@ public class PowerStatistics extends TimerTask {
         // We allocated power to each method based on activity
         allocateEnergyUsageToActivity(methodActivityPerThread, powerPerThread);
 
-        writePowerMeasurementsToCsvFiles(methodActivityPerThread);
+        List<Activity> activities = methodActivityPerThread
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+        Map<String, DataPoint> powerConsumption = aggregateActivityToDataPoints(activities, false);
+        Map<String, DataPoint> filteredPowerConsumption = aggregateActivityToDataPoints(activities, true);
+        csvResultsWriter.writePowerConsumptionPerMethod(powerConsumption);
+        csvResultsWriter.writePowerConsumptionPerMethodFiltered(filteredPowerConsumption);
+        if (prometheusWriter != null) {
+            //prometheusWriter.writePowerConsumptionPerMethod(powerConsumption);
+            prometheusWriter.writePowerConsumptionPerMethodFiltered(filteredPowerConsumption);
+        }
+    }
+
+    /**
+     * Read power data from configured measure method
+     *
+     * @return current CPU power consumption in watts as reported by measure method
+     */
+    static DataPoint getCurrentCpuPowerInWatts() {
+        return measureMethod.measureFirstConfiguredPath();
     }
 
     private static void gatherMethodActivityPerThread(Map<String, Set<MethodActivity>> methodActivityPerThread, Set<Thread> threads) {
@@ -115,11 +164,11 @@ public class PowerStatistics extends TimerTask {
 
                 Arrays.stream(stackTrace)
                     .findFirst()
-                    .map(PowerStatistics::getFullQualifiedMethodName)
+                    .map(PowerMeasurementCollector::getFullQualifiedMethodName)
                     .ifPresent(activity::setMethodQualifier);
                 Arrays.stream(stackTrace)
-                    .map(PowerStatistics::getFullQualifiedMethodName)
-                    .filter(PowerStatistics::isMethodInFilterList)
+                    .map(PowerMeasurementCollector::getFullQualifiedMethodName)
+                    .filter(PowerMeasurementCollector::isMethodInFilterList)
                     .findFirst()
                     .ifPresent(activity::setFilteredMethodQualifier);
 
@@ -158,22 +207,11 @@ public class PowerStatistics extends TimerTask {
         if (!activity.isFinalized()) {
             return;
         }
-
         energyConsumptionPerMethod.merge(
             activity.getIdentifier(false),
             getDataPointFrom(activity, false),
             this::addDataPoint
         );
-    }
-
-    private void writePowerMeasurementsToCsvFiles(Map<String, Set<MethodActivity>> methodActivityPerThread) {
-        List<Activity> activities = methodActivityPerThread
-            .values()
-            .stream()
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-        new ResultsWriter(this, false, 0.0)
-            .createPowerConsumptionPerMethodCsvAndWriteToFiles(activities);
     }
 
     public Map<String, DataPoint> getEnergyConsumptionPerMethod(boolean asFiltered) {
@@ -191,7 +229,6 @@ public class PowerStatistics extends TimerTask {
      */
     public DataPoint getDataPointFrom(Activity activity, boolean filtered) {
         Optional<Quantity> quantity = Optional.ofNullable(activity.getRepresentedQuantity());
-
         return new DataPoint(
             activity.getIdentifier(filtered),
             quantity.map(Quantity::getValue).orElse(null),
@@ -265,14 +302,16 @@ public class PowerStatistics extends TimerTask {
     }
 
     /**
-     * Clones <code>DataPoint</code> but with new <code>unit</code>
+     * Create a new <code>DataPoint</code> but with new <code>unit</code>.
+     * The <code>valueTransformer</code> can be used to calculate a new value in the new DataPoint.
      *
-     * @param dp   <code>DataPoint</code> to clone
-     * @param unit new unit
+     * @param dp               <code>DataPoint</code> to clone
+     * @param unit             new unit
+     * @param valueTransformer a calculation instruction to transform the value in the new DataPoint.
+     *                         For no transformation, specify identity <code>x -> x</code>.
      * @return <code>DataPoint</code> with new <code>unit</code>
      */
-    public DataPoint cloneDataPointWithNewUnit(@NotNull DataPoint dp, @NotNull Unit unit) {
-        return new DataPoint(dp.getName(), dp.getValue(), unit, dp.getTime(), dp.getThreadName());
+    public DataPoint cloneAndCalculateDataPoint(@NotNull DataPoint dp, @NotNull Unit unit, Function<Double, Double> valueTransformer) {
+        return new DataPoint(dp.getName(), valueTransformer.apply(dp.getValue()), unit, dp.getTime(), dp.getThreadName());
     }
-
 }

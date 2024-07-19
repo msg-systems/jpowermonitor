@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [not yet released]
+- add prometheus interface and configuration
+- fix calculation of energy for intervals different to 1sec (1 Ws = 1 J)
+- refactor all BigDecimals to Double/double values (for slightly better performance and slightly less precise results)
 - add cloud toolkit estimation
 - use double/Double instead of BigDecimal
 - refactoring of MeasureMethod hierarchy

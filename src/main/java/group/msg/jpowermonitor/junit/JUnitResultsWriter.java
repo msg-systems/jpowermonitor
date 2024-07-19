@@ -26,7 +26,7 @@ import static group.msg.jpowermonitor.util.Converter.convertWattHoursToJoule;
 /**
  * Result writer for the JUnit extension.
  */
-public class ResultsWriter {
+public class JUnitResultsWriter {
     static {
         setLocaleDependentValues();
     }
@@ -53,7 +53,7 @@ public class ResultsWriter {
         return Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? format : format.replace(';', ',');
     }
 
-    public ResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv, @Nullable Double carbonDioxideEmissionFactor) {
+    public JUnitResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv, @Nullable Double carbonDioxideEmissionFactor) {
         this.pathToResultCsv = pathToResultCsv;
         this.pathToMeasurementCsv = pathToMeasurementCsv;
         this.carbonDioxideEmissionFactor = carbonDioxideEmissionFactor;

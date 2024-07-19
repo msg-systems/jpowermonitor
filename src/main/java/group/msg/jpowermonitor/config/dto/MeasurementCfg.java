@@ -1,4 +1,4 @@
-package group.msg.jpowermonitor.config;
+package group.msg.jpowermonitor.config.dto;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import lombok.Data;
  * @see EstimationCfg
  */
 @Data
-public class Measurement {
+public class MeasurementCfg {
     private String method;
     private CsvMeasurementCfg csv;
     private LibreHardwareMonitorCfg lhm;

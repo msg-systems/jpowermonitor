@@ -52,7 +52,7 @@ measurement:
     cpuMaxWatts: 3.5
 
 # ------------------------------------------------
-# Recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
+# Recording settings for JUnit Extension only: (recordings have no effect on measured power consumption, as this is done after the test)
 csvRecording:
   # If specified, the results for every test are appended to a csv file.
   # On Windows: the file must not be opened in Excel in parallel!
@@ -73,3 +73,17 @@ javaAgent:
   gatherStatisticsIntervalInMs: 10
   # Write energy measurement results to CSV files interval in seconds.
   writeEnergyMeasurementsToCsvIntervalInS: 30
+  # ------------------------------------------------
+  # Configuration for Monitoring Interfaces
+  # Current only implementation is prometheus.
+  monitoring:
+    # Prometheus configuration
+    prometheus:
+      # Enable sending metrics to prometheus.
+      enabled: false
+      # jPowerMonitor will open a http server port on this port for supplying the measurement data to prometheus.
+      httpPort: 1234
+      # Write energy measurement results to prometheus interval in seconds.
+      writeEnergyIntervalInS: 30
+      # Publish default Prometheus JVM Metrics. This includes information about GC, memory etc.
+      publishJvmMetrics: false

@@ -3,9 +3,9 @@ package group.msg.jpowermonitor.measurement.csv;
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.agent.Unit;
-import group.msg.jpowermonitor.config.CsvColumn;
-import group.msg.jpowermonitor.config.CsvMeasurementCfg;
-import group.msg.jpowermonitor.config.JPowerMonitorConfig;
+import group.msg.jpowermonitor.config.dto.CsvColumnCfg;
+import group.msg.jpowermonitor.config.dto.CsvMeasurementCfg;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import group.msg.jpowermonitor.dto.DataPoint;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,14 +36,14 @@ import java.util.stream.Stream;
  */
 public class CommaSeparatedValuesReader implements MeasureMethod {
 
-    private final JPowerMonitorConfig config;
+    private final JPowerMonitorCfg config;
 
-    public CommaSeparatedValuesReader(JPowerMonitorConfig config) {
+    public CommaSeparatedValuesReader(JPowerMonitorCfg config) {
         this.config = config;
         initCsvConfig(config);
     }
 
-    private void initCsvConfig(JPowerMonitorConfig config) {
+    private void initCsvConfig(JPowerMonitorCfg config) {
         CsvMeasurementCfg csvConfig = config.getMeasurement().getCsv();
         Path csvInputPath = Stream.of(
                 (Supplier<Path>) () -> this.tryReadingFromFileSystem(csvConfig.getInputFile()),
@@ -101,7 +101,7 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
         Path csvInputFile = config.getMeasurement().getCsv().getInputFileAsPath();
         try {
             String[] values = readColumnsFromCsv(csvInputFile);
-            CsvColumn column = config.getMeasurement().getCsv().getColumns().get(0);
+            CsvColumnCfg column = config.getMeasurement().getCsv().getColumns().get(0);
             int retryCount = 0;
             while (values.length < column.getIndex() + 1 && retryCount++ < 3) {
                 System.err.printf("%s re-reading line since it did not contain column %s\n", DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()), column.getIndex());
@@ -199,7 +199,7 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
 
     @Override
     public @NotNull List<String> configuredSensors() {
-        return config.getMeasurement().getCsv().getColumns().stream().map(CsvColumn::getName).collect(Collectors.toList()); // only lhm
+        return config.getMeasurement().getCsv().getColumns().stream().map(CsvColumnCfg::getName).collect(Collectors.toList()); // only lhm
     }
 
     @Override

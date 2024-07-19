@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class ResultsWriterTest {
+class CsvJUnitResultsWriterTest {
     private static final String NEW_LINE = System.lineSeparator();
 
     static Stream<Arguments> l10nTestConstructorValues() {
@@ -41,9 +41,9 @@ class ResultsWriterTest {
         Files.deleteIfExists(pathToResultCsv);
         Files.deleteIfExists(pathToMeasurementCsv);
         Locale.setDefault(currentLocale);
-        ResultsWriter.setLocaleDependentValues();
+        JUnitResultsWriter.setLocaleDependentValues();
         // Act
-        new ResultsWriter(pathToResultCsv, pathToMeasurementCsv, 485.0);
+        new JUnitResultsWriter(pathToResultCsv, pathToMeasurementCsv, 485.0);
         // Assert
         assertThat(Files.readString(pathToResultCsv, StandardCharsets.UTF_8)).isEqualTo(expContentResultCsv + NEW_LINE); // trim carriage-return
         assertThat(Files.readString(pathToMeasurementCsv, StandardCharsets.UTF_8)).isEqualTo(expContentMeasurementCsv + NEW_LINE); // trim carriage-return
