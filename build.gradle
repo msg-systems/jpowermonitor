@@ -19,7 +19,7 @@ plugins {
 
 group = 'io.github.msg-systems'
 version = rootProject.file('version.txt').text.trim()
-description='JUnit Extension and Java Agent for energy consumption measurement. See also https://github.com/msg-systems/jpowermonitor'
+description = 'JUnit Extension and Java Agent for energy consumption measurement. See also https://github.com/msg-systems/jpowermonitor'
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
@@ -33,6 +33,10 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    demo
+}
+
 dependencies {
     implementation(
         [group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.3.1'],
@@ -42,6 +46,11 @@ dependencies {
         [group: 'io.prometheus', name: 'simpleclient_common', version: '0.16.0'],
         [group: 'io.prometheus', name: 'simpleclient_hotspot', version: '0.16.0'],
         [group: 'io.prometheus', name: 'simpleclient_httpserver', version: '0.16.0'],
+        [group: 'org.slf4j', name: 'slf4j-api', version: '2.0.13'],
+    )
+    demo (
+        [group: 'org.slf4j', name: 'slf4j-api', version: '2.0.13'],
+        [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.13"],
     )
     compileOnly(
         [group: 'org.jetbrains', name: 'annotations', version: "24.1.0"],
@@ -49,9 +58,8 @@ dependencies {
     )
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
-        [group: 'org.slf4j', name: 'slf4j-api', version: "2.0.13"],
+        [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.13"],
         [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.10.3"],
-        [group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.6'],
         [group: 'org.assertj', name: 'assertj-core', version: "3.26.3"]
     )
 }
@@ -62,12 +70,34 @@ apply from: "gradle/dependencyUpdates.gradle"
 apply from: "gradle/publish.gradle"
 apply from: "gradle/signing.gradle"
 apply from: "gradle/dist.gradle"
-
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 // --------------------- shadowJar
 shadowJar {
-    exclude("*.yaml")
-    exclude("logback.xml")
+    exclude("*.yaml") // exclude template.yaml
+    exclude("*.json") // exclude grafana dashboards
+    exclude("simplelogger.properties")
+    exclude("group/msg/jpowermonitor/demo")
+    exclude("group/msg/jpowermonitor/demo/*")
+    dependencies {
+        exclude(dependency('org.slf4j:slf4j-simple'))
+    }
 }
+
+tasks.register('shadowJarDemo', ShadowJar) {
+    mergeServiceFiles()
+    group = "shadow"
+    archiveBaseName = 'jpowermonitor-demo'
+    configurations = [project.configurations.demo]
+    manifest {
+        attributes('Main-Class': 'group.msg.jpowermonitor.demo.StressCpuExample')
+    }
+    from(sourceSets.main.output) {
+        include 'group/msg/jpowermonitor/demo/StressCpuExample.class' // Pfad zur gewünschten Klasse
+        include 'simplelogger.properties'
+    }
+}
+
+shadowJar.dependsOn(shadowJarDemo)
 
 // --------------------- license-report:
 import com.github.jk1.license.filter.LicenseBundleNormalizer

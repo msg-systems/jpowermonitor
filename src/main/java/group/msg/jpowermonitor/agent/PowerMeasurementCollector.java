@@ -4,7 +4,7 @@ import group.msg.jpowermonitor.MeasureMethod;
 import group.msg.jpowermonitor.MeasureMethodProvider;
 import group.msg.jpowermonitor.agent.export.csv.CsvResultsWriter;
 import group.msg.jpowermonitor.agent.export.prometheus.PrometheusWriter;
-import group.msg.jpowermonitor.config.DefaultConfigProvider;
+import group.msg.jpowermonitor.config.DefaultCfgProvider;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import group.msg.jpowermonitor.config.dto.JavaAgentCfg;
 import group.msg.jpowermonitor.dto.Activity;
@@ -13,6 +13,8 @@ import group.msg.jpowermonitor.dto.MethodActivity;
 import group.msg.jpowermonitor.dto.Quantity;
 import group.msg.jpowermonitor.util.CpuAndThreadUtils;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ThreadMXBean;
@@ -37,6 +39,7 @@ import static group.msg.jpowermonitor.util.Constants.ONE_THOUSAND;
 /**
  * Thread for collecting power statistics.
  */
+@Slf4j
 public class PowerMeasurementCollector extends TimerTask {
     /**
      * Power measurement method.
@@ -44,7 +47,7 @@ public class PowerMeasurementCollector extends TimerTask {
     private static final MeasureMethod measureMethod;
 
     static {
-        JPowerMonitorCfg config = new DefaultConfigProvider().readConfig(null);
+        JPowerMonitorCfg config = new DefaultCfgProvider().readConfig(null);
         measureMethod = MeasureMethodProvider.resolveMeasureMethod(config);
     }
 
@@ -69,6 +72,8 @@ public class PowerMeasurementCollector extends TimerTask {
     private static Set<String> packageFilter;
     private PrometheusWriter prometheusWriter;
     private final CsvResultsWriter csvResultsWriter;
+    @Setter
+    private long correctionMeasureStackActivityInMs;
 
 
     public PowerMeasurementCollector(long pid, ThreadMXBean threadMXBean, JavaAgentCfg javaAgentCfg) {
@@ -88,23 +93,18 @@ public class PowerMeasurementCollector extends TimerTask {
 
     @Override
     public void run() {
-        Thread.currentThread().setName(PowerMeasurementCollector.class.getSimpleName() + "_Thread");
-
         Map<String, Set<MethodActivity>> methodActivityPerThread = new HashMap<>();
         Set<Thread> threads = Thread.getAllStackTraces().keySet();
-
         long duration = 0;
-        while (duration < measurementInterval) { // 1 sec
+        while (duration < measurementInterval - correctionMeasureStackActivityInMs) { // 1 sec
             gatherMethodActivityPerThread(methodActivityPerThread, threads);
             duration += gatherStatisticsInterval; // 10 ms
-            // Sleep for statisticsInterval, e.g. 10 ms
-            try {
+            try { // Sleep for statisticsInterval, e.g. 10 ms
                 TimeUnit.MILLISECONDS.sleep(gatherStatisticsInterval);
             } catch (InterruptedException ex) {
-                System.err.println(ex.getLocalizedMessage());
+                log.error("sleep interrupted: {}", ex.getMessage());
             }
         }
-
         // Adds current power to total energy consumption of application
         DataPoint currentPower = getCurrentCpuPowerInWatts();
 
@@ -133,7 +133,6 @@ public class PowerMeasurementCollector extends TimerTask {
         csvResultsWriter.writePowerConsumptionPerMethod(powerConsumption);
         csvResultsWriter.writePowerConsumptionPerMethodFiltered(filteredPowerConsumption);
         if (prometheusWriter != null) {
-            //prometheusWriter.writePowerConsumptionPerMethod(powerConsumption);
             prometheusWriter.writePowerConsumptionPerMethodFiltered(filteredPowerConsumption);
         }
     }
@@ -277,7 +276,7 @@ public class PowerMeasurementCollector extends TimerTask {
         if (dp1.getUnit() == null || dp2.getUnit() == null
             || dp1.getValue() == null || dp2.getValue() == null
             || !dp1.getUnit().equals(dp2.getUnit())) {
-            System.err.println("not addable: dp1 = " + dp1 + ", dp2 = " + dp2);
+            log.warn("not addable: dp1 = " + dp1 + ", dp2 = " + dp2);
             return false;
         }
         return true;

@@ -4,6 +4,7 @@ import group.msg.jpowermonitor.JPowerMonitorException;
 import lombok.Data;
 import lombok.Getter;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -28,7 +29,7 @@ public class JPowerMonitorCfg {
     private CsvRecordingCfg csvRecording;
     private JavaAgentCfg javaAgent = new JavaAgentCfg();
 
-    // special case of constant
+    // special case of cached constants
     @Getter
     private static Double co2EmissionFactor;
 
@@ -59,11 +60,12 @@ public class JPowerMonitorCfg {
         setDefaultIfNotSet(initCycles, this::setInitCycles, 10);
         setDefaultIfNotSet(calmDownIntervalInMs, this::setCalmDownIntervalInMs, 1000);
         setDefaultIfNotSet(percentageOfSamplesAtBeginningToDiscard, this::setPercentageOfSamplesAtBeginningToDiscard, 15.0);
-
         setDefaultIfNotSet(javaAgent.getMonitoring().getPrometheus().getHttpPort(), javaAgent.getMonitoring().getPrometheus()::setHttpPort, 1234);
         setDefaultIfNotSet(javaAgent.getMonitoring().getPrometheus().getWriteEnergyIntervalInS(), javaAgent.getMonitoring().getPrometheus()::setWriteEnergyIntervalInS, 30L);
 
         setCo2EmissionFactor(Objects.requireNonNullElse(carbonDioxideEmissionFactor, 485.0));
+        setCarbonDioxideEmissionFactor(Objects.requireNonNullElse(carbonDioxideEmissionFactor, 485.0));
+        javaAgent.setPackageFilter(Objects.requireNonNullElse(javaAgent.getPackageFilter(), Collections.emptySet()));
     }
 
     public static void setCo2EmissionFactor(Double carbonDioxideEmissionFactor) {

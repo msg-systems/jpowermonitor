@@ -9,6 +9,7 @@ import group.msg.jpowermonitor.dto.Quantity;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -25,14 +26,14 @@ class PowerMeasurementCfgCollectorTest {
 
     @Test
     void areAddableTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         assertTrue(new PowerMeasurementCollector(0, null, javaAgentCfg).areDataPointsAddable(DP1, DP2));
     }
 
     @SuppressWarnings("ConstantConditions")
     @Test
     void areNotAddableFailBecauseOfValueNullTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         PowerMeasurementCollector testee = new PowerMeasurementCollector(0L, null, javaAgentCfg);
         assertThatThrownBy(() -> testee.areDataPointsAddable(DP1, null)).isInstanceOf(Exception.class);
         assertThatThrownBy(() -> testee.areDataPointsAddable(null, DP2)).isInstanceOf(Exception.class);
@@ -40,7 +41,7 @@ class PowerMeasurementCfgCollectorTest {
 
     @Test
     void areNotAddableBecauseOfValueNullTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         PowerMeasurementCollector testee = new PowerMeasurementCollector(0L, null, javaAgentCfg);
 
         DataPoint dp2 = new DataPoint("y", null, Unit.WATT, LocalDateTime.now(), null);
@@ -50,7 +51,7 @@ class PowerMeasurementCfgCollectorTest {
 
     @Test
     void areNotAddableBecauseOfUnitNullTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         PowerMeasurementCollector testee = new PowerMeasurementCollector(0L, null, javaAgentCfg);
         DataPoint dp2 = new DataPoint("y", 0.0, null, LocalDateTime.now(), null);
         assertThat(testee.areDataPointsAddable(DP1, dp2)).isFalse();
@@ -59,7 +60,7 @@ class PowerMeasurementCfgCollectorTest {
 
     @Test
     void areNotAddableBecauseOfDifferentUnitsTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         PowerMeasurementCollector testee = new PowerMeasurementCollector(0L, null, javaAgentCfg);
         DataPoint dp2 = testee.cloneAndCalculateDataPoint(DP2, Unit.WATTHOURS, x -> x);
         assertThat(testee.areDataPointsAddable(DP1, dp2)).isFalse();
@@ -67,7 +68,7 @@ class PowerMeasurementCfgCollectorTest {
 
     @Test
     void addTwoDataPointsTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         PowerMeasurementCollector testee = new PowerMeasurementCollector(0L, null, javaAgentCfg);
         DataPoint dpSum = testee.addDataPoint(DP1, DP2);
         assertThat(dpSum.getValue()).isEqualTo(DP1.getValue() + DP2.getValue());
@@ -75,7 +76,7 @@ class PowerMeasurementCfgCollectorTest {
 
     @Test
     void addMultipleDataPointsTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         PowerMeasurementCollector testee = new PowerMeasurementCollector(0L, null, javaAgentCfg);
         DataPoint dp3 = new DataPoint("x", 10.0, Unit.WATT, LocalDateTime.now(), null);
         DataPoint dp4 = new DataPoint("x", 100.0, Unit.WATT, LocalDateTime.now(), null);
@@ -85,7 +86,7 @@ class PowerMeasurementCfgCollectorTest {
 
     @Test
     void addMultipleDataPointsWithDifferentUnitsTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         PowerMeasurementCollector testee = new PowerMeasurementCollector(0L, null, javaAgentCfg);
         DataPoint dp3 = new DataPoint("x", 10.0, Unit.WATT, LocalDateTime.now(), null);
         DataPoint dp4 = new DataPoint("x", 100.0, Unit.WATTHOURS, LocalDateTime.now(), null);
@@ -95,7 +96,7 @@ class PowerMeasurementCfgCollectorTest {
 
     @Test
     void cloneWithNewUnitTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         PowerMeasurementCollector testee = new PowerMeasurementCollector(0L, null, javaAgentCfg);
         DataPoint dp3 = testee.cloneAndCalculateDataPoint(DP1, Unit.WATTHOURS, x -> x);
         assertNotEquals(dp3, DP1);
@@ -104,7 +105,7 @@ class PowerMeasurementCfgCollectorTest {
 
     @Test
     void aggregateActivityTest() {
-        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(null, 0, 0, 0, new MonitoringCfg());
+        JavaAgentCfg javaAgentCfg = new JavaAgentCfg(new HashSet<>(), 0, 0, 0, new MonitoringCfg());
         PowerMeasurementCollector testee = new PowerMeasurementCollector(0L, null, javaAgentCfg);
 
         MethodActivity ma1 = new MethodActivity();

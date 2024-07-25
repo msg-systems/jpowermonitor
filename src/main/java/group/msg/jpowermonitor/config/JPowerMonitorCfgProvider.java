@@ -9,7 +9,7 @@ import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
  * Any specific reading is part of the implementation, this might include finding the source as well
  * as caching.
  */
-public interface JPowerMonitorConfigProvider {
+public interface JPowerMonitorCfgProvider {
 
     JPowerMonitorCfg getCachedConfig() throws JPowerMonitorException;
 

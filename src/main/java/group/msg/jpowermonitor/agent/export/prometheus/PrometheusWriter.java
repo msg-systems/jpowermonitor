@@ -7,31 +7,36 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.HTTPServer;
 import io.prometheus.client.hotspot.DefaultExports;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 import static group.msg.jpowermonitor.util.Constants.APP_TITLE;
-import static group.msg.jpowermonitor.util.Constants.LOG_PREFIX;
 
+/**
+ * Prometheus Writer to write energy, co2 and power per filtered method to prometheus.
+ */
+@Slf4j
 public class PrometheusWriter implements ResultsWriter {
     protected static final String METRICS_PREFIX = APP_TITLE + "_";
-    private static final String energyConsumptionPerMethodMetricName = METRICS_PREFIX + "energy_per_method";
-    private static final String powerConsumptionPerMethodMetricName = METRICS_PREFIX + "power_per_method";
-    private static final String energyConsumptionPerFilteredMethodMetricName = METRICS_PREFIX + "energy_per_method_filtered";
-    private static final String co2ConsumptionPerFilteredMethodMetricName = METRICS_PREFIX + "co2_per_method_filtered";
-    private static final String powerConsumptionPerFilteredMethodMetricName = METRICS_PREFIX + "power_per_method_filtered";
+    private static final String ENERGY_CONSUMPTION_PER_FILTERED_METHOD_METRIC_NAME = METRICS_PREFIX + "energy_per_method_filtered";
+    private static final String CO2_CONSUMPTION_PER_FILTERED_METHOD_METRIC_NAME = METRICS_PREFIX + "co2_per_method_filtered";
+    private static final String POWER_CONSUMPTION_PER_FILTERED_METHOD_METRIC_NAME = METRICS_PREFIX + "power_per_method_filtered";
 
-    private static final String energyConsumptionPerFilteredMethodMetricHelp = "Energy for the filtered methods in Joules";
-    private static final String powerConsumptionPerFilteredMethodMetricHelp = "Power for the filtered methods in Watts";
-    private static final String co2ConsumptionPerFilteredMethodMetricHelp = "CO2 consumption of the filtered methods in grams";
+    private static final String ENERGY_CONSUMPTION_PER_FILTERED_METHOD_METRIC_HELP = "Energy for the filtered methods in Joules";
+    private static final String POWER_CONSUMPTION_PER_FILTERED_METHOD_METRIC_HELP = "Power for the filtered methods in Watts";
+    private static final String CO2_CONSUMPTION_PER_FILTERED_METHOD_METRIC_HELP = "CO2 consumption of the filtered methods in grams";
 
     private static final CollectorRegistry registry = new CollectorRegistry();
-    private static final Map<String, Gauge> gaugeMap = new HashMap<>();
+    private static final Map<String, Gauge> gaugeMap = new ConcurrentHashMap<>();
     private final long pid;
     private static HTTPServer server;
+    private static final Lock lock = new ReentrantLock();
 
     /**
      * Constructor
@@ -40,15 +45,21 @@ public class PrometheusWriter implements ResultsWriter {
      */
     public PrometheusWriter(PrometheusCfg prometheusCfg) {
         this.pid = ProcessHandle.current().pid();
-        if (PrometheusWriter.server == null) {
-            if (prometheusCfg.isPublishJvmMetrics()) {
-                DefaultExports.initialize();
-            }
-            System.out.println(LOG_PREFIX + "Opening Http Server for jPowerMonitor Prometheus Metrics on port " + prometheusCfg.getHttpPort());
+        if (lock.tryLock()) {
             try {
-                PrometheusWriter.server = new HTTPServer(prometheusCfg.getHttpPort());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                if (PrometheusWriter.server == null) {
+                    if (prometheusCfg.isPublishJvmMetrics()) {
+                        DefaultExports.initialize();
+                    }
+                    log.info("Opening Http Server for jPowerMonitor Prometheus Metrics on port " + prometheusCfg.getHttpPort());
+                    try {
+                        PrometheusWriter.server = new HTTPServer(prometheusCfg.getHttpPort());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            } finally {
+                lock.unlock();
             }
         }
     }
@@ -60,7 +71,7 @@ public class PrometheusWriter implements ResultsWriter {
 
     @Override
     public void writePowerConsumptionPerMethodFiltered(Map<String, DataPoint> measurements) {
-        registerGaugeAndSetDataPoints(powerConsumptionPerFilteredMethodMetricName, measurements, pid, DataPoint::getValue);
+        registerGaugeAndSetDataPoints(POWER_CONSUMPTION_PER_FILTERED_METHOD_METRIC_NAME, measurements, pid, DataPoint::getValue);
     }
 
     @Override
@@ -70,8 +81,8 @@ public class PrometheusWriter implements ResultsWriter {
 
     @Override
     public void writeEnergyConsumptionPerMethodFiltered(Map<String, DataPoint> measurements) {
-        registerGaugeAndSetDataPoints(energyConsumptionPerFilteredMethodMetricName, measurements, pid, DataPoint::getValue);
-        registerGaugeAndSetDataPoints(co2ConsumptionPerFilteredMethodMetricName, measurements, pid, DataPoint::getCo2Value);
+        registerGaugeAndSetDataPoints(ENERGY_CONSUMPTION_PER_FILTERED_METHOD_METRIC_NAME, measurements, pid, DataPoint::getValue);
+        registerGaugeAndSetDataPoints(CO2_CONSUMPTION_PER_FILTERED_METHOD_METRIC_NAME, measurements, pid, DataPoint::getCo2Value);
     }
 
     /**
@@ -81,6 +92,7 @@ public class PrometheusWriter implements ResultsWriter {
      * @param valueSupplier a function to get the value for the time series to be published.
      */
     public void registerGaugeAndSetDataPoints(String metric, Map<String, DataPoint> metrics, long pid, Function<DataPoint, Double> valueSupplier) {
+        log.debug("writing " + metric + ", metrics.size:" + metrics.size());
         Gauge gauge = gaugeMap.computeIfAbsent(metric,
             k -> Gauge.build()
                 .name(metric)
@@ -95,21 +107,14 @@ public class PrometheusWriter implements ResultsWriter {
     }
 
     private String helpForName(String metric) {
-        if (energyConsumptionPerFilteredMethodMetricName.equals(metric)) {
-            return energyConsumptionPerFilteredMethodMetricHelp;
-        } else if (powerConsumptionPerFilteredMethodMetricName.equals(metric)) {
-            return powerConsumptionPerFilteredMethodMetricHelp;
-        } else if (co2ConsumptionPerFilteredMethodMetricName.equals(metric)) {
-            return co2ConsumptionPerFilteredMethodMetricHelp;
+        if (ENERGY_CONSUMPTION_PER_FILTERED_METHOD_METRIC_NAME.equals(metric)) {
+            return ENERGY_CONSUMPTION_PER_FILTERED_METHOD_METRIC_HELP;
+        } else if (POWER_CONSUMPTION_PER_FILTERED_METHOD_METRIC_NAME.equals(metric)) {
+            return POWER_CONSUMPTION_PER_FILTERED_METHOD_METRIC_HELP;
+        } else if (CO2_CONSUMPTION_PER_FILTERED_METHOD_METRIC_NAME.equals(metric)) {
+            return CO2_CONSUMPTION_PER_FILTERED_METHOD_METRIC_HELP;
         } else {
             throw new IllegalArgumentException("Unknown metric. Configure help for " + metric);
         }
-    }
-
-    public void deregisterGauges() {
-        for (Gauge gauge : gaugeMap.values()) {
-            registry.unregister(gauge);
-        }
-        gaugeMap.clear();
     }
 }

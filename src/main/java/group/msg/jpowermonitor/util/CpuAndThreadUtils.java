@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor.util;
 
 import group.msg.jpowermonitor.dto.DataPoint;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ManagementFactory;
@@ -17,8 +18,9 @@ import static group.msg.jpowermonitor.util.Constants.ONE_HUNDRED;
  *
  * @author deinerj
  */
+@Slf4j
 public class CpuAndThreadUtils {
-    private static final double EST_CPU_USAGE_FALLBACK = 0.5;
+
     private static ThreadMXBean threadMXBean;
 
     @NotNull
@@ -27,7 +29,7 @@ public class CpuAndThreadUtils {
             threadMXBean = ManagementFactory.getThreadMXBean();
             // Check if CPU Time measurement is supported by the JVM. Quit otherwise
             if (!threadMXBean.isThreadCpuTimeSupported()) {
-                System.err.println("Thread CPU Time is not supported in this JVM, unable to measure energy consumption.");
+                log.error("Thread CPU Time is not supported in this JVM, unable to measure energy consumption.");
                 System.exit(1);
             }
             // Enable CPU Time measurement if it is disabled
@@ -65,40 +67,5 @@ public class CpuAndThreadUtils {
         return powerPerApplicationThread;
     }
 
-    public static double getCpuUsage() {
-        // see https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours
-        long[] ids = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getAllThreadIds();
 
-        // Init measurement start time and CPU time
-        long startTime = System.nanoTime();
-        long startCpuTime = 0L;
-        for (long id : ids) {
-            startCpuTime += CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getThreadCpuTime(id);
-        }
-
-        // Wait for 100ms
-        try {
-            TimeUnit.MILLISECONDS.sleep(100);
-        } catch (InterruptedException e) {
-            System.err.println("Sleep was interrupted, ignoring");
-        }
-
-        // End measurement and add CPU time of all threads
-        long endTime = System.nanoTime();
-        long endCpuTime = 0L;
-        for (long id : ids) {
-            endCpuTime += CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication().getThreadCpuTime(id);
-        }
-
-        // Calculate approximated CPU usage in the last 100ms
-        long elapsedCpu = endCpuTime - startCpuTime;
-        long elapsedTime = endTime - startTime;
-        double cpuUsage = (double) elapsedCpu / elapsedTime;
-
-        if (cpuUsage <= 0) { // Fallback to 0.5 (50%) if CPU usage is negative or zero
-            return EST_CPU_USAGE_FALLBACK;
-        }
-        // Fallback to 1 if CPU usage is greater than 1 - more than 100% is not possible ;)
-        return Math.min(cpuUsage, 1);
-    }
 }

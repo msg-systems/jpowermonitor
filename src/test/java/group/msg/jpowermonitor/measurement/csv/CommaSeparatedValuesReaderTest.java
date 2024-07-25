@@ -1,8 +1,8 @@
 package group.msg.jpowermonitor.measurement.csv;
 
-import group.msg.jpowermonitor.config.DefaultConfigProvider;
+import group.msg.jpowermonitor.config.DefaultCfgProvider;
+import group.msg.jpowermonitor.config.JPowerMonitorCfgProvider;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
-import group.msg.jpowermonitor.config.JPowerMonitorConfigProvider;
 import group.msg.jpowermonitor.dto.DataPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,12 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CommaSeparatedValuesReaderTest {
     @BeforeEach
     void setup() {
-        DefaultConfigProvider.invalidateCachedConfig();
+        DefaultCfgProvider.invalidateCachedConfig();
     }
 
     @Test
     void readMeasurementsFromFile() throws InterruptedException {
-        JPowerMonitorConfigProvider configProvider = new DefaultConfigProvider();
+        JPowerMonitorCfgProvider configProvider = new DefaultCfgProvider();
         configProvider.readConfig("CommaSeparatedValuesReaderTest.yaml");
         JPowerMonitorCfg config = configProvider.getCachedConfig();
         CommaSeparatedValuesReader cmr = new CommaSeparatedValuesReader(config);
@@ -38,7 +38,7 @@ class CommaSeparatedValuesReaderTest {
 
     @Test
     void readFirstLine() throws IOException {
-        JPowerMonitorConfigProvider configProvider = new DefaultConfigProvider();
+        JPowerMonitorCfgProvider configProvider = new DefaultCfgProvider();
         configProvider.readConfig("CommaSeparatedValuesReaderTest.yaml");
         JPowerMonitorCfg config = configProvider.getCachedConfig();
         CommaSeparatedValuesReader cmr = new CommaSeparatedValuesReader(config);
@@ -48,7 +48,7 @@ class CommaSeparatedValuesReaderTest {
 
     @Test
     void readUmlautsFirstLine() throws IOException {
-        JPowerMonitorConfigProvider configProvider = new DefaultConfigProvider();
+        JPowerMonitorCfgProvider configProvider = new DefaultCfgProvider();
         configProvider.readConfig("CommaSeparatedValuesReaderTest.yaml");
         JPowerMonitorCfg config = configProvider.getCachedConfig();
         CommaSeparatedValuesReader cmr = new CommaSeparatedValuesReader(config);
@@ -59,7 +59,7 @@ class CommaSeparatedValuesReaderTest {
 
     @Test
     void readLastLine() throws IOException {
-        JPowerMonitorConfigProvider configProvider = new DefaultConfigProvider();
+        JPowerMonitorCfgProvider configProvider = new DefaultCfgProvider();
         configProvider.readConfig("CommaSeparatedValuesReaderTest.yaml");
         JPowerMonitorCfg config = configProvider.getCachedConfig();
         CommaSeparatedValuesReader cmr = new CommaSeparatedValuesReader(config);
@@ -72,7 +72,7 @@ class CommaSeparatedValuesReaderTest {
         String umlauts = Files.readAllLines(Path.of("src/test/resources/umlauts.txt"), StandardCharsets.UTF_8).get(0);
         StringBuilder expectedSb = new StringBuilder("My_Last_Line_With_10.000_Xes_At_The_End," + umlauts + ";WithUmlauts;");
         IntStream.range(0, 10_000).forEach(i -> expectedSb.append("X"));
-        JPowerMonitorConfigProvider configProvider = new DefaultConfigProvider();
+        JPowerMonitorCfgProvider configProvider = new DefaultCfgProvider();
         configProvider.readConfig("CommaSeparatedValuesReaderTest.yaml");
         JPowerMonitorCfg config = configProvider.getCachedConfig();
         CommaSeparatedValuesReader cmr = new CommaSeparatedValuesReader(config);

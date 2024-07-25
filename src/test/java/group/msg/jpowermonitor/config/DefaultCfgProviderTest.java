@@ -20,15 +20,15 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 
-class DefaultConfigProviderTest {
+class DefaultCfgProviderTest {
     @BeforeEach
     void resetConfig() {
-        DefaultConfigProvider.invalidateCachedConfig();
+        DefaultCfgProvider.invalidateCachedConfig();
     }
 
     @Test
     public void readConfig_fromResourceIfNoFile() {
-        JPowerMonitorCfg cfg = new DefaultConfigProvider().readConfig("DefaultConfigProviderTest.yaml");
+        JPowerMonitorCfg cfg = new DefaultCfgProvider().readConfig("DefaultConfigProviderTest.yaml");
         assertThat(cfg).isNotNull();
 
         JPowerMonitorCfg expected = new JPowerMonitorCfg();
@@ -83,7 +83,7 @@ class DefaultConfigProviderTest {
 
     @Test
     public void readConfig_usesCaching() {
-        JPowerMonitorConfigProvider provider = new DefaultConfigProvider();
+        JPowerMonitorCfgProvider provider = new DefaultCfgProvider();
         JPowerMonitorCfg first = provider.readConfig("DefaultConfigProviderTest.yaml");
         assertThat(first).isNotNull();
         JPowerMonitorCfg second = provider.readConfig("something.else");

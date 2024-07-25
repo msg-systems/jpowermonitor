@@ -3,6 +3,8 @@ package group.msg.jpowermonitor.agent.export.csv;
 import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.agent.export.ResultsWriter;
 import group.msg.jpowermonitor.dto.DataPoint;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedWriter;
@@ -21,7 +23,11 @@ import static group.msg.jpowermonitor.util.Constants.NEW_LINE;
  *
  * @author deinerj
  */
+@Slf4j
+@Getter
 public class CsvResultsWriter implements ResultsWriter {
+    protected static final String FILE_NAME_PREFIX = APP_TITLE + "_";
+
     private static final String dataPointFormatCsv;
     private static final String dataPointFormatEnergyConsumptionCsv;
 
@@ -29,8 +35,6 @@ public class CsvResultsWriter implements ResultsWriter {
         dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s%s";
         dataPointFormatEnergyConsumptionCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s,%s,%s%s";
     }
-
-    protected static final String FILE_NAME_PREFIX = APP_TITLE + "_";
     private final String energyConsumptionPerMethodFileName;
     private final String energyConsumptionPerFilteredMethodFileName;
     private final String powerConsumptionPerMethodFileName;
@@ -45,8 +49,8 @@ public class CsvResultsWriter implements ResultsWriter {
         this.energyConsumptionPerFilteredMethodFileName = FILE_NAME_PREFIX + pid + "_energy_per_method_filtered.csv";
         this.powerConsumptionPerMethodFileName = FILE_NAME_PREFIX + pid + "_power_per_method.csv";
         this.powerConsumptionPerFilteredMethodFileName = FILE_NAME_PREFIX + pid + "_power_per_method_filtered.csv";
-        System.out.println("Energy consumption per method is written to '" + energyConsumptionPerMethodFileName + "'");
-        System.out.println("Energy consumption per filtered methods is written to '" + energyConsumptionPerFilteredMethodFileName + "'");
+        log.debug("Energy consumption per method is written to '" + energyConsumptionPerMethodFileName + "'");
+        log.debug("Energy consumption per filtered methods is written to '" + energyConsumptionPerFilteredMethodFileName + "'");
     }
 
     @Override
@@ -96,16 +100,11 @@ public class CsvResultsWriter implements ResultsWriter {
             NEW_LINE);
     }
 
-    protected void writeToFile(String csv, String fileName) {
-        writeToFile(csv, fileName, false);
-    }
-
     protected void writeToFile(String csv, String fileName, boolean append) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, append))) {
             bw.write(csv);
         } catch (IOException ex) {
-            System.err.println(ex.getLocalizedMessage());
-            ex.printStackTrace();
+            log.error(ex.getMessage(), ex);
         }
     }
 }

@@ -1,12 +1,12 @@
 package group.msg.jpowermonitor;
 
+import group.msg.jpowermonitor.config.JPowerMonitorCfgProvider;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
-import group.msg.jpowermonitor.config.JPowerMonitorConfigProvider;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
 
-public class ConfigProviderForTests implements JPowerMonitorConfigProvider {
+public class CfgProviderForTests implements JPowerMonitorCfgProvider {
 
     public JPowerMonitorCfg readConfig(Class<?> testClass) throws JPowerMonitorException {
         return readConfig(testClass.getSimpleName() + ".yaml");
@@ -14,12 +14,12 @@ public class ConfigProviderForTests implements JPowerMonitorConfigProvider {
 
     @Override
     public JPowerMonitorCfg getCachedConfig() throws JPowerMonitorException {
-        throw new JPowerMonitorException("Cache not implemented for " + ConfigProviderForTests.class);
+        throw new JPowerMonitorException("Cache not implemented for " + CfgProviderForTests.class);
     }
 
     @Override
     public JPowerMonitorCfg readConfig(String source) throws JPowerMonitorException {
-        ClassLoader cl = ConfigProviderForTests.class.getClassLoader();
+        ClassLoader cl = CfgProviderForTests.class.getClassLoader();
         try (InputStream input = cl.getResourceAsStream(source)) {
             return new Yaml().loadAs(input, JPowerMonitorCfg.class);
         } catch (Exception exc) {

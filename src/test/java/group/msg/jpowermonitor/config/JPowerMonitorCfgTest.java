@@ -1,6 +1,6 @@
 package group.msg.jpowermonitor.config;
 
-import group.msg.jpowermonitor.ConfigProviderForTests;
+import group.msg.jpowermonitor.CfgProviderForTests;
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import group.msg.jpowermonitor.config.dto.LibreHardwareMonitorCfg;
@@ -90,7 +90,7 @@ public class JPowerMonitorCfgTest {
 
     @Test
     public void testFilterSet() {
-        JPowerMonitorCfg config = new ConfigProviderForTests().readConfig(getClass());
+        JPowerMonitorCfg config = new CfgProviderForTests().readConfig(getClass());
         Set<String> packageFilter = config.getJavaAgent().getPackageFilter();
         assertThat(packageFilter.contains("com.msg")).isTrue();
         assertThat(packageFilter.contains("de.gillardon")).isTrue();
@@ -98,21 +98,21 @@ public class JPowerMonitorCfgTest {
 
     @Test
     public void testMeasurementInterval() {
-        JPowerMonitorCfg config = new ConfigProviderForTests().readConfig(getClass());
+        JPowerMonitorCfg config = new CfgProviderForTests().readConfig(getClass());
         long measurementIntervalInMs = config.getJavaAgent().getMeasurementIntervalInMs();
         assertThat(measurementIntervalInMs).isEqualTo(1000L);
     }
 
     @Test
     public void testGatherStatisticsIntervalInMsInterval() {
-        JPowerMonitorCfg config = new ConfigProviderForTests().readConfig(getClass());
+        JPowerMonitorCfg config = new CfgProviderForTests().readConfig(getClass());
         long gatherStatisticsIntervalInMs = config.getJavaAgent().getGatherStatisticsIntervalInMs();
         assertThat(gatherStatisticsIntervalInMs).isEqualTo(100L);
     }
 
     @Test
     public void testWriteEnergyMeasurementsToCsvIntervalInS() {
-        JPowerMonitorCfg config = new ConfigProviderForTests().readConfig(getClass());
+        JPowerMonitorCfg config = new CfgProviderForTests().readConfig(getClass());
         long writeEnergyMeasurementsToCsvIntervalInS = config.getJavaAgent()
             .getWriteEnergyMeasurementsToCsvIntervalInS();
         assertThat(writeEnergyMeasurementsToCsvIntervalInS).isEqualTo(20L);

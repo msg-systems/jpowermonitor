@@ -3,36 +3,36 @@ package group.msg.jpowermonitor.agent;
 import group.msg.jpowermonitor.agent.export.csv.CsvResultsWriter;
 import group.msg.jpowermonitor.agent.export.prometheus.PrometheusWriter;
 import group.msg.jpowermonitor.agent.export.statistics.StatisticsWriter;
-import group.msg.jpowermonitor.config.DefaultConfigProvider;
+import group.msg.jpowermonitor.config.DefaultCfgProvider;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import group.msg.jpowermonitor.config.dto.JavaAgentCfg;
+import group.msg.jpowermonitor.measurement.est.EstimationReader;
 import group.msg.jpowermonitor.util.Constants;
 import group.msg.jpowermonitor.util.CpuAndThreadUtils;
-import org.jetbrains.annotations.NotNull;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ThreadMXBean;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static group.msg.jpowermonitor.util.Constants.LOG_PREFIX;
 import static group.msg.jpowermonitor.util.Constants.SEPARATOR;
-
 
 /**
  * Implements java agent to introspect power consumption of any java application.
  * <br><br>
  * Usage:<br>
- * <code>java -javaagent:jpowermonitor-1.0.2-SNAPSHOT-all.jar[=path-to-jpowermonitor.yaml] -jar MyApp.jar [args]</code>
+ * <code>java -javaagent:jpowermonitor-1.0.3-SNAPSHOT-all.jar[=path-to-jpowermonitor.yaml] -jar MyApp.jar [args]</code>
  *
  * @author deinerj
  */
+@Slf4j
 public class JPowerMonitorAgent {
-    private static final int ONE_SECOND_IN_MILLIES = 1000;
-    private static Timer timer;
-    private static PowerMeasurementCollector powerMeasurementCollector;
-    private static Timer writeEnergyMeasurementResultsToCsv;
-    private static Timer writeEnergyMeasurementResultsToPrometheus;
+    private static final int ONE_SECOND_IN_MILLIS = 1000;
+    @Getter
+    private static final boolean slf4jLoggerImplPresent = !LoggerFactory.getILoggerFactory().getLogger("JPowerMonitorAgent").getName().equals("NOP");
 
     private JPowerMonitorAgent() {
     }
@@ -45,79 +45,87 @@ public class JPowerMonitorAgent {
      * @param inst java agent params
      */
     public static void premain(String args, Instrumentation inst) {
-        System.out.println("Measuring power with " + Constants.APP_TITLE + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion());
-        System.out.println(SEPARATOR);
-        ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
         long pid = ProcessHandle.current().pid();
-        JPowerMonitorCfg cfg = new DefaultConfigProvider().readConfig(args);
-        JavaAgentCfg javaAgentCfg = cfg.getJavaAgent();
-        System.out.println(LOG_PREFIX + Thread.currentThread().getName() + ": Start monitoring application with PID " + pid);
+        String appInfo = "Measuring power with " + Constants.APP_TITLE + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion() + "(" + pid + ")";
 
+        if (isSlf4jLoggerImplPresent()) {
+            log.info(appInfo);
+        } else {
+            System.out.println(appInfo);
+        }
+        log.info(SEPARATOR);
+        ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
+        JPowerMonitorCfg cfg = new DefaultCfgProvider().readConfig(args);
+        JavaAgentCfg javaAgentCfg = cfg.getJavaAgent();
+        log.debug("Start monitoring application with PID " + pid + ", javaAgentCfg.getMeasurementIntervalInMs():" + javaAgentCfg.getMeasurementIntervalInMs());
         // TimerTask to calculate power consumption per thread at runtime using a configurable measurement interval
         // start Timer as daemon thread, so that it does not prevent applications from stopping
-        timer = new Timer("PowerStatistics-Thread", true);
-        powerMeasurementCollector = new PowerMeasurementCollector(pid, threadMXBean, javaAgentCfg);
-        timer.schedule(powerMeasurementCollector, javaAgentCfg.getGatherStatisticsIntervalInMs(), javaAgentCfg.getGatherStatisticsIntervalInMs());
+        Timer powerMeasurementTimer = new Timer("PowerMeasurementCollector", true);
+        Timer energyToCsvTimer = new Timer("CsvResultsWriter", true);
+        Timer energyToPrometheusTimer = new Timer("PrometheusWriter", true);
 
+        PowerMeasurementCollector powerMeasurementCollector = new PowerMeasurementCollector(pid, threadMXBean, javaAgentCfg);
+        if (cfg.getMeasurement().getMethod().equalsIgnoreCase("est")) {
+            // as the estimation method is sleeping for a certain time while measuring the power, correct the wait time
+            // in the power measure collector by that period of time.
+            powerMeasurementCollector.setCorrectionMeasureStackActivityInMs(EstimationReader.MEASURE_TIME_ESTIMATION_MS);
+
+            // for the other methods there is also a small delay depending on the hardware running on. This may vary between 10 and 40 ms.
+            // Ignore this for the moment...
+        }
+        long delayAndPeriodPmc = javaAgentCfg.getMeasurementIntervalInMs();
+        powerMeasurementTimer.schedule(powerMeasurementCollector, delayAndPeriodPmc, delayAndPeriodPmc);
+        log.debug("Scheduled PowerMeasurementCollector with delay " + delayAndPeriodPmc + "ms and period " + delayAndPeriodPmc + "ms");
         // TimerTask to write energy measurement statistics to CSV files while application still running
         if (javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() > 0) {
-            CsvResultsWriter rw = new CsvResultsWriter();
+            CsvResultsWriter cw = new CsvResultsWriter();
+            long delayAndPeriodCw = javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * ONE_SECOND_IN_MILLIS;
             // start Timer as daemon thread, so that it does not prevent applications from stopping
-            writeEnergyMeasurementResultsToCsv = new Timer("ResultsWriter", true);
-            writeEnergyMeasurementResultsToCsv.schedule(
+            energyToCsvTimer.schedule(
                 new TimerTask() {
                     @Override
                     public void run() {
-                        rw.writeEnergyConsumptionPerMethod(powerMeasurementCollector.getEnergyConsumptionPerMethod(false));
-                        rw.writeEnergyConsumptionPerMethodFiltered(powerMeasurementCollector.getEnergyConsumptionPerMethod(true));
+                        cw.writeEnergyConsumptionPerMethod(powerMeasurementCollector.getEnergyConsumptionPerMethod(false));
+                        cw.writeEnergyConsumptionPerMethodFiltered(powerMeasurementCollector.getEnergyConsumptionPerMethod(true));
                     }
-                }, javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * ONE_SECOND_IN_MILLIES,
-                javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() * ONE_SECOND_IN_MILLIES);
+                }, delayAndPeriodCw, delayAndPeriodCw);
+            log.debug("Scheduled CsvResultsWriter with delay " + delayAndPeriodCw + "ms and period " + delayAndPeriodCw + "ms");
         }
         if (javaAgentCfg.getMonitoring().getPrometheus().isEnabled()) {
-            writeEnergyMeasurementResultsToPrometheus = new Timer("PrometheusWriter", true);
             PrometheusWriter pw = new PrometheusWriter(javaAgentCfg.getMonitoring().getPrometheus());
-            writeEnergyMeasurementResultsToPrometheus.schedule(
+            long delayAndPeriodPw = javaAgentCfg.getMonitoring().getPrometheus().getWriteEnergyIntervalInS() * ONE_SECOND_IN_MILLIS;
+            energyToPrometheusTimer.schedule(
                 new TimerTask() {
                     @Override
                     public void run() {
-                        // pw.writeEnergyConsumptionPerMethod(powerMeasurementCollector.getEnergyConsumptionPerMethod(false));
                         pw.writeEnergyConsumptionPerMethodFiltered(powerMeasurementCollector.getEnergyConsumptionPerMethod(true));
                     }
-                }, javaAgentCfg.getMonitoring().getPrometheus().getWriteEnergyIntervalInS() * ONE_SECOND_IN_MILLIES,
-                javaAgentCfg.getMonitoring().getPrometheus().getWriteEnergyIntervalInS() * ONE_SECOND_IN_MILLIES);
+                }, delayAndPeriodPw, delayAndPeriodPw);
+            log.debug("Scheduled PrometheusWriter with delay " + delayAndPeriodPw + "ms and period " + delayAndPeriodPw + "ms");
         }
+
         // Gracefully stop measurement at application shutdown
         Runtime.getRuntime().addShutdownHook(
             new Thread(() -> {
-                powerMeasurementCollector.cancel();
-                timer.cancel();
-                timer.purge();
-                if (writeEnergyMeasurementResultsToCsv != null) {
-                    writeEnergyMeasurementResultsToCsv.cancel();
-                    writeEnergyMeasurementResultsToCsv.purge();
-                }
-                if (writeEnergyMeasurementResultsToPrometheus != null) {
-                    writeEnergyMeasurementResultsToPrometheus.cancel();
-                    writeEnergyMeasurementResultsToPrometheus.purge();
-                }
-                System.out.println("Power measurement ended gracefully");
+                powerMeasurementTimer.cancel();
+                powerMeasurementTimer.purge();
+                energyToCsvTimer.cancel();
+                energyToCsvTimer.purge();
+                energyToPrometheusTimer.cancel();
+                energyToPrometheusTimer.purge();
+                log.info("Power measurement ended gracefully");
             })
         );
-
-        // At shutdown write last results to CSV files
-        Runtime.getRuntime().addShutdownHook(new Thread(createEnergyConsumptionWriter(cfg)));
-        // at shutdown write statistics
-        Thread statisticsThread = new Thread(() -> new StatisticsWriter(powerMeasurementCollector).writeStatistics(System.out::println));
-        Runtime.getRuntime().addShutdownHook(statisticsThread);
-    }
-
-    private static @NotNull Runnable createEnergyConsumptionWriter(JPowerMonitorCfg cfg) {
-        // At shutdown write missing power metrics since last scheduled call.
-        return () -> {
+        // at shutdown write last results to CSV files and write statistics
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             CsvResultsWriter rw = new CsvResultsWriter();
             rw.writeEnergyConsumptionPerMethod(powerMeasurementCollector.getEnergyConsumptionPerMethod(false));
             rw.writeEnergyConsumptionPerMethodFiltered(powerMeasurementCollector.getEnergyConsumptionPerMethod(true));
-        };
+            new StatisticsWriter(powerMeasurementCollector).writeStatistics(rw);
+        }));
+    }
+
+    public static void agentmain(String args, Instrumentation inst) {
+        premain(args, inst);
     }
 }

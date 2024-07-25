@@ -7,6 +7,7 @@ import group.msg.jpowermonitor.config.dto.CsvColumnCfg;
 import group.msg.jpowermonitor.config.dto.CsvMeasurementCfg;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import group.msg.jpowermonitor.dto.DataPoint;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -34,8 +35,8 @@ import java.util.stream.Stream;
  *
  * @see MeasureMethod
  */
+@Slf4j
 public class CommaSeparatedValuesReader implements MeasureMethod {
-
     private final JPowerMonitorCfg config;
 
     public CommaSeparatedValuesReader(JPowerMonitorCfg config) {
@@ -57,7 +58,7 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
     }
 
     public Path findFileIgnoringCase(Path path, String fileName) {
-        System.out.println("Reading csv input file from given source '" + fileName + "' on path " + path);
+        log.info("Reading csv input file from given source '{}' on path {}", fileName, path);
         if (!Files.isDirectory(path)) {
             throw new IllegalArgumentException("Path must be a directory!");
         }
@@ -72,26 +73,26 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
     }
 
     private Path tryReadingFromFileSystem(String source) {
-        System.out.println("Reading csv input file from filesystem: '" + source + "'");
+        log.info("Reading csv input file from file system: '{}'", source);
         Path path = Paths.get(source);
         if (!Files.isRegularFile(path) || !Files.isReadable(path)) {
-            System.out.println("'" + source + "' is not a regular file or not readable, it will not be read from filesystem");
+            log.info("'{}' is not a regular file or not readable, it will not be read from filesystem", source);
             return null;
         }
         return path;
     }
 
     private Path tryReadingFromResources(String source) {
-        System.out.println("Reading csv input file from resources: '" + source + "'");
+        log.info("Reading csv input file from resources: '{}'", source);
         URL inputUrl = CommaSeparatedValuesReader.class.getClassLoader().getResource(source);
         if (inputUrl == null) {
-            System.out.println("'" + source + "' is not available as resource");
+            log.info("'{}' is not available as resource", source);
             return null;
         }
         try {
             return Paths.get(inputUrl.toURI());
         } catch (URISyntaxException e) {
-            System.out.println("'" + source + "' URL cannot be converted to URI");
+            log.info("'{}' URL cannot be converted to URI", source);
             return null;
         }
     }
@@ -104,7 +105,7 @@ public class CommaSeparatedValuesReader implements MeasureMethod {
             CsvColumnCfg column = config.getMeasurement().getCsv().getColumns().get(0);
             int retryCount = 0;
             while (values.length < column.getIndex() + 1 && retryCount++ < 3) {
-                System.err.printf("%s re-reading line since it did not contain column %s\n", DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()), column.getIndex());
+                log.warn("{} re-reading line since it did not contain column {}", DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now()), column.getIndex());
                 TimeUnit.SECONDS.sleep(1L);
                 values = readColumnsFromCsv(csvInputFile);
             }

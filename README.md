@@ -84,10 +84,18 @@ For non current measuring sensors (e.g. temperature) the base load is not calcul
 #### Java Agent
 - You may build the jpowermonitor fat jar using the build target `shadowJar` and the copy the `-all.jar` into a folder of your project.
 - You can use this jar for the java agent. Alternatively you may download the fat jar from mvn central [here](https://repo.maven.apache.org/maven2/io/github/msg-systems/jpowermonitor/).
-- For testing call with `java -javaagent:.\build\libs\jpowermonitor-<version>-all.jar[=path-to-jpowermonitor.yaml] -jar .\build\libs\jpowermonitor-<version>-all.jar [runtimeSeconds] [cpuThreads]`
-- The second `.\build\libs\jpowermonitor-<version>-all.jar` is just an example and can be replaced by any `jar` of your choice
+- For testing call with `java -javaagent:.\build\libs\jpowermonitor-<version>-all.jar[=path-to-jpowermonitor.yaml] -jar .\build\libs\jpowermonitor-demo-<version>.jar [runtimeSeconds] [cpuThreads]`
+- The `.\build\libs\jpowermonitor-demo-<version>.jar` is just an example and can be replaced by any `jar` of your choice
 - The configuration can be passed as a parameter using the `=` sign! If nothing is passed, the default configuration file `jpowermonitor.yaml` is searched.
 - For starting the agent with Spring Boot, Servlet-Container etc. please consult the respective documentation for adding a java agent.
+  - e.g. for use with gradle and Spring Boot you may use
+   ``` 
+    bootRun {
+      jvmArgs += ["-javaagent:./lib/jpowermonitor-1.3.0-all.jar=./lib/jpowermonitor.yaml"]
+    }
+    ```
+   in your gradle script.
+
 
 <span id="JunitTests"><span>
 #### JUnit Tests
@@ -156,8 +164,6 @@ You may specify the following additional attributes:
 `topk(5, sort_desc(sum by(method) (jPowerMonitor_energy_per_method_filtered{pid="27712", job=~"jPowerMonitor"})))`
 * thread - get only data for one thread:
   `topk(5, sort_desc(sum by(method) (jPowerMonitor_energy_per_method_filtered{thread="main", job=~"jPowerMonitor"})))`
-
-
 
 
 

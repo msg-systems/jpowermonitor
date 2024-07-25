@@ -4,6 +4,7 @@ import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.agent.Unit;
 import group.msg.jpowermonitor.dto.DataPoint;
 import group.msg.jpowermonitor.dto.SensorValue;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +27,9 @@ import static group.msg.jpowermonitor.util.Converter.convertWattHoursToJoule;
 /**
  * Result writer for the JUnit extension.
  */
+@Slf4j
 public class JUnitResultsWriter {
+
     static {
         setLocaleDependentValues();
     }
@@ -53,7 +56,7 @@ public class JUnitResultsWriter {
         return Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? format : format.replace(';', ',');
     }
 
-    public JUnitResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv, @Nullable Double carbonDioxideEmissionFactor) {
+    public JUnitResultsWriter(@Nullable Path pathToResultCsv, @Nullable Path pathToMeasurementCsv, @NotNull Double carbonDioxideEmissionFactor) {
         this.pathToResultCsv = pathToResultCsv;
         this.pathToMeasurementCsv = pathToMeasurementCsv;
         this.carbonDioxideEmissionFactor = carbonDioxideEmissionFactor;
@@ -78,7 +81,7 @@ public class JUnitResultsWriter {
             if (fileToCreate.toFile().getParentFile() != null) {
                 boolean createdDir = fileToCreate.toFile().getParentFile().mkdirs();
                 if (createdDir) {
-                    System.out.println("Created directory for writing the csv file to: " + fileToCreate.toFile().getParentFile().getAbsolutePath());
+                    log.debug("Created directory for writing the csv file to: " + fileToCreate.toFile().getParentFile().getAbsolutePath());
                 }
             }
             Files.createFile(fileToCreate);
@@ -157,8 +160,7 @@ public class JUnitResultsWriter {
         try {
             Files.writeString(path, lineToAppend, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
         } catch (IOException e) {
-            System.err.println("Unable to append to csv file: " + path);
-            e.printStackTrace();
+            log.error("Unable to append to csv file: " + path, e);
         }
     }
 }

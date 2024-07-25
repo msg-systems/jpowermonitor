@@ -1,8 +1,8 @@
 package group.msg.jpowermonitor.measurement.est;
 
-import group.msg.jpowermonitor.config.DefaultConfigProvider;
+import group.msg.jpowermonitor.config.DefaultCfgProvider;
+import group.msg.jpowermonitor.config.JPowerMonitorCfgProvider;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
-import group.msg.jpowermonitor.config.JPowerMonitorConfigProvider;
 import group.msg.jpowermonitor.dto.DataPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -25,14 +25,14 @@ import java.util.stream.IntStream;
 class EstimationReaderTest {
     @BeforeEach
     void setup() {
-        DefaultConfigProvider.invalidateCachedConfig();
+        DefaultCfgProvider.invalidateCachedConfig();
     }
 
     volatile boolean threadIsStopped = false;
 
     @Test
     void testEstimateWattageBasedOnCpuUsage() throws ExecutionException, InterruptedException, TimeoutException {
-        JPowerMonitorConfigProvider configProvider = new DefaultConfigProvider();
+        JPowerMonitorCfgProvider configProvider = new DefaultCfgProvider();
         configProvider.readConfig("EstimationReaderTest.yaml");
         ExecutorService executor = Executors.newSingleThreadExecutor(); // cannot use try with resources here, since we use JDK 11 for compilation.
         try {
@@ -50,14 +50,14 @@ class EstimationReaderTest {
         }
     }
 
-    private Callable<String> createMeasureThread(JPowerMonitorConfigProvider configProvider) {
+    private Callable<String> createMeasureThread(JPowerMonitorCfgProvider configProvider) {
         JPowerMonitorCfg config = configProvider.getCachedConfig();
         EstimationReader cmr = new EstimationReader(config);
         return () -> {
             try {
                 while (!threadIsStopped) {
                     DataPoint dataPoint = cmr.measureFirstConfiguredPath();
-                    System.out.println("cpuMeasure: " + dataPoint);
+                    log.info("cpuMeasure: " + dataPoint);
                     Assertions.assertTrue(config.getMeasurement().getEst().getCpuMinWatts() <= dataPoint.getValue()
                                           && dataPoint.getValue() <= config.getMeasurement().getEst().getCpuMaxWatts(),
                         "Value must be between configured min and max value.");
@@ -74,7 +74,7 @@ class EstimationReaderTest {
         try {
             TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
-            System.out.println("ignore InterruptedException");
+            log.error("ignore InterruptedException");
         }
     }
 }

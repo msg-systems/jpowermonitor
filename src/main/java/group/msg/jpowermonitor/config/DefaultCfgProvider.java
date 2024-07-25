@@ -2,6 +2,7 @@ package group.msg.jpowermonitor.config;
 
 import group.msg.jpowermonitor.JPowerMonitorException;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
@@ -18,7 +19,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static group.msg.jpowermonitor.util.Constants.APP_TITLE;
-import static group.msg.jpowermonitor.util.Constants.LOG_PREFIX;
 
 /**
  * Default configuration provider preferring file system to resources.
@@ -36,12 +36,13 @@ import static group.msg.jpowermonitor.util.Constants.LOG_PREFIX;
  * <li>If nothing was found, throw an exception.</li>
  * </ul>
  */
-public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
+@Slf4j
+public class DefaultCfgProvider implements JPowerMonitorCfgProvider {
     private static final String DEFAULT_CONFIG = APP_TITLE + ".yaml";
     private final Charset yamlFileEncoding;
     private static JPowerMonitorCfg cachedConfig = null;
 
-    public DefaultConfigProvider() {
+    public DefaultCfgProvider() {
         this.yamlFileEncoding = StandardCharsets.UTF_8;
     }
 
@@ -64,40 +65,40 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
     @NotNull
     private JPowerMonitorCfg acquireConfigFromSource(String source) {
         JPowerMonitorCfg cfg = Stream.of(
-                        (Supplier<JPowerMonitorCfg>) () -> this.tryReadingFromFileSystem(source),
-                        () -> this.tryReadingFromResources(source),
-                        () -> {
-                            Path conf = findFileIgnoringCase(Path.of("."), DEFAULT_CONFIG);
-                            return this.readConfigFromPath(conf);
-                        })
-                .map(Supplier::get)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElseThrow(() -> new JPowerMonitorException(String.format("Unable to read %s configuration from source '%s'", APP_TITLE, source)));
+                (Supplier<JPowerMonitorCfg>) () -> this.tryReadingFromFileSystem(source),
+                () -> this.tryReadingFromResources(source),
+                () -> {
+                    Path conf = findFileIgnoringCase(Path.of("."), DEFAULT_CONFIG);
+                    return this.readConfigFromPath(conf);
+                })
+            .map(Supplier::get)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElseThrow(() -> new JPowerMonitorException(String.format("Unable to read %s configuration from source '%s'", APP_TITLE, source)));
         cfg.initializeConfiguration();
         return cfg;
     }
 
     public Path findFileIgnoringCase(Path path, String fileName) {
-        System.out.println(LOG_PREFIX + "Reading " + APP_TITLE + " configuration from given source '" + fileName + "' on path " + path);
+        log.info("Reading " + APP_TITLE + " configuration from given source '" + fileName + "' on path " + path);
         if (!Files.isDirectory(path)) {
             throw new IllegalArgumentException("Path must be a directory!");
         }
         try (Stream<Path> walk = Files.walk(path)) {
             return walk
-                    .filter(Files::isReadable)
-                    .filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().equalsIgnoreCase(fileName)).findFirst().orElse(null);
+                .filter(Files::isReadable)
+                .filter(Files::isRegularFile)
+                .filter(p -> p.getFileName().toString().equalsIgnoreCase(fileName)).findFirst().orElse(null);
         } catch (IOException e) {
             return null;
         }
     }
 
     private JPowerMonitorCfg tryReadingFromFileSystem(String source) {
-        System.out.println("Reading " + APP_TITLE + " configuration from filesystem: '" + source + "'");
+        log.info("Reading " + APP_TITLE + " configuration from filesystem: '" + source + "'");
         Path path = Paths.get(source);
         if (!Files.isRegularFile(path)) {
-            System.out.println("'" + source + "' is not a regular file, it will not be read from filesystem");
+            log.error("'" + source + "' is not a regular file, it will not be read from filesystem");
             return null;
         }
         return readConfigFromPath(path);
@@ -107,25 +108,25 @@ public class DefaultConfigProvider implements JPowerMonitorConfigProvider {
         try (Reader reader = Files.newBufferedReader(path, yamlFileEncoding)) {
             return new Yaml().loadAs(reader, JPowerMonitorCfg.class);
         } catch (Exception e) {
-            System.err.println("Cannot read '" + path + "' from filesystem: " + e.getMessage());
+            log.error("Cannot read '" + path + "' from filesystem: " + e.getMessage());
         }
         return null;
     }
 
     private JPowerMonitorCfg tryReadingFromResources(String source) {
-        System.out.println("Reading " + APP_TITLE + " configuration from resources: '" + source + "'");
-        if (DefaultConfigProvider.class.getClassLoader().getResource(source) == null) {
-            System.out.println("'" + source + "' is not available as resource");
+        log.info("Reading " + APP_TITLE + " configuration from resources: '" + source + "'");
+        if (DefaultCfgProvider.class.getClassLoader().getResource(source) == null) {
+            log.info("'" + source + "' is not available as resource");
             return null;
         }
         return readConfigFromResource(source);
     }
 
     private JPowerMonitorCfg readConfigFromResource(String source) {
-        try (InputStream input = DefaultConfigProvider.class.getClassLoader().getResourceAsStream(source)) {
+        try (InputStream input = DefaultCfgProvider.class.getClassLoader().getResourceAsStream(source)) {
             return new Yaml().loadAs(input, JPowerMonitorCfg.class);
         } catch (Exception exc) {
-            System.out.println("Cannot read '" + source + "' from resources:" + exc.getMessage());
+            log.error("Cannot read '" + source + "' from resources:" + exc.getMessage());
         }
         return null;
     }

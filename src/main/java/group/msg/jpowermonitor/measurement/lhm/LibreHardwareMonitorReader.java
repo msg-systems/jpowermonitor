@@ -75,7 +75,7 @@ public class LibreHardwareMonitorReader implements MeasureMethod {
             // the config assures that getPaths is not null and has at least one element!
             return client.execute(new HttpGet(lhmConfig.getUrl()), response -> getDataPoint(response, lhmConfig.getPaths().get(0)));
         } catch (IOException e) {
-            throw new JPowerMonitorException("Unable to reach Libre Hardware Monitor at url: " + lhmConfig.getUrl() + "!", e);
+            throw new JPowerMonitorException("Unable to reach Libre Hardware Monitor at url: " + lhmConfig.getUrl() + "!");
         }
     }
 

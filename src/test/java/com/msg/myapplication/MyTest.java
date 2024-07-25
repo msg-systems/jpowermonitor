@@ -4,7 +4,6 @@ import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
 import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
 import lombok.extern.slf4j.Slf4j;
-
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
