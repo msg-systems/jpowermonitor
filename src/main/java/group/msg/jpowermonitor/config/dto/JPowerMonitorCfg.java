@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static group.msg.jpowermonitor.config.dto.MeasureMethodKey.CSV;
+import static group.msg.jpowermonitor.config.dto.MeasureMethodKey.EST;
+import static group.msg.jpowermonitor.config.dto.MeasureMethodKey.LHM;
+
 /**
  * Data class for jPowerMonitor configuration.
  * Includes all configuration values.
@@ -37,7 +41,8 @@ public class JPowerMonitorCfg {
         if (measurement == null || measurement.getMethod() == null) {
             throw new JPowerMonitorException("A measuring method must be defined!");
         }
-        if ("lhm".equals(measurement.getMethod())) {
+        MeasureMethodKey measureMethod = measurement.getMethodKey();
+        if (LHM.equals(measureMethod)) {
             if (measurement.getLhm() == null || measurement.getLhm().getUrl() == null) {
                 throw new JPowerMonitorException("Libre Hardware Monitor REST endpoint URL must be configured");
             }
@@ -50,9 +55,13 @@ public class JPowerMonitorCfg {
                 || pathElems.get(0).getPath().isEmpty()) {
                 throw new JPowerMonitorException("At least one path to a sensor value must be configured under paths");
             }
-        } else {
+        } else if (CSV.equals(measureMethod)) {
             if (measurement.getCsv() == null || measurement.getCsv().getInputFile() == null || measurement.getCsv().getColumns() == null || measurement.getCsv().getColumns().isEmpty()) {
                 throw new JPowerMonitorException("CSV input filepath and columns must be configured");
+            }
+        } else if (EST.equals(measureMethod)) {
+            if (measurement.getEst() == null || measurement.getEst().getCpuMinWatts() == null || measurement.getEst().getCpuMaxWatts() == null) {
+                throw new JPowerMonitorException("EST cpuMinWatts and cpuMaxWatts must be configured");
             }
         }
         setDefaultIfNotSet(samplingIntervalInMs, this::setSamplingIntervalInMs, 300);

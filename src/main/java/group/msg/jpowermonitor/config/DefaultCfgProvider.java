@@ -1,6 +1,7 @@
 package group.msg.jpowermonitor.config;
 
 import group.msg.jpowermonitor.JPowerMonitorException;
+import group.msg.jpowermonitor.agent.JPowerMonitorAgent;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -80,7 +81,10 @@ public class DefaultCfgProvider implements JPowerMonitorCfgProvider {
     }
 
     public Path findFileIgnoringCase(Path path, String fileName) {
-        log.info("Reading " + APP_TITLE + " configuration from given source '" + fileName + "' on path " + path);
+        log.info("Reading {} configuration from given source '{}' on path {}", APP_TITLE, fileName, path);
+        if (!JPowerMonitorAgent.isSlf4jLoggerImplPresent()) {
+            System.out.println("Reading " + APP_TITLE + " configuration from given source '" + fileName + "' on path " + path);
+        }
         if (!Files.isDirectory(path)) {
             throw new IllegalArgumentException("Path must be a directory!");
         }
@@ -108,7 +112,10 @@ public class DefaultCfgProvider implements JPowerMonitorCfgProvider {
         try (Reader reader = Files.newBufferedReader(path, yamlFileEncoding)) {
             return new Yaml().loadAs(reader, JPowerMonitorCfg.class);
         } catch (Exception e) {
-            log.error("Cannot read '" + path + "' from filesystem: " + e.getMessage());
+            log.error("Cannot read '{}' from filesystem: {}", path, e.getMessage());
+            if (!JPowerMonitorAgent.isSlf4jLoggerImplPresent()) {
+                System.err.println("Cannot read '" + path + "' from filesystem: " + e.getMessage());
+            }
         }
         return null;
     }
@@ -125,8 +132,11 @@ public class DefaultCfgProvider implements JPowerMonitorCfgProvider {
     private JPowerMonitorCfg readConfigFromResource(String source) {
         try (InputStream input = DefaultCfgProvider.class.getClassLoader().getResourceAsStream(source)) {
             return new Yaml().loadAs(input, JPowerMonitorCfg.class);
-        } catch (Exception exc) {
-            log.error("Cannot read '" + source + "' from resources:" + exc.getMessage());
+        } catch (Exception e) {
+            log.error("Cannot read '{}' from resources: {}", source, e.getMessage());
+            if (!JPowerMonitorAgent.isSlf4jLoggerImplPresent()) {
+                System.err.println("Cannot read '" + source + "' from resources: " + e.getMessage());
+            }
         }
         return null;
     }

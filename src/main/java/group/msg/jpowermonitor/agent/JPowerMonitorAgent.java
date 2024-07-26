@@ -6,6 +6,7 @@ import group.msg.jpowermonitor.agent.export.statistics.StatisticsWriter;
 import group.msg.jpowermonitor.config.DefaultCfgProvider;
 import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
 import group.msg.jpowermonitor.config.dto.JavaAgentCfg;
+import group.msg.jpowermonitor.config.dto.MeasureMethodKey;
 import group.msg.jpowermonitor.measurement.est.EstimationReader;
 import group.msg.jpowermonitor.util.Constants;
 import group.msg.jpowermonitor.util.CpuAndThreadUtils;
@@ -46,7 +47,13 @@ public class JPowerMonitorAgent {
      */
     public static void premain(String args, Instrumentation inst) {
         long pid = ProcessHandle.current().pid();
-        String appInfo = "Measuring power with " + Constants.APP_TITLE + ", Version " + JPowerMonitorAgent.class.getPackage().getImplementationVersion() + "(" + pid + ")";
+        JPowerMonitorCfg cfg = new DefaultCfgProvider().readConfig(args);
+        MeasureMethodKey measureMethodKey = cfg.getMeasurement().getMethodKey();
+        String appInfo = String.format("Measuring power with %s, Version %s (Pid: %s) using measure method '%s'",
+            Constants.APP_TITLE,
+            JPowerMonitorAgent.class.getPackage().getImplementationVersion(),
+            pid,
+            measureMethodKey.getName());
 
         if (isSlf4jLoggerImplPresent()) {
             log.info(appInfo);
@@ -55,7 +62,7 @@ public class JPowerMonitorAgent {
         }
         log.info(SEPARATOR);
         ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
-        JPowerMonitorCfg cfg = new DefaultCfgProvider().readConfig(args);
+
         JavaAgentCfg javaAgentCfg = cfg.getJavaAgent();
         log.debug("Start monitoring application with PID " + pid + ", javaAgentCfg.getMeasurementIntervalInMs():" + javaAgentCfg.getMeasurementIntervalInMs());
         // TimerTask to calculate power consumption per thread at runtime using a configurable measurement interval
@@ -65,7 +72,7 @@ public class JPowerMonitorAgent {
         Timer energyToPrometheusTimer = new Timer("PrometheusWriter", true);
 
         PowerMeasurementCollector powerMeasurementCollector = new PowerMeasurementCollector(pid, threadMXBean, javaAgentCfg);
-        if (cfg.getMeasurement().getMethod().equalsIgnoreCase("est")) {
+        if (MeasureMethodKey.EST.equals(measureMethodKey)) {
             // as the estimation method is sleeping for a certain time while measuring the power, correct the wait time
             // in the power measure collector by that period of time.
             powerMeasurementCollector.setCorrectionMeasureStackActivityInMs(EstimationReader.MEASURE_TIME_ESTIMATION_MS);
