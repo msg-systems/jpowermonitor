@@ -65,12 +65,12 @@ public class CsvResultsWriter implements ResultsWriter {
 
     @Override
     public void writeEnergyConsumptionPerMethod(Map<String, DataPoint> measurements) {
-        writeToFile(createCsv(measurements), energyConsumptionPerMethodFileName, true);
+        writeToFile(createCsv(measurements), energyConsumptionPerMethodFileName, false);
     }
 
     @Override
     public void writeEnergyConsumptionPerMethodFiltered(Map<String, DataPoint> measurements) {
-        writeToFile(createCsv(measurements), energyConsumptionPerFilteredMethodFileName, true);
+        writeToFile(createCsv(measurements), energyConsumptionPerFilteredMethodFileName, false);
     }
 
     protected String createCsv(Map<String, DataPoint> measurements) {
