@@ -10,6 +10,7 @@ import io.prometheus.client.hotspot.DefaultExports;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
@@ -37,6 +38,8 @@ public class PrometheusWriter implements ResultsWriter {
     private final long pid;
     private static HTTPServer server;
     private static final Lock lock = new ReentrantLock();
+    // keep in mind the last run in order to find out, if a timeseries is not provided with values any more.
+    private static final Map<String, Map<String, DataPoint>> lastRun = new HashMap<>();
 
     /**
      * Constructor
@@ -104,6 +107,29 @@ public class PrometheusWriter implements ResultsWriter {
             //                       pid,                   thread,             method            time series value
             gauge.labels(String.valueOf(pid), dp.getThreadName(), dp.getName()).set(valueSupplier.apply(dp));
         }
+        if (lastRun.get(metric) != null) {
+            // compare and remove all missing...
+            Map<String, DataPoint> missing = findMissingDatapointsInCurrentRun(metrics, lastRun.get(metric));
+            for (Map.Entry<String, DataPoint> entry : missing.entrySet()) {
+                DataPoint dp = entry.getValue();
+                log.debug("'{}' is missing - removing", dp.getThreadName() + dp.getName());
+                gauge.remove(String.valueOf(pid), dp.getThreadName(), dp.getName());
+            }
+        }
+        lastRun.put(metric, metrics);
+    }
+
+    private Map<String, DataPoint> findMissingDatapointsInCurrentRun(Map<String, DataPoint> current, Map<String, DataPoint> last) {
+        Map<String, DataPoint> result = new HashMap<>();
+        // Iterate over the last map's entries
+        for (Map.Entry<String, DataPoint> entry : last.entrySet()) {
+            String key = entry.getKey();
+            // If the key is not in the current map, add it to the result
+            if (!current.containsKey(key)) {
+                result.put(key, entry.getValue());
+            }
+        }
+        return result;
     }
 
     private String helpForName(String metric) {
