@@ -8,14 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [not yet released]
 - add prometheus interface and configuration
 - fix calculation of energy for intervals different to 1sec (1 Ws = 1 J)
-- refactor all BigDecimals to Double/double values (for slightly better performance and slightly less precise results)
-- add cloud toolkit estimation
-- use double/Double instead of BigDecimal
-- refactoring of MeasureMethod hierarchy
+- add cloud toolkit estimation method
+- use double/Double instead of BigDecimal: refactor all BigDecimals to double/Double values (for slightly better performance and slightly less precise results)
+- refactor MeasureMethod hierarchy
 - upgrade com.fasterxml.jackson.datatype:jackson-datatype-jsr310 to 2.17.2
-- org.junit.jupiter:junit-jupiter to 5.10.3
+- org.junit.jupiter:junit-jupiter to 5.11.0
 - upgrade org.assertj:assertj-core to 3.26.3
-- upgrade gradle to 8.9
+- upgrade snakeyaml to 2.3
+- upgrade junit-jupiter to 5.11.0
+- upgrade org.slf4j:slf4j-api to 2.0.16 
+- upgrade gradle to 8.10.1
 
 ## 2024-01-17 - release 1.1.2
 - upgrade httpclient to 5.3

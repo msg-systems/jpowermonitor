@@ -131,8 +131,4 @@ public class JPowerMonitorAgent {
             new StatisticsWriter(powerMeasurementCollector).writeStatistics(rw);
         }));
     }
-
-    public static void agentmain(String args, Instrumentation inst) {
-        premain(args, inst);
-    }
 }
