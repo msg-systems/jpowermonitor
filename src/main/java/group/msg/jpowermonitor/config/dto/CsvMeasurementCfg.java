@@ -1,4 +1,4 @@
-package group.msg.jpowermonitor.config;
+package group.msg.jpowermonitor.config.dto;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Data class for csv measurement config.
  *
- * @see CsvColumn
+ * @see CsvColumnCfg
  */
 @Data
 public class CsvMeasurementCfg {
@@ -18,7 +18,7 @@ public class CsvMeasurementCfg {
     // this is set during initialization of CommaSeparatedValuesReader.
     private Path inputFileAsPath;
     private String lineToRead = "last";
-    private List<CsvColumn> columns;
+    private List<CsvColumnCfg> columns;
     private String delimiter = ",";
     private String encoding;
 

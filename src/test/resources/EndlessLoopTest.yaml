@@ -14,7 +14,7 @@ measurement:
     lineToRead: 'last'
     # Columns to read, index starts at 0.
     columns:
-      - { index: 2, name: 'CPU Power', energyInIdleMode: 2.01}
+      - { index: 2, name: 'CPU Power', energyInIdleMode: 2.01 }
     # Encoding to use for reading the csv input file
     encoding: 'UTF-8'
     # Delimiter to use for separating the columns in the csv input file

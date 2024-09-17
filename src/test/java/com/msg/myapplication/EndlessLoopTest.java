@@ -3,7 +3,7 @@ package com.msg.myapplication;
 import group.msg.jpowermonitor.dto.SensorValue;
 import group.msg.jpowermonitor.dto.SensorValues;
 import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
-import group.msg.jpowermonitor.util.StressCpuExample;
+import group.msg.jpowermonitor.demo.StressCpuExample;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

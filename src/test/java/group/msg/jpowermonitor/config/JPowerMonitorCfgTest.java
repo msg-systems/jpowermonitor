@@ -1,7 +1,11 @@
 package group.msg.jpowermonitor.config;
 
-import group.msg.jpowermonitor.ConfigProviderForTests;
+import group.msg.jpowermonitor.CfgProviderForTests;
 import group.msg.jpowermonitor.JPowerMonitorException;
+import group.msg.jpowermonitor.config.dto.JPowerMonitorCfg;
+import group.msg.jpowermonitor.config.dto.LibreHardwareMonitorCfg;
+import group.msg.jpowermonitor.config.dto.MeasurementCfg;
+import group.msg.jpowermonitor.config.dto.PathElementCfg;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -10,18 +14,18 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class JPowerMonitorConfigTest {
+public class JPowerMonitorCfgTest {
 
     @Test
     public void initialization_noHWGroup() {
-        JPowerMonitorConfig config = new JPowerMonitorConfig();
+        JPowerMonitorCfg config = new JPowerMonitorCfg();
         assertThatThrownBy(config::initializeConfiguration).isInstanceOf(JPowerMonitorException.class);
     }
 
     @Test
     public void initialization_noUrl() {
-        JPowerMonitorConfig config = new JPowerMonitorConfig();
-        Measurement measurement = new Measurement();
+        JPowerMonitorCfg config = new JPowerMonitorCfg();
+        MeasurementCfg measurement = new MeasurementCfg();
         measurement.setMethod("lhm");
         measurement.setLhm(new LibreHardwareMonitorCfg());
         config.setMeasurement(measurement);
@@ -32,9 +36,9 @@ public class JPowerMonitorConfigTest {
     public void initialization_noPath() {
         LibreHardwareMonitorCfg lhmConfig = new LibreHardwareMonitorCfg();
         lhmConfig.setUrl("some.url");
-        lhmConfig.setPaths(List.of(new PathElement()));
-        JPowerMonitorConfig config = new JPowerMonitorConfig();
-        Measurement measurement = new Measurement();
+        lhmConfig.setPaths(List.of(new PathElementCfg()));
+        JPowerMonitorCfg config = new JPowerMonitorCfg();
+        MeasurementCfg measurement = new MeasurementCfg();
         measurement.setMethod("lhm");
         measurement.setLhm(lhmConfig);
         config.setMeasurement(measurement);
@@ -43,13 +47,13 @@ public class JPowerMonitorConfigTest {
 
     @Test
     public void initialization_urlPreparation() {
-        PathElement path = new PathElement();
+        PathElementCfg path = new PathElementCfg();
         path.setPath(List.of("path"));
         LibreHardwareMonitorCfg lhmConfig = new LibreHardwareMonitorCfg();
         lhmConfig.setUrl("some.url");
         lhmConfig.setPaths(List.of(path));
-        JPowerMonitorConfig config = new JPowerMonitorConfig();
-        Measurement measurement = new Measurement();
+        JPowerMonitorCfg config = new JPowerMonitorCfg();
+        MeasurementCfg measurement = new MeasurementCfg();
         measurement.setMethod("lhm");
         measurement.setLhm(lhmConfig);
         config.setMeasurement(measurement);
@@ -59,13 +63,13 @@ public class JPowerMonitorConfigTest {
 
     @Test
     public void initialization_defaultValues() {
-        PathElement path = new PathElement();
+        PathElementCfg path = new PathElementCfg();
         path.setPath(List.of("path"));
         LibreHardwareMonitorCfg lhmConfig = new LibreHardwareMonitorCfg();
         lhmConfig.setUrl("some.url");
         lhmConfig.setPaths(List.of(path));
-        JPowerMonitorConfig config = new JPowerMonitorConfig();
-        Measurement measurement = new Measurement();
+        JPowerMonitorCfg config = new JPowerMonitorCfg();
+        MeasurementCfg measurement = new MeasurementCfg();
         measurement.setMethod("lhm");
         measurement.setLhm(lhmConfig);
         config.setMeasurement(measurement);
@@ -86,7 +90,7 @@ public class JPowerMonitorConfigTest {
 
     @Test
     public void testFilterSet() {
-        JPowerMonitorConfig config = new ConfigProviderForTests().readConfig(getClass());
+        JPowerMonitorCfg config = new CfgProviderForTests().readConfig(getClass());
         Set<String> packageFilter = config.getJavaAgent().getPackageFilter();
         assertThat(packageFilter.contains("com.msg")).isTrue();
         assertThat(packageFilter.contains("de.gillardon")).isTrue();
@@ -94,21 +98,21 @@ public class JPowerMonitorConfigTest {
 
     @Test
     public void testMeasurementInterval() {
-        JPowerMonitorConfig config = new ConfigProviderForTests().readConfig(getClass());
+        JPowerMonitorCfg config = new CfgProviderForTests().readConfig(getClass());
         long measurementIntervalInMs = config.getJavaAgent().getMeasurementIntervalInMs();
         assertThat(measurementIntervalInMs).isEqualTo(1000L);
     }
 
     @Test
     public void testGatherStatisticsIntervalInMsInterval() {
-        JPowerMonitorConfig config = new ConfigProviderForTests().readConfig(getClass());
+        JPowerMonitorCfg config = new CfgProviderForTests().readConfig(getClass());
         long gatherStatisticsIntervalInMs = config.getJavaAgent().getGatherStatisticsIntervalInMs();
         assertThat(gatherStatisticsIntervalInMs).isEqualTo(100L);
     }
 
     @Test
     public void testWriteEnergyMeasurementsToCsvIntervalInS() {
-        JPowerMonitorConfig config = new ConfigProviderForTests().readConfig(getClass());
+        JPowerMonitorCfg config = new CfgProviderForTests().readConfig(getClass());
         long writeEnergyMeasurementsToCsvIntervalInS = config.getJavaAgent()
             .getWriteEnergyMeasurementsToCsvIntervalInS();
         assertThat(writeEnergyMeasurementsToCsvIntervalInS).isEqualTo(20L);

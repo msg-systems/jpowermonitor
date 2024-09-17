@@ -10,23 +10,19 @@ percentageOfSamplesAtBeginningToDiscard: 20
 # Sampling interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
 # Too short intervals also affect the energy consumption!
 samplingIntervalInMs: 300
-# Conversion factor to calculate approximated CO2 consumption in grams from energy consumption per kWh.
-# Depends on the energy mix of your location, for Germany compare e.g. https://www.umweltbundesamt.de/themen/klima-energie/energieversorgung/strom-waermeversorgung-in-zahlen#Strommix
-# Value for year 2022: 498
-carbonDioxideEmissionFactor: 498
-
+#
 measurement:
-  # Specify which measurement method to use. Possible values: lhm, csv, est
+  # Specify which measurement method to use. Possible values: lhm, csv
   method: 'lhm'
   # Configuration for reading from csv file. E.g. output from HWInfo
   csv:
     # Path to csv file to read measure values from
-    inputFile: 'hwinfo.csv'
+    inputFile: 'hwinfo-test.csv'
     # Which line in the csv input file contains the current measured values? The first or the last? This depends on the measurement tool. Possible value: first, last
     lineToRead: 'last'
     # Columns to read, index starts at 0.
     columns:
-      - { index: 95, name: 'CPU Package Power [W]', energyInIdleMode: }
+      - { index: 2, name: 'CPU Power', energyInIdleMode: }
     # Encoding to use for reading the csv input file
     encoding: 'UTF-8'
     # Delimiter to use for separating the columns in the csv input file
@@ -42,17 +38,8 @@ measurement:
       #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Powers', 'CPU Cores' ], energyInIdleMode: 9.5 }
       #- { path: [ 'MSGN13205', 'Intel Core i7-9850H', 'Temperatures', 'CPU Core #1' ] } # no energyInIdleMode for temperatures...
       #- { path: [ 'MSGN16749', '11th Gen Intel Core i7-11850H', 'Powers', 'CPU Package' ], energyInIdleMode: }
-  est:
-    # Compare https://www.cloudcarbonfootprint.org/docs/methodology/#energy-estimate-watt-hours 
-    # Defaults are the average values from AWS: 0.74 - 3.5
-    # Find the values for your VM here: https://github.com/cloud-carbon-footprint/cloud-carbon-coefficients/tree/main/data
-    #                          or here: https://github.com/re-cinq/emissions-data/tree/main/data/v2
-    # Determine AWS instance type in terminal: ´curl http://169.254.169.254/latest/meta-data/instance-type´
-    cpuMinWatts: 0.74
-    cpuMaxWatts: 3.5
-
 # ------------------------------------------------
-# Recording settings for JUnit Extension only: (recordings have no effect on measured power consumption, as this is done after the test)
+# Only JUnit Extension: Recording settings: (recordings have no effect on measured power consumption, as this is done after the test)
 csvRecording:
   # If specified, the results for every test are appended to a csv file.
   # On Windows: the file must not be opened in Excel in parallel!
@@ -64,26 +51,12 @@ csvRecording:
 # Configuration for JavaAgent
 javaAgent:
   # Filter power and energy for methods starting with this packageFilter names
-  packageFilter: [ 'group.msg', 'de.gillardon' ]
+  packageFilter: [ 'com.msg', 'de.gillardon' ]
   # Energy measurement interval in milliseconds. This is the interval the data source for the sensor values is questioned for new values.
   # Too short intervals also affect the energy consumption!
   measurementIntervalInMs: 1000
   # Gather statistics interval in milliseconds. This is the interval the stacktrace of each active thread is questioned for active methods.
   # Too short intervals also affect the energy consumption!
-  gatherStatisticsIntervalInMs: 10
+  gatherStatisticsIntervalInMs: 100
   # Write energy measurement results to CSV files interval in seconds.
-  writeEnergyMeasurementsToCsvIntervalInS: 30
-  # ------------------------------------------------
-  # Configuration for Monitoring Interfaces
-  # Current only implementation is prometheus.
-  monitoring:
-    # Prometheus configuration
-    prometheus:
-      # Enable sending metrics to prometheus.
-      enabled: false
-      # jPowerMonitor will open a http server port on this port for supplying the measurement data to prometheus.
-      httpPort: 1234
-      # Write energy measurement results to prometheus interval in seconds.
-      writeEnergyIntervalInS: 30
-      # Publish default Prometheus JVM Metrics. This includes information about GC, memory etc.
-      publishJvmMetrics: false
+  writeEnergyMeasurementsToCsvIntervalInS: 20

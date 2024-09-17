@@ -1,4 +1,4 @@
-package group.msg.jpowermonitor.config;
+package group.msg.jpowermonitor.config.dto;
 
 import lombok.Data;
 
@@ -10,8 +10,11 @@ import lombok.Data;
  * @see EstimationCfg
  */
 @Data
-public class Measurement {
-    private String method;
+public class MeasurementCfg {
+    private String method; // sadly snakeyaml does not support using Enums as attributes.
+    public MeasureMethodKey getMethodKey() {
+        return MeasureMethodKey.of(method);
+    }
     private CsvMeasurementCfg csv;
     private LibreHardwareMonitorCfg lhm;
     private EstimationCfg est;

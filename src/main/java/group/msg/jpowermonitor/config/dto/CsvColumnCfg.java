@@ -1,4 +1,4 @@
-package group.msg.jpowermonitor.config;
+package group.msg.jpowermonitor.config.dto;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @see CsvMeasurementCfg
  */
 @Data
-public class CsvColumn {
+public class CsvColumnCfg {
     private int index;
     private String name;
     private Double energyInIdleMode;

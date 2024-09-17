@@ -1,4 +1,4 @@
-package group.msg.jpowermonitor.config;
+package group.msg.jpowermonitor.config.dto;
 
 import lombok.Data;
 
@@ -7,10 +7,10 @@ import java.util.List;
 /**
  * Data element for Libre Hardware Monitor config.
  *
- * @see PathElement
+ * @see PathElementCfg
  */
 @Data
 public class LibreHardwareMonitorCfg {
     private String url;
-    private List<PathElement> paths;
+    private List<PathElementCfg> paths;
 }

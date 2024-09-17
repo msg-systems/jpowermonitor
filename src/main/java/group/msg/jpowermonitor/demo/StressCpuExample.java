@@ -1,5 +1,7 @@
-package group.msg.jpowermonitor.util;
+package group.msg.jpowermonitor.demo;
 
+import group.msg.jpowermonitor.util.CmdLineArgs;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.atomic.LongAdder;
@@ -11,6 +13,7 @@ import java.util.stream.IntStream;
  *
  * @author deinerj
  */
+@Slf4j
 public class StressCpuExample {
 
     public static final short DEFAULT_SECONDS_TO_RUN = 15;
@@ -73,20 +76,20 @@ public class StressCpuExample {
                     cmdLineArgs.setCpuThreads(Integer.parseInt(args[1]));
                 }
             } catch (NumberFormatException ex) {
-                System.out.printf("Could not parse argument, using default of %s seconds and %s CPU threads: %s%n", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads(), ex.getMessage());
+                log.info("Could not parse argument, using default of {} seconds and {} CPU threads: {}", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads(), ex.getMessage());
             }
         } else {
-            System.out.printf("No arguments, using default of %s seconds and %s CPU threads%n", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads());
+            log.info("No arguments, using default of {} seconds and {} CPU threads", DEFAULT_SECONDS_TO_RUN, cmdLineArgs.getCpuThreads());
         }
         return cmdLineArgs;
     }
 
     private static void logStart(String logPrefix, short secondsToRun, int usedCpuThreads) {
-        System.out.printf("Start %sEndlessLoopCpuStressTest   for %s seconds using %s CPU thread(s)...%n", logPrefix, secondsToRun, usedCpuThreads);
+        log.info("Start {}EndlessLoopCpuStressTest   for {} seconds using {} CPU thread(s)...", logPrefix, secondsToRun, usedCpuThreads);
     }
 
     private static void logEnd(String logPrefix, long start, long loopCounter, long sequentialLoopCounter) {
-        System.out.printf("%s EndlessLoopCpuStressTest, took %s seconds, ran loop %,d times, %s %% of sequential%n", logPrefix, calcDurationSec(start), loopCounter, calcProgressPercentaged(loopCounter, sequentialLoopCounter));
+        log.info("{} EndlessLoopCpuStressTest, took {} seconds, ran loop {} times, {} % of sequential", logPrefix, calcDurationSec(start), loopCounter, calcProgressPercentaged(loopCounter, sequentialLoopCounter));
     }
 
     private static long calcDurationSec(long start) {
