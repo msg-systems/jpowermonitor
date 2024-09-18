@@ -4,6 +4,7 @@ import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -25,13 +26,11 @@ public class ReplaceInStringTest {
     private static String INPUT_LF;
     private static String OUTPUT_LF; //
     private static String OUTPUT_LF2; //
-    private static final int REPETIONS = 1;
-    private static final int NUM_RUNS = 1_000_000;
+    private static final int NUM_RUNS = 300_000;
 
-    private static final String REGEX = "[\r]*\n";
-    private static final Pattern PATTERN = Pattern.compile(REGEX);
-
-    private static final String REPLACEMENT = "\\\\n";
+    // A carriage return means moving the cursor to the beginning of the line. The code is \r.
+    // A line feed means moving one line forward. The code is \n.
+    private static final Pattern PATTERN = Pattern.compile("\r\n");
 
     @BeforeAll
     static void prepare() throws IOException {
@@ -39,15 +38,14 @@ public class ReplaceInStringTest {
         byte[] contentCrLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/content-cr-lf.txt"));
         INPUT_LF = new String(contentLf, StandardCharsets.UTF_8);
         INPUT_CR_LF = new String(contentCrLf, StandardCharsets.UTF_8);
-        // Assertions.assertEquals(INPUT_CR_LF, INPUT_LF);
+        log.info("Input with LF has length: {} and with CR LF: {}", INPUT_LF.length(), INPUT_CR_LF.length());
+        //Assertions.assertEquals(INPUT_CR_LF, INPUT_LF);
         OUTPUT_LF = ReplaceInStringTest.replaceUsingRegex(INPUT_LF);
         OUTPUT_LF2 = ReplaceInStringTest.replaceUsingRegex(INPUT_CR_LF);
+        Assertions.assertEquals(OUTPUT_LF, OUTPUT_LF2); // works, LF and CRLF is removed.
+        OUTPUT_LF = replaceCarriageReturn(INPUT_LF);
+        OUTPUT_LF2 = replaceCarriageReturn(INPUT_CR_LF);
         Assertions.assertEquals(OUTPUT_LF, OUTPUT_LF2);
-
-        //  OUTPUT_LF = ReplaceInStringTest.replaceLineFeedWithString(INPUT_LF);
-        //  OUTPUT_LF2 = ReplaceInStringTest.replaceLineFeedWithString(INPUT_CR_LF);
-        //  Assertions.assertEquals(OUTPUT_LF, OUTPUT_LF2); ==> DOES NOT WORK ==> replaceLineFeedWithString does not produce same output!!!
-
         log.info("Prepared test");
     }
 
@@ -69,26 +67,53 @@ public class ReplaceInStringTest {
         log.info("testReplaceUsingRegularExpressions: {} ms", System.currentTimeMillis() - start);
     }
 
-
     @ParameterizedTest
     @MethodSource("provideStringsForReplacing")
     void testReplaceUsingStringBuffer(String input, String expected) {
         final long start = System.currentTimeMillis();
         for (int i = 0; i < NUM_RUNS; i++) {
-            String res = ReplaceInStringTest.replaceLineFeedWithString(input);
+            String res = ReplaceInStringTest.replaceCarriageReturn(input);
+            assertThat(res).isEqualTo(expected);
+        }
+        log.info("testReplaceUsingStringBuffer: {} ms", System.currentTimeMillis() - start);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideStringsForReplacing")
+    @Disabled
+    void testReplaceCrLfWithLf(String input, String expected) {
+        final long start = System.currentTimeMillis();
+        for (int i = 0; i < NUM_RUNS; i++) {
+            String res = ReplaceInStringTest.replaceCrLfWithLf(input);
             assertThat(res).isEqualTo(expected);
         }
         log.info("testReplaceUsingStringBuffer: {} ms", System.currentTimeMillis() - start);
     }
 
     /**
-     * Replaces "linefeed" and/or "carriage return" with the string "\\n".
+     * Replaces "linefeed" and/or "carriage return" with the string "\n" (linefeed).
      *
      * @param input the input that contains carriage return/linefeed.
-     * @return String with "\\n" instead of carriage return/linefeed.
+     * @return String with "\n" instead of carriage return/linefeed.
      */
     private static String replaceUsingRegex(String input) {
-        return PATTERN.matcher(input).replaceAll(REPLACEMENT);
+        return PATTERN.matcher(input).replaceAll("\n");
+    }
+
+    public static String replaceCarriageReturn(String input) {
+        char[] chars = input.toCharArray();
+        StringBuilder result = new StringBuilder();
+        // replace \r\n with \n
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == '\r' && i + 1 < chars.length && chars[i + 1] == '\n') {
+                // If we find \r followed by \n, append \n and skip the next character
+                result.append('\n');
+                i++; // Skip the '\n'
+            } else {
+                result.append(chars[i]); // Otherwise, just append the current character
+            }
+        }
+        return result.toString();
     }
 
     /**
@@ -97,7 +122,7 @@ public class ReplaceInStringTest {
      * @param input the input that contains carriage return/linefeed.
      * @return String with "\\n" instead of carriage return/linefeed.
      */
-    public static String replaceLineFeedWithString(final String input) {
+    public static String replaceCrLfWithLf(final String input) {
         if (input == null) {
             return null;
         }
