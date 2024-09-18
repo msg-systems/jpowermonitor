@@ -25,7 +25,6 @@ public class ReplaceInStringTest {
     private static String INPUT_CR_LF;
     private static String INPUT_LF;
     private static String OUTPUT_LF; //
-    private static String OUTPUT_LF2; //
     private static final int NUM_RUNS = 300_000;
 
     // A carriage return means moving the cursor to the beginning of the line. The code is \r.
@@ -41,19 +40,16 @@ public class ReplaceInStringTest {
         log.info("Input with LF has length: {} and with CR LF: {}", INPUT_LF.length(), INPUT_CR_LF.length());
         //Assertions.assertEquals(INPUT_CR_LF, INPUT_LF);
         OUTPUT_LF = ReplaceInStringTest.replaceUsingRegex(INPUT_LF);
-        OUTPUT_LF2 = ReplaceInStringTest.replaceUsingRegex(INPUT_CR_LF);
-        Assertions.assertEquals(OUTPUT_LF, OUTPUT_LF2); // works, LF and CRLF is removed.
+        String compareString = ReplaceInStringTest.replaceUsingRegex(INPUT_CR_LF);
+        Assertions.assertEquals(OUTPUT_LF, compareString); // works, LF and CRLF is removed.
         OUTPUT_LF = replaceCarriageReturn(INPUT_LF);
-        OUTPUT_LF2 = replaceCarriageReturn(INPUT_CR_LF);
-        Assertions.assertEquals(OUTPUT_LF, OUTPUT_LF2);
+        compareString = replaceCarriageReturn(INPUT_CR_LF);
+        Assertions.assertEquals(OUTPUT_LF, compareString);
         log.info("Prepared test");
     }
 
     static Stream<Arguments> provideStringsForReplacing() {
-        return Stream.of(
-            Arguments.of(INPUT_LF, OUTPUT_LF),
-            Arguments.of(INPUT_CR_LF, OUTPUT_LF2)
-        );
+        return Stream.of(Arguments.of(INPUT_LF, OUTPUT_LF), Arguments.of(INPUT_CR_LF, OUTPUT_LF));
     }
 
     @ParameterizedTest
@@ -139,8 +135,7 @@ public class ReplaceInStringTest {
             // Case 2: "linefeed" or "carriage return" exist in the string
         } else {
             while (sb.length() > i) {
-                if ("\\n".equals(String.valueOf(sb.charAt(i))) ||
-                    "\r".equals(String.valueOf(sb.charAt(i)))) {
+                if ("\\n".equals(String.valueOf(sb.charAt(i))) || "\r".equals(String.valueOf(sb.charAt(i)))) {
                     sb.replace(i, i + 1, "\\n");
                 }
                 i++;
