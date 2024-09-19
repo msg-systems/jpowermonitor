@@ -22,16 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith({JPowerMonitorExtension.class})
 @Slf4j
 public class ReplaceInStringTest {
-    private static String SIMPLE_LF;
-    private static String SIMPLE_CR_LF;
-    private static String INPUT_LF;
-    private static String INPUT_XML_CR_LF;
-    private static String INPUT_CR_LF;
-    private static String OUT_SIMPLE_LF;
-    private static String OUTPUT_LF; //
-    private static String OUTPUT_XML_LF; //
     private static final int NUM_RUNS = 300_000;
-
+    //  private static final int NUM_RUNS = 1;
     // A carriage return means moving the cursor to the beginning of the line. The code is \r.
     // A line feed means moving one line forward. The code is \n.
     private static final Pattern PATTERN = Pattern.compile("\\R"); // same as "(\r)*\n"
@@ -41,42 +33,31 @@ public class ReplaceInStringTest {
         // create input for parametrized tests
         byte[] simpleLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/simple-lf.txt"));
         byte[] simpleCrLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/simple-cr-lf.txt"));
-        byte[] contentLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/content-lf.txt"));
-        byte[] contentCrLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/content-cr-lf.txt"));
-        byte[] contentXmlCrLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/big-xml.xml"));
-        SIMPLE_LF = new String(simpleLf, StandardCharsets.UTF_8);
-        SIMPLE_CR_LF = new String(simpleCrLf, StandardCharsets.UTF_8);
-        INPUT_LF = new String(contentLf, StandardCharsets.UTF_8);
-        INPUT_CR_LF = new String(contentCrLf, StandardCharsets.UTF_8);
-        INPUT_XML_CR_LF = new String(contentXmlCrLf, StandardCharsets.UTF_8);
-
+        String simpleLfInput = new String(simpleLf, StandardCharsets.UTF_8);
+        String simpleCrLfInput = new String(simpleCrLf, StandardCharsets.UTF_8);
         // assert that all three methods produce the same result:
-        Assertions.assertEquals(ReplaceInStringTest.replaceUsingRegex(SIMPLE_LF), ReplaceInStringTest.replaceUsingForwardSearchAndChars(SIMPLE_LF));
-        Assertions.assertEquals(ReplaceInStringTest.replaceUsingForwardSearchAndChars(SIMPLE_LF), ReplaceInStringTest.replaceUsingIndexOfAndStringReplace(SIMPLE_LF));
-        Assertions.assertEquals(ReplaceInStringTest.replaceUsingRegex(SIMPLE_CR_LF), ReplaceInStringTest.replaceUsingForwardSearchAndChars(SIMPLE_CR_LF));
-        Assertions.assertEquals(ReplaceInStringTest.replaceUsingForwardSearchAndChars(SIMPLE_CR_LF), ReplaceInStringTest.replaceUsingIndexOfAndStringReplace(SIMPLE_CR_LF));
+        Assertions.assertEquals(ReplaceInStringTest.replaceUsingRegex(simpleLfInput), ReplaceInStringTest.replaceUsingForwardSearchAndChars(simpleLfInput));
+        Assertions.assertEquals(ReplaceInStringTest.replaceUsingForwardSearchAndChars(simpleLfInput), ReplaceInStringTest.replaceUsingIndexOfAndStringReplace(simpleLfInput));
+        Assertions.assertEquals(ReplaceInStringTest.replaceUsingRegex(simpleCrLfInput), ReplaceInStringTest.replaceUsingForwardSearchAndChars(simpleCrLfInput));
+        Assertions.assertEquals(ReplaceInStringTest.replaceUsingForwardSearchAndChars(simpleCrLfInput), ReplaceInStringTest.replaceUsingIndexOfAndStringReplace(simpleCrLfInput));
         log.info("All methods produce same result");
-
-        // create input for parametrized tests and one reference output per file:
-        OUT_SIMPLE_LF = ReplaceInStringTest.replaceUsingRegex(SIMPLE_LF);
-        OUTPUT_LF = ReplaceInStringTest.replaceUsingRegex(INPUT_LF);
-        OUTPUT_XML_LF = ReplaceInStringTest.replaceUsingRegex(INPUT_XML_CR_LF);
-        log.info("Prepared test");
     }
 
     static Stream<Arguments> provideStringsForReplacing() {
         return Stream.of(
-            Arguments.of(Named.of("simple Input LF", SIMPLE_LF), Named.of("expected", OUT_SIMPLE_LF))
-            , Arguments.of(Named.of("simple Input CRLF", SIMPLE_CR_LF), Named.of("expected", OUT_SIMPLE_LF))
-            , Arguments.of(Named.of("loremIpsum LF", INPUT_LF), Named.of("expected", OUTPUT_LF))
-            , Arguments.of(Named.of("loremIpsum CRLF", INPUT_CR_LF), Named.of("expected", OUTPUT_LF))
-           // , Arguments.of(Named.of("Xml CRLF", INPUT_XML_CR_LF), Named.of("expected", OUTPUT_XML_LF))
+            Arguments.of(Named.of("Text LF", "src/test/resources/replace-string-test/content-lf.txt"))
+            , Arguments.of(Named.of("Text CRLF", "src/test/resources/replace-string-test/content-cr-lf.txt"))
+            //  , Arguments.of(Named.of("Xml CRLF", "src/test/resources/replace-string-test/big-xml.xml"))
         );
     }
 
     @ParameterizedTest
     @MethodSource("provideStringsForReplacing")
-    void testReplaceUsingRegularExpressions(String input, String expected) {
+    void testReplaceUsingRegularExpressions(String file) throws IOException {
+        byte[] content = Files.readAllBytes(Paths.get(file));
+        String input = new String(content, StandardCharsets.UTF_8);
+        String expected = ReplaceInStringTest.replaceUsingForwardSearchAndChars(input);
+
         final long start = System.currentTimeMillis();
         String res = null;
         for (int i = 0; i < NUM_RUNS; i++) {
@@ -88,7 +69,11 @@ public class ReplaceInStringTest {
 
     @ParameterizedTest
     @MethodSource("provideStringsForReplacing")
-    void testReplaceUsingForwardSearchAndChars(String input, String expected) {
+    void testReplaceUsingForwardSearchAndChars(String file) throws IOException {
+        byte[] content = Files.readAllBytes(Paths.get(file));
+        String input = new String(content, StandardCharsets.UTF_8);
+        String expected = ReplaceInStringTest.replaceUsingRegex(input);
+
         final long start = System.currentTimeMillis();
         String res = null;
         for (int i = 0; i < NUM_RUNS; i++) {
@@ -100,7 +85,11 @@ public class ReplaceInStringTest {
 
     @ParameterizedTest
     @MethodSource("provideStringsForReplacing")
-    void testReplaceUsingIndexOfAndStringReplace(String input, String expected) {
+    void testReplaceUsingIndexOfAndStringReplace(String file) throws IOException {
+        byte[] content = Files.readAllBytes(Paths.get(file));
+        String input = new String(content, StandardCharsets.UTF_8);
+        String expected = ReplaceInStringTest.replaceUsingRegex(input);
+
         final long start = System.currentTimeMillis();
         String res = null;
         for (int i = 0; i < NUM_RUNS; i++) {
