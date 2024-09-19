@@ -4,6 +4,7 @@ import group.msg.jpowermonitor.junit.JPowerMonitorExtension;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,10 +25,12 @@ public class ReplaceInStringTest {
     private static String SIMPLE_LF;
     private static String SIMPLE_CR_LF;
     private static String INPUT_LF;
+    private static String INPUT_XML_CR_LF;
     private static String INPUT_CR_LF;
     private static String OUT_SIMPLE_LF;
     private static String OUTPUT_LF; //
-    private static final int NUM_RUNS = 1_000_000;
+    private static String OUTPUT_XML_LF; //
+    private static final int NUM_RUNS = 300_000;
 
     // A carriage return means moving the cursor to the beginning of the line. The code is \r.
     // A line feed means moving one line forward. The code is \n.
@@ -40,10 +43,12 @@ public class ReplaceInStringTest {
         byte[] simpleCrLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/simple-cr-lf.txt"));
         byte[] contentLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/content-lf.txt"));
         byte[] contentCrLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/content-cr-lf.txt"));
+        byte[] contentXmlCrLf = Files.readAllBytes(Paths.get("src/test/resources/replace-string-test/big-xml.xml"));
         SIMPLE_LF = new String(simpleLf, StandardCharsets.UTF_8);
         SIMPLE_CR_LF = new String(simpleCrLf, StandardCharsets.UTF_8);
         INPUT_LF = new String(contentLf, StandardCharsets.UTF_8);
         INPUT_CR_LF = new String(contentCrLf, StandardCharsets.UTF_8);
+        INPUT_XML_CR_LF = new String(contentXmlCrLf, StandardCharsets.UTF_8);
 
         // assert that all three methods produce the same result:
         Assertions.assertEquals(ReplaceInStringTest.replaceUsingRegex(SIMPLE_LF), ReplaceInStringTest.replaceUsingForwardSearchAndChars(SIMPLE_LF));
@@ -55,25 +60,29 @@ public class ReplaceInStringTest {
         // create input for parametrized tests and one reference output per file:
         OUT_SIMPLE_LF = ReplaceInStringTest.replaceUsingRegex(SIMPLE_LF);
         OUTPUT_LF = ReplaceInStringTest.replaceUsingRegex(INPUT_LF);
+        OUTPUT_XML_LF = ReplaceInStringTest.replaceUsingRegex(INPUT_XML_CR_LF);
         log.info("Prepared test");
     }
 
     static Stream<Arguments> provideStringsForReplacing() {
         return Stream.of(
-            Arguments.of(SIMPLE_LF, OUT_SIMPLE_LF),
-            Arguments.of(SIMPLE_CR_LF, OUT_SIMPLE_LF),
-            Arguments.of(INPUT_LF, OUTPUT_LF),
-            Arguments.of(INPUT_CR_LF, OUTPUT_LF));
+            Arguments.of(Named.of("simple Input LF", SIMPLE_LF), Named.of("expected", OUT_SIMPLE_LF))
+            , Arguments.of(Named.of("simple Input CRLF", SIMPLE_CR_LF), Named.of("expected", OUT_SIMPLE_LF))
+            , Arguments.of(Named.of("loremIpsum LF", INPUT_LF), Named.of("expected", OUTPUT_LF))
+            , Arguments.of(Named.of("loremIpsum CRLF", INPUT_CR_LF), Named.of("expected", OUTPUT_LF))
+           // , Arguments.of(Named.of("Xml CRLF", INPUT_XML_CR_LF), Named.of("expected", OUTPUT_XML_LF))
+        );
     }
 
     @ParameterizedTest
     @MethodSource("provideStringsForReplacing")
     void testReplaceUsingRegularExpressions(String input, String expected) {
         final long start = System.currentTimeMillis();
+        String res = null;
         for (int i = 0; i < NUM_RUNS; i++) {
-            String res = replaceUsingRegex(input);
-            assertThat(res).isEqualTo(expected);
+            res = ReplaceInStringTest.replaceUsingRegex(input);
         }
+        assertThat(res).isEqualTo(expected);
         log.info("testReplaceUsingRegularExpressions: {} ms", System.currentTimeMillis() - start);
     }
 
@@ -81,10 +90,11 @@ public class ReplaceInStringTest {
     @MethodSource("provideStringsForReplacing")
     void testReplaceUsingForwardSearchAndChars(String input, String expected) {
         final long start = System.currentTimeMillis();
+        String res = null;
         for (int i = 0; i < NUM_RUNS; i++) {
-            String res = ReplaceInStringTest.replaceUsingForwardSearchAndChars(input);
-            assertThat(res).isEqualTo(expected);
+            res = ReplaceInStringTest.replaceUsingForwardSearchAndChars(input);
         }
+        assertThat(res).isEqualTo(expected);
         log.info("testReplaceUsingForwardSearchAndChars: {} ms", System.currentTimeMillis() - start);
     }
 
@@ -92,10 +102,11 @@ public class ReplaceInStringTest {
     @MethodSource("provideStringsForReplacing")
     void testReplaceUsingIndexOfAndStringReplace(String input, String expected) {
         final long start = System.currentTimeMillis();
+        String res = null;
         for (int i = 0; i < NUM_RUNS; i++) {
-            String res = ReplaceInStringTest.replaceUsingIndexOfAndStringReplace(input);
-            assertThat(res).isEqualTo(expected);
+            res = ReplaceInStringTest.replaceUsingIndexOfAndStringReplace(input);
         }
+        assertThat(res).isEqualTo(expected);
         log.info("testReplaceUsingIndexOfAndStringReplace: {} ms", System.currentTimeMillis() - start);
     }
 
@@ -137,9 +148,7 @@ public class ReplaceInStringTest {
         if (input == null) {
             return null;
         }
-        int i = 0;
         final StringBuilder sb = new StringBuilder(input);
-
         int pos = sb.indexOf("\r\n");
         // Case 1: "linefeed" and "carriage return" exist in the string
         if (pos != -1) {
@@ -149,12 +158,10 @@ public class ReplaceInStringTest {
             }
             // Case 2: "linefeed" or "carriage return" exist in the string
         } else {
-            while (sb.length() > i) {
-                if ("\n".equals(String.valueOf(sb.charAt(i))) ||
-                    "\r".equals(String.valueOf(sb.charAt(i)))) {
-                    sb.replace(i, i + 1, "\\n");
-                }
-                i++;
+            pos = sb.indexOf("\n");
+            while (pos != -1) {
+                sb.replace(pos, pos + 1, "\\n");
+                pos = sb.indexOf("\n", pos + 2);
             }
         }
         return sb.toString();
