@@ -79,24 +79,24 @@ public class ReplaceInStringTest {
 
     @ParameterizedTest
     @MethodSource("provideStringsForReplacing")
-    void testReplaceUsingStringBuffer(String input, String expected) {
+    void testReplaceUsingForwardSearchAndChars(String input, String expected) {
         final long start = System.currentTimeMillis();
         for (int i = 0; i < NUM_RUNS; i++) {
             String res = ReplaceInStringTest.replaceUsingForwardSearchAndChars(input);
             assertThat(res).isEqualTo(expected);
         }
-        log.info("testReplaceUsingStringBuffer: {} ms", System.currentTimeMillis() - start);
+        log.info("testReplaceUsingForwardSearchAndChars: {} ms", System.currentTimeMillis() - start);
     }
 
     @ParameterizedTest
     @MethodSource("provideStringsForReplacing")
-    void testReplaceCrLfWithLf(String input, String expected) {
+    void testReplaceUsingIndexOfAndStringReplace(String input, String expected) {
         final long start = System.currentTimeMillis();
         for (int i = 0; i < NUM_RUNS; i++) {
             String res = ReplaceInStringTest.replaceUsingIndexOfAndStringReplace(input);
             assertThat(res).isEqualTo(expected);
         }
-        log.info("testReplaceUsingStringBuffer: {} ms", System.currentTimeMillis() - start);
+        log.info("testReplaceUsingIndexOfAndStringReplace: {} ms", System.currentTimeMillis() - start);
     }
 
     /**
