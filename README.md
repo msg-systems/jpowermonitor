@@ -150,7 +150,9 @@ https://prometheus.io/docs/visualization/grafana
 `{__name__=~"jPowerMonitor_.*"}`
 
 ##### Top 5 power per method filtered metrics
-`topk(5, sort_desc(sum by(method) (jPowerMonitor_power_per_method_filtered{job=~"jPowerMonitor"})))`
+Show average power per method as multiple threads may execute same method and usually one wants to see the average: 
+
+`topk(5, sort_desc(avg by(method) (jPowerMonitor_power_per_method_filtered{job=~"jPowerMonitor"})))`
 
 ##### Top 5 energy per method filtered metrics
 `topk(5, sort_desc(sum by(method) (jPowerMonitor_energy_per_method_filtered{job=~"jPowerMonitor"})))`
