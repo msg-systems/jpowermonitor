@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - separate jPowerMonitor jar from demo application jpowermonitor-demo.jar. See Readme for more information.
 - dependency updates:
   - upgrade com.fasterxml.jackson.datatype:jackson-datatype-jsr310 to 2.17.2
-  - org.junit.jupiter:junit-jupiter to 5.11.0
+  - org.apache.httpcomponents.client5:httpclient5 to 5.4
+  - org.junit.jupiter:junit-jupiter to 5.11.1
   - upgrade org.assertj:assertj-core to 3.26.3
   - upgrade snakeyaml to 2.3
   - upgrade junit-jupiter to 5.11.0
