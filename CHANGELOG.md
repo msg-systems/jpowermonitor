@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [not yet released]
+- no changes yet
+
+## 2024-09-26 - release 1.2.0
 - add prometheus interface and configuration
 - add cloud toolkit estimation method
 - fix calculation of energy for intervals different to 1sec (1 Ws = 1 J)
