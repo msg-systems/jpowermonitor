@@ -276,7 +276,7 @@ public class PowerMeasurementCollector extends TimerTask {
         if (dp1.getUnit() == null || dp2.getUnit() == null
             || dp1.getValue() == null || dp2.getValue() == null
             || !dp1.getUnit().equals(dp2.getUnit())) {
-            log.warn("not addable: dp1 = " + dp1 + ", dp2 = " + dp2);
+            log.warn("not addable: dp1 = {}, dp2 = {}", dp1, dp2);
             return false;
         }
         return true;

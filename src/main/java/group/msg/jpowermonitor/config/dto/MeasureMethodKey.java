@@ -4,6 +4,7 @@ import group.msg.jpowermonitor.JPowerMonitorException;
 import lombok.Getter;
 
 import java.util.Arrays;
+
 @Getter
 public enum MeasureMethodKey {
     LHM("lhm", "Libre Hardware Monitor"),
@@ -17,6 +18,7 @@ public enum MeasureMethodKey {
         this.key = k;
         this.name = n;
     }
+
     public static MeasureMethodKey of(String providedKey) {
         return Arrays.stream(values())
             .filter(v -> v.getKey().equalsIgnoreCase(providedKey))

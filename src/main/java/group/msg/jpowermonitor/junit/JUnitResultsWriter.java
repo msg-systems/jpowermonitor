@@ -81,7 +81,7 @@ public class JUnitResultsWriter {
             if (fileToCreate.toFile().getParentFile() != null) {
                 boolean createdDir = fileToCreate.toFile().getParentFile().mkdirs();
                 if (createdDir) {
-                    log.debug("Created directory for writing the csv file to: " + fileToCreate.toFile().getParentFile().getAbsolutePath());
+                    log.debug("Created directory for writing the csv file to: {}", fileToCreate.toFile().getParentFile().getAbsolutePath());
                 }
             }
             Files.createFile(fileToCreate);
@@ -160,7 +160,7 @@ public class JUnitResultsWriter {
         try {
             Files.writeString(path, lineToAppend, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
         } catch (IOException e) {
-            log.error("Unable to append to csv file: " + path, e);
+            log.error("Unable to append to csv file: {}", path, e);
         }
     }
 }

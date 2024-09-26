@@ -6,7 +6,7 @@ The power consumption of Java applications should become measurable, and thus vi
 This library includes an extension for measuring unit tests, as well as a Java agent for measuring any Java application.
 The Java agent collects the activity of the application to be measured at regular, configurable intervals. The agent takes into account the power consumption provided by the configured measurement tool.
 The CPU usage of the program and the current power consumption are aggregated to energy consumption per method over runtime and written into a CSV file.
-The result of the measurement is the energy consumption in watt hours or joule.
+The result of the measurement is the energy consumption in watt-hours or joule.
 
 ### Quick Start
 - Install and configure Tool __Libre Hardware Monitor__: https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
@@ -19,7 +19,7 @@ The result of the measurement is the energy consumption in watt hours or joule.
 - The tool __HWiNFO__ or __another tool that writes sensor values to a CSV file__ could be used alternatively, __measurement -> method__ must be set to 'csv' and Logging to CSV in HWiNFO must be active: https://www.hwinfo.com/
   - Configure HWiNFO to log the values of the power sensors to the CSV file.
   - Start the logging in HWiNFO to a file e.g. in your project directory.
-- If no measurement tool available or no measurement interfaces accessible (e. g. in virtualized cloud scenarios) configure
+- If no measurement tool available or no measurement interfaces accessible (e.g. in virtualized cloud scenarios) configure
 __measurement -> method__ to 'est' (@since jpowermonitor-1.2.0) and configure appropriate 'cpuMinWatts' / 'cpuMaxWatts' according to your platform (@see https://github.com/cloud-carbon-footprint/cloud-carbon-coefficients/tree/main/data).
 - To start the __Java agent__, the "fat jar" (incl. dependencies, with name `jpowermonitor-<version>-all.jar`) must be __downloaded from mvn central [here](https://repo.maven.apache.org/maven2/io/github/msg-systems/jpowermonitor/)__ or __must first be built__ with the Gradle task `shadowJar`.
 - __Copy `src/main/resources/jpowermonitor-template.yaml` to the execution directory and rename it to `./jpowermonitor.yaml`__.
@@ -70,15 +70,15 @@ For the configuration of the JUnit extension a yaml file with the name of the ex
 | javaAgentCfg -> measurementIntervalInMs                            | Energy measurement interval in milliseconds for the Java Agent. This is the interval the data source for the sensor values is questioned for new values.                                                                                                                                                                                                                                                                                                                                                                                                        | X         | 1000                             |
 | javaAgentCfg -> gatherStatisticsIntervalInMs                       | Gather statistics interval in milliseconds. This is the interval the stacktrace of each active thread is questioned for active methods. Should be smaller than `measurementIntervalInMs`.                                                                                                                                                                                                                                                                                                                                                                       | X         | 10                               |
 | javaAgentCfg -> writeEnergyMeasurementsToCsvIntervalInS            | Write energy measurement results to CSV files interval in seconds. Leave empty to write energy measurement results only at program exit (be sure your application to measure exits "gracefully", thus by calling System.exit(..), else results might be lost!).                                                                                                                                                                                                                                                                                                 | X         | 30                               |
-| javaAgentCfg -> monitoring                                         | Section for configuration of monitoring interfaces.  @since jpowermonitor:1.3.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |           |                                  |
-| javaAgentCfg -> monitoring -> prometheus                           | Section for configuration of Prometheus monitoring interface.  @since jpowermonitor:1.3.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |           |                                  |
+| javaAgentCfg -> monitoring                                         | Section for configuration of monitoring interfaces.  @since jpowermonitor:1.2.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |           |                                  |
+| javaAgentCfg -> monitoring -> prometheus                           | Section for configuration of Prometheus monitoring interface.  @since jpowermonitor:1.2.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |           |                                  |
 | javaAgentCfg -> monitoring -> prometheus -> enabled                | Set to true, if prometheus monitoring should be enabled. This will start a HttpServer on the configured port.                                                                                                                                                                                                                                                                                                                                                                                                                                                   | X         | false                            |
 | javaAgentCfg -> monitoring -> prometheus -> httpPort               | Prometheus Http Server Port. Prometheus will ask the jPowerMonitored application for metrics on this port.                                                                                                                                                                                                                                                                                                                                                                                                                                                      | X         | 1234                             |
 | javaAgentCfg -> monitoring -> prometheus -> writeEnergyIntervalInS | Write energy measurement results to Prometheus interval in seconds.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | X         | 30                               |
 | javaAgentCfg -> monitoring -> prometheus -> publishJvmMetrics      | Should the default JVM Metric be published to Prometheus? This includes information about GC, memory etc.                                                                                                                                                                                                                                                                                                                                                                                                                                                       | X         | false                            |
 
 If no base load (`energyInIdleMode`) is specified for a path, this is measured before each test. So a mixed operation between configuration of the base load and measurement is also possible and the results can be compared (some sensors provide very similar values).
-For non current measuring sensors (e.g. temperature) the base load is not calculated extra and also not subtracted from the measured value! It is only output if a base load must also be calculated for a current-measuring sensor because this is not specified in the configuration.
+For non-current measuring sensors (e.g. temperature) the base load is not calculated extra and also not subtracted from the measured value! It is only output if a base load must also be calculated for a current-measuring sensor because this is not specified in the configuration.
 
 ### Integration into your own project
 #### Java Agent
@@ -91,7 +91,7 @@ For non current measuring sensors (e.g. temperature) the base load is not calcul
   - e.g. for use with gradle and Spring Boot you may use
    ``` 
     bootRun {
-      jvmArgs += ["-javaagent:./lib/jpowermonitor-1.3.0-all.jar=./lib/jpowermonitor.yaml"]
+      jvmArgs += ["-javaagent:./lib/jpowermonitor-1.2.0-all.jar=./lib/jpowermonitor.yaml"]
     }
     ```
    in your gradle script.
@@ -150,7 +150,9 @@ https://prometheus.io/docs/visualization/grafana
 `{__name__=~"jPowerMonitor_.*"}`
 
 ##### Top 5 power per method filtered metrics
-`topk(5, sort_desc(sum by(method) (jPowerMonitor_power_per_method_filtered{job=~"jPowerMonitor"})))`
+Show average power per method as multiple threads may execute same method and usually one wants to see the average: 
+
+`topk(5, sort_desc(avg by(method) (jPowerMonitor_power_per_method_filtered{job=~"jPowerMonitor"})))`
 
 ##### Top 5 energy per method filtered metrics
 `topk(5, sort_desc(sum by(method) (jPowerMonitor_energy_per_method_filtered{job=~"jPowerMonitor"})))`
@@ -175,5 +177,5 @@ This markdown can be converted to html with
 `pandoc --self-contained -t slidy -c docs/slidy.css -o Readme.html README.md` to html and from there to pdf via print function of the browser.
 
 # Copyright & License
-Copyright &copy; 2022-2023 msg for banking ag <br/>
+Copyright &copy; 2022-2024 msg for banking ag <br/>
 Licensed under [Apache License 2.0](./LICENSE.txt)

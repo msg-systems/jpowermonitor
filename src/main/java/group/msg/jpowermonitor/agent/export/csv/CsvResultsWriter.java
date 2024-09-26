@@ -35,6 +35,7 @@ public class CsvResultsWriter implements ResultsWriter {
         dataPointFormatCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s%s";
         dataPointFormatEnergyConsumptionCsv = Locale.getDefault().getCountry().toLowerCase(Locale.ROOT).equals("de") ? "%s;%s;%s;%s;%s;%s;%s%s" : "%s,%s,%s,%s,%s,%s,%s%s";
     }
+
     private final String energyConsumptionPerMethodFileName;
     private final String energyConsumptionPerFilteredMethodFileName;
     private final String powerConsumptionPerMethodFileName;
@@ -49,8 +50,8 @@ public class CsvResultsWriter implements ResultsWriter {
         this.energyConsumptionPerFilteredMethodFileName = FILE_NAME_PREFIX + pid + "_energy_per_method_filtered.csv";
         this.powerConsumptionPerMethodFileName = FILE_NAME_PREFIX + pid + "_power_per_method.csv";
         this.powerConsumptionPerFilteredMethodFileName = FILE_NAME_PREFIX + pid + "_power_per_method_filtered.csv";
-        log.debug("Energy consumption per method is written to '" + energyConsumptionPerMethodFileName + "'");
-        log.debug("Energy consumption per filtered methods is written to '" + energyConsumptionPerFilteredMethodFileName + "'");
+        log.debug("Energy consumption per method is written to '{}'", energyConsumptionPerMethodFileName);
+        log.debug("Energy consumption per filtered methods is written to '{}'", energyConsumptionPerFilteredMethodFileName);
     }
 
     @Override

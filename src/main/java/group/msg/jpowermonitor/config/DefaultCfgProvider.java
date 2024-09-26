@@ -99,10 +99,10 @@ public class DefaultCfgProvider implements JPowerMonitorCfgProvider {
     }
 
     private JPowerMonitorCfg tryReadingFromFileSystem(String source) {
-        log.info("Reading " + APP_TITLE + " configuration from filesystem: '" + source + "'");
+        log.info("Reading {} configuration from filesystem: '{}'", APP_TITLE, source);
         Path path = Paths.get(source);
         if (!Files.isRegularFile(path)) {
-            log.error("'" + source + "' is not a regular file, it will not be read from filesystem");
+            log.error("'{}' is not a regular file, it will not be read from filesystem", source);
             return null;
         }
         return readConfigFromPath(path);
@@ -121,9 +121,9 @@ public class DefaultCfgProvider implements JPowerMonitorCfgProvider {
     }
 
     private JPowerMonitorCfg tryReadingFromResources(String source) {
-        log.info("Reading " + APP_TITLE + " configuration from resources: '" + source + "'");
+        log.info("Reading {} configuration from resources: {}", APP_TITLE, source);
         if (DefaultCfgProvider.class.getClassLoader().getResource(source) == null) {
-            log.info("'" + source + "' is not available as resource");
+            log.info("'{}' is not available as resource", source);
             return null;
         }
         return readConfigFromResource(source);

@@ -25,5 +25,5 @@ MEASUREMENT_INTERVAL
 			- POWER_THREAD (W) = POWER_TOTAL * (THREAD_TIME / APPLICATION_TIME)
 		- determine power usage of each method per MEASUREMENT_INTERVAL
 			- POWER_METHOD (W) = POWER_THREAD * (METHOD_ACTIVITY * STATISTICS_INTERVAL / MEASUREMENT_INTERVAL) -> currently fix ration of 1 / 100
-		- determine energy usage of each method in MEASUREMENT_INTERVAL (currenty assumption: MEASUREMENT_INTERVAL always 1000ms, so W = J)
+		- determine energy usage of each method in MEASUREMENT_INTERVAL (current assumption: MEASUREMENT_INTERVAL always 1000ms, so W = J)
 			- ENERGY_METHOD (J) = POWER_METHOD * MEASUREMENT_INTERVAL / 1000

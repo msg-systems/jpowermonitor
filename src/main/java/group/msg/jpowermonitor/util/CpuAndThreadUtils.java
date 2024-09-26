@@ -9,7 +9,6 @@ import java.lang.management.ThreadMXBean;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static group.msg.jpowermonitor.util.Constants.ONE_HUNDRED;
 

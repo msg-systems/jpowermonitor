@@ -64,7 +64,7 @@ public class JPowerMonitorAgent {
         ThreadMXBean threadMXBean = CpuAndThreadUtils.initializeAndGetThreadMxBeanOrFailAndQuitApplication();
 
         JavaAgentCfg javaAgentCfg = cfg.getJavaAgent();
-        log.debug("Start monitoring application with PID " + pid + ", javaAgentCfg.getMeasurementIntervalInMs():" + javaAgentCfg.getMeasurementIntervalInMs());
+        log.debug("Start monitoring application with PID {}, javaAgentCfg.getMeasurementIntervalInMs(): {}", pid, javaAgentCfg.getMeasurementIntervalInMs());
         // TimerTask to calculate power consumption per thread at runtime using a configurable measurement interval
         // start Timer as daemon thread, so that it does not prevent applications from stopping
         Timer powerMeasurementTimer = new Timer("PowerMeasurementCollector", true);
@@ -82,7 +82,7 @@ public class JPowerMonitorAgent {
         }
         long delayAndPeriodPmc = javaAgentCfg.getMeasurementIntervalInMs();
         powerMeasurementTimer.schedule(powerMeasurementCollector, delayAndPeriodPmc, delayAndPeriodPmc);
-        log.debug("Scheduled PowerMeasurementCollector with delay " + delayAndPeriodPmc + "ms and period " + delayAndPeriodPmc + "ms");
+        log.debug("Scheduled PowerMeasurementCollector with delay {} ms and period {} ms", delayAndPeriodPmc, delayAndPeriodPmc);
         // TimerTask to write energy measurement statistics to CSV files while application still running
         if (javaAgentCfg.getWriteEnergyMeasurementsToCsvIntervalInS() > 0) {
             CsvResultsWriter cw = new CsvResultsWriter();
@@ -96,7 +96,7 @@ public class JPowerMonitorAgent {
                         cw.writeEnergyConsumptionPerMethodFiltered(powerMeasurementCollector.getEnergyConsumptionPerMethod(true));
                     }
                 }, delayAndPeriodCw, delayAndPeriodCw);
-            log.debug("Scheduled CsvResultsWriter with delay " + delayAndPeriodCw + "ms and period " + delayAndPeriodCw + "ms");
+            log.debug("Scheduled CsvResultsWriter with delay {} ms and period {} ms", delayAndPeriodCw, delayAndPeriodCw);
         }
         if (javaAgentCfg.getMonitoring().getPrometheus().isEnabled()) {
             PrometheusWriter pw = new PrometheusWriter(javaAgentCfg.getMonitoring().getPrometheus());
@@ -108,7 +108,7 @@ public class JPowerMonitorAgent {
                         pw.writeEnergyConsumptionPerMethodFiltered(powerMeasurementCollector.getEnergyConsumptionPerMethod(true));
                     }
                 }, delayAndPeriodPw, delayAndPeriodPw);
-            log.debug("Scheduled PrometheusWriter with delay " + delayAndPeriodPw + "ms and period " + delayAndPeriodPw + "ms");
+            log.debug("Scheduled PrometheusWriter with delay {} ms and period {} ms", delayAndPeriodPw, delayAndPeriodPw);
         }
 
         // Gracefully stop measurement at application shutdown

@@ -1,7 +1,5 @@
 package group.msg.jpowermonitor.util;
 
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,7 +14,6 @@ public class HumanReadableTime {
     private static final Map<TimeUnit, String> TIME_UNITS_MILLIS = timeUnitsToMillis();
 
     private static final double factorNanosToHours = 3600000000000.0;
-    private static final MathContext mc = new MathContext(50, RoundingMode.HALF_UP);
 
     public static double nanosToHours(long nanos) {
         return nanos / factorNanosToHours;
