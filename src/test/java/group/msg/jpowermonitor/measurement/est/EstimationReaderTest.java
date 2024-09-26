@@ -57,7 +57,7 @@ class EstimationReaderTest {
             try {
                 while (!threadIsStopped) {
                     DataPoint dataPoint = cmr.measureFirstConfiguredPath();
-                    log.info("cpuMeasure: " + dataPoint);
+                    log.info("cpuMeasure: {}", dataPoint);
                     Assertions.assertTrue(config.getMeasurement().getEst().getCpuMinWatts() <= dataPoint.getValue()
                                           && dataPoint.getValue() <= config.getMeasurement().getEst().getCpuMaxWatts(),
                         "Value must be between configured min and max value.");

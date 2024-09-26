@@ -3,7 +3,6 @@ package group.msg.jpowermonitor.agent.export.prometheus;
 import group.msg.jpowermonitor.agent.export.ResultsWriter;
 import group.msg.jpowermonitor.config.dto.PrometheusCfg;
 import group.msg.jpowermonitor.dto.DataPoint;
-import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.exporter.HTTPServer;
 import io.prometheus.client.hotspot.DefaultExports;
@@ -33,12 +32,11 @@ public class PrometheusWriter implements ResultsWriter {
     private static final String POWER_CONSUMPTION_PER_FILTERED_METHOD_METRIC_HELP = "Power for the filtered methods in Watts";
     private static final String CO2_CONSUMPTION_PER_FILTERED_METHOD_METRIC_HELP = "CO2 consumption of the filtered methods in grams";
 
-    private static final CollectorRegistry registry = new CollectorRegistry();
     private static final Map<String, Gauge> gaugeMap = new ConcurrentHashMap<>();
     private final long pid;
     private static HTTPServer server;
     private static final Lock lock = new ReentrantLock();
-    // keep in mind the last run in order to find out, if a timeseries is not provided with values any more.
+    // keep in mind the last run in order to find out, if a timeseries is not provided with values anymore.
     private static final Map<String, Map<String, DataPoint>> lastRun = new HashMap<>();
 
     /**
@@ -54,7 +52,7 @@ public class PrometheusWriter implements ResultsWriter {
                     if (prometheusCfg.isPublishJvmMetrics()) {
                         DefaultExports.initialize();
                     }
-                    log.info("Opening Http Server for jPowerMonitor Prometheus Metrics on port " + prometheusCfg.getHttpPort());
+                    log.info("Opening Http Server for jPowerMonitor Prometheus Metrics on port {}", prometheusCfg.getHttpPort());
                     try {
                         PrometheusWriter.server = new HTTPServer(prometheusCfg.getHttpPort());
                     } catch (IOException e) {
@@ -95,7 +93,7 @@ public class PrometheusWriter implements ResultsWriter {
      * @param valueSupplier a function to get the value for the time series to be published.
      */
     public void registerGaugeAndSetDataPoints(String metric, Map<String, DataPoint> metrics, long pid, Function<DataPoint, Double> valueSupplier) {
-        log.debug("writing " + metric + ", metrics.size:" + metrics.size());
+        log.debug("writing {}, metrics.size: {}", metric, metrics.size());
         Gauge gauge = gaugeMap.computeIfAbsent(metric,
             k -> Gauge.build()
                 .name(metric)
