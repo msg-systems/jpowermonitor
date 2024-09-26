@@ -2,8 +2,8 @@ publishing {
     repositories {
         maven {
             credentials {
-                username = project.property("ossrhToken") ? project.property('ossrhToken') : null
-                password = project.property("ossrhTokenPassword") ? project.property('ossrhTokenPassword') : null
+                username = project.hasProperty("ossrhToken") ? project.property('ossrhToken') : null
+                password = project.hasProperty("ossrhTokenPassword") ? project.property('ossrhTokenPassword') : null
             }
             url = project.version.endsWith('-SNAPSHOT') ?
                 'https://s01.oss.sonatype.org/content/repositories/snapshots' :
