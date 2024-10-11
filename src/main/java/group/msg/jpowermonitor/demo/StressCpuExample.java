@@ -158,6 +158,13 @@ public class StressCpuExample {
         return sequentialLoopCounter + percentagedLoopCounter + parallelLoopCounter;
     }
 
+    // --------------------------------------------------------------------------------------------------------------
+    // The following methods contain duplicated code.
+    // This is on purpose, otherwise the measurements with jPowerMonitor Agent cannot determine the correct method.
+    // If, for example, the code were outsourced to a separate method, this method would always be displayed in
+    // the measurement results.
+    // --------------------------------------------------------------------------------------------------------------
+
     private static long iAm100PercentParallel(long runUntil) {
         long loopCounter = 0;
         while (System.currentTimeMillis() < runUntil) {
