@@ -3,7 +3,6 @@ package group.msg.jpowermonitor.agent.export.statistics;
 import group.msg.jpowermonitor.agent.JPowerMonitorAgent;
 import group.msg.jpowermonitor.agent.PowerMeasurementCollector;
 import group.msg.jpowermonitor.agent.export.csv.CsvResultsWriter;
-import group.msg.jpowermonitor.demo.StressCpuExample;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.NumberFormat;
@@ -16,6 +15,7 @@ import static group.msg.jpowermonitor.util.Converter.convertJouleToWattHours;
 @Slf4j
 public class StatisticsWriter {
     private final PowerMeasurementCollector powerMeasurementCollector;
+    private static long benchmarkResult;
 
     public StatisticsWriter(PowerMeasurementCollector powerMeasurementCollector) {
         this.powerMeasurementCollector = powerMeasurementCollector;
@@ -33,11 +33,11 @@ public class StatisticsWriter {
             convertJouleToWattHours(powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getValue()),
             convertJouleToKiloWattHours(powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getValue()),
             powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getCo2Value());
-        String benchmarkResult =
+        String benchmarkResult = hasBenchmarkResult() ?
             "Benchmark result efficiency factor (sum of all loop counters / energyConsumptionTotal): *** "
             + NumberFormat.getNumberInstance(Locale.GERMANY)
-                .format(StressCpuExample.getBenchmarkResult() / powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getValue().longValue())
-            + " *** jPMarks";
+                .format(getBenchmarkResult() / powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getValue().longValue())
+            + " *** jPMarks" : "";
         String filesInfo = "Energy consumption per method written to '" + csvResultsWriter.getEnergyConsumptionPerMethodFileName()
                            + "' and filtered methods written to '" + csvResultsWriter.getEnergyConsumptionPerFilteredMethodFileName() + "'" + "\n" + SEPARATOR;
 
@@ -50,5 +50,17 @@ public class StatisticsWriter {
             System.out.println(benchmarkResult);
             System.out.println(filesInfo);
         }
+    }
+
+    private static long getBenchmarkResult() {
+        return benchmarkResult;
+    }
+
+    public static void setBenchmarkResult(long benchmarkResult) {
+        StatisticsWriter.benchmarkResult = benchmarkResult;
+    }
+
+    private boolean hasBenchmarkResult() {
+        return benchmarkResult > 0;
     }
 }

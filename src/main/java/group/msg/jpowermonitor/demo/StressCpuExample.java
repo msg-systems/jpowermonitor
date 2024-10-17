@@ -1,5 +1,6 @@
 package group.msg.jpowermonitor.demo;
 
+import group.msg.jpowermonitor.agent.export.statistics.StatisticsWriter;
 import group.msg.jpowermonitor.util.CmdLineArgs;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,7 @@ public class StressCpuExample {
         runSequentialEnergyMeasurementAndBenchmarkUsingOneCpuThread();
         runPercentagedEnergyMeasurementAndBenchmarkUsingOneCpuThread();
         runParallelEnergyMeasurementAndBenchmarkUsingMultipleCpuThreads();
+        StatisticsWriter.setBenchmarkResult(getBenchmarkResult());
         System.exit(0); // Important to exit properly since JavaAgent will not exit gracefully without
     }
 
@@ -145,16 +147,9 @@ public class StressCpuExample {
     }
 
     /**
-     * @return true if this is a benchmark run
-     */
-    public static boolean isBenchmarkRun() {
-        return sequentialLoopCounter > 0 || percentagedLoopCounter > 0 || parallelLoopCounter > 0;
-    }
-
-    /**
      * @return sum of all loop counters
      */
-    public static long getBenchmarkResult() {
+    private static long getBenchmarkResult() {
         return sequentialLoopCounter + percentagedLoopCounter + parallelLoopCounter;
     }
 
