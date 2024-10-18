@@ -22,8 +22,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith({JPowerMonitorExtension.class})
 @Slf4j
 public class ReplaceInStringTest {
-    private static final int NUM_RUNS = 300_000;
-    //  private static final int NUM_RUNS = 1;
+    private static final int NUM_RUNS = 100_000;
+    //private static final int NUM_RUNS = 10; // ==> use this in case the big xml is tested...
+
     // A carriage return means moving the cursor to the beginning of the line. The code is \r.
     // A line feed means moving one line forward. The code is \n.
     private static final Pattern PATTERN = Pattern.compile("\\R"); // same as "(\r)*\n"
@@ -99,6 +100,12 @@ public class ReplaceInStringTest {
         log.info("testReplaceUsingIndexOfAndStringReplace: {} ms", System.currentTimeMillis() - start);
     }
 
+    // -------------------------------------------------------------------------------------------------
+    //
+    // Implementation of "business logic" follows:
+    //
+    // -------------------------------------------------------------------------------------------------
+
     /**
      * Replaces "linefeed" or "carriage return+linefeed" with the string "\n" (the characters 'backslash' and 'n').
      *
@@ -107,8 +114,18 @@ public class ReplaceInStringTest {
      */
     private static String replaceUsingRegex(String input) {
         return PATTERN.matcher(input).replaceAll("\\\\n");
+
+        // In Java, backslashes in strings and regex must be escaped as \\.
+        // In regex, a backslash is represented as \\.
+        // If replaceAll() is used to replace \n, this is written as \\\\n in Java, to escape the backslash and interpret the regular expression.
     }
 
+    /**
+     * Replaces "linefeed" or "carriage return+linefeed" with the string "\n" (the characters 'backslash' and 'n').
+     *
+     * @param input the input that contains carriage return/linefeed.
+     * @return String with "\n" instead of carriage return/linefeed.
+     */
     public static String replaceUsingForwardSearchAndChars(String input) {
         char[] chars = input.toCharArray();
         StringBuilder result = new StringBuilder();
