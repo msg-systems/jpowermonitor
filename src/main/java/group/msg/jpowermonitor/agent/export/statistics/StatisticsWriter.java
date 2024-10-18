@@ -33,14 +33,17 @@ public class StatisticsWriter {
             convertJouleToWattHours(powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getValue()),
             convertJouleToKiloWattHours(powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getValue()),
             powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getCo2Value());
-        String benchmarkResult =
-            "Benchmark result efficiency factor (sum of all loop counters / energyConsumptionTotal): *** "
-            + NumberFormat.getNumberInstance(Locale.GERMANY)
-                .format(StressCpuExample.getBenchmarkResult() / powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getValue().longValue())
-            + " *** jPMarks";
+        long energyConsumptionTotalInJoule = powerMeasurementCollector.getEnergyConsumptionTotalInJoule().get().getValue().longValue();
+        String benchmarkResult = "Benchmark result efficiency factor (sum of all loop counters / energyConsumptionTotal): *** ";
+        if (energyConsumptionTotalInJoule != 0) {
+            benchmarkResult += NumberFormat.getNumberInstance(Locale.GERMANY)
+                    .format(StressCpuExample.getBenchmarkResult() / energyConsumptionTotalInJoule)
+                + " *** jPMarks";
+        else {
+            benchmarkResult += " 0 *** jPMarks";
+        }
         String filesInfo = "Energy consumption per method written to '" + csvResultsWriter.getEnergyConsumptionPerMethodFileName()
                            + "' and filtered methods written to '" + csvResultsWriter.getEnergyConsumptionPerFilteredMethodFileName() + "'" + "\n" + SEPARATOR;
-
         if (JPowerMonitorAgent.isSlf4jLoggerImplPresent()) {
             log.info(appStatistics);
             log.info(benchmarkResult);
