@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         maven {
-            url "https://plugins.gradle.org/" // fix missing jcenter dependencies for e.g. cyclonedx plugin
+            url = "https://plugins.gradle.org/" // fix missing jcenter dependencies for e.g. cyclonedx plugin
         }
     }
 }
@@ -73,11 +73,11 @@ apply from: "gradle/dist.gradle"
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 // --------------------- shadowJar
 shadowJar {
-    exclude("*.yaml") // exclude template.yaml
-    exclude("*.json") // exclude grafana dashboards
-    exclude("simplelogger.properties")
-    exclude("group/msg/jpowermonitor/demo")
-    exclude("group/msg/jpowermonitor/demo/*")
+    exclude({"*.yaml"}) // exclude template.yaml
+    exclude({"*.json"}) // exclude grafana dashboards
+    exclude({"simplelogger.properties"})
+    exclude({"group/msg/jpowermonitor/demo"})
+    exclude({"group/msg/jpowermonitor/demo/*"})
     dependencies {
         exclude(dependency('org.slf4j:slf4j-simple'))
     }

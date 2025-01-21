@@ -4,7 +4,7 @@ if (project.hasProperty('signing.gnupg.keyName')) {
     signing {
         useGpgCmd()
         required = !rootProject.version.endsWith('-SNAPSHOT')
-        sign publishing.publications.mavenJava
+        sign (publishing.publications.mavenJava)
     }
 } else {
     logger.info('Disable signing of artifacts as no key is configured')
