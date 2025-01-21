@@ -24,10 +24,10 @@ jar {
             'Can-Set-Native-Method-Prefix': false
         )
     }
-    exclude({"group/msg/jpowermonitor/demo"}) // do not include Demo class into Jar.
-    exclude({"*.yaml"})
-    exclude({"simplelogger.properties"})
-    exclude({"*.json"})
+    exclude("group/msg/jpowermonitor/demo") // do not include Demo class into Ja.
+    exclude("*.yaml")
+    exclude("simplelogger.properties")
+    exclude("*.json")
 }
 
 java {
