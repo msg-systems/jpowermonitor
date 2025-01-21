@@ -60,7 +60,7 @@ dependencies {
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
         [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.16"],
         [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.11.4"],
-        [group: 'org.assertj', name: 'assertj-core', version: "3.27.0"]
+        [group: 'org.assertj', name: 'assertj-core', version: "3.27.3"]
     )
 }
 
