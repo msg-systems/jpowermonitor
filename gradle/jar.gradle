@@ -17,14 +17,14 @@ jar {
             'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
             'Build-Timestamp': new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
             'Build-Revision': gitHash(),
-            'Compatibility': project.sourceCompatibility,
+            'Compatibility': java {sourceCompatibility},
             'Built-By': System.getProperty('user.name'),
             'Premain-Class': getProperty('premain.classname'),
             'Can-Redefine-Classes': false,
             'Can-Set-Native-Method-Prefix': false
         )
     }
-    exclude("group/msg/jpowermonitor/demo") // do not include Demo class into Jar.
+    exclude("group/msg/jpowermonitor/demo") // do not include Demo class into Ja.
     exclude("*.yaml")
     exclude("simplelogger.properties")
     exclude("*.json")

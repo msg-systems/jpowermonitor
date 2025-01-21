@@ -1,12 +1,11 @@
-
 test {
     useJUnitPlatform()
 }
 testlogger {
-    showStandardStreams true
-    showPassedStandardStreams false
-    showSkippedStandardStreams false
-    showFailedStandardStreams true
+    showStandardStreams = true
+    showPassedStandardStreams = false
+    showSkippedStandardStreams = false
+    showFailedStandardStreams = true
 }
 
 jacoco {
@@ -18,5 +17,5 @@ jacocoTestReport {
         csv.required = false
         html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
-    dependsOn test // test must be run before jacocoTestReports.
+    dependsOn(test) // test must be run before jacocoTestReports.
 }
