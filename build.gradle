@@ -15,6 +15,7 @@ plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
     id 'com.github.jk1.dependency-license-report' version "2.9"
     id 'org.cyclonedx.bom' version "2.3.1"
+    id "org.jreleaser" version '1.18.0'
 }
 
 group = 'io.github.msg-systems'
@@ -39,27 +40,28 @@ configurations {
 
 dependencies {
     implementation(
-        [group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.4.1'],
-        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.18.2'],
-        [group: 'org.yaml', name: 'snakeyaml', version: '2.3'],
+        [group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.4.4'],
+        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.19.0'],
+        [group: 'org.yaml', name: 'snakeyaml', version: '2.4'],
         [group: 'io.prometheus', name: 'simpleclient', version: '0.16.0'],
         [group: 'io.prometheus', name: 'simpleclient_common', version: '0.16.0'],
         [group: 'io.prometheus', name: 'simpleclient_hotspot', version: '0.16.0'],
         [group: 'io.prometheus', name: 'simpleclient_httpserver', version: '0.16.0'],
-        [group: 'org.slf4j', name: 'slf4j-api', version: '2.0.16'],
+        [group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'],
     )
-    demo (
-        [group: 'org.slf4j', name: 'slf4j-api', version: '2.0.16'],
-        [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.16"],
+    demo(
+        [group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'],
+        [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.17"],
     )
     compileOnly(
-        [group: 'org.jetbrains', name: 'annotations', version: "26.0.1"],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.11.4"],
+        [group: 'org.jetbrains', name: 'annotations', version: "26.0.2"],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.12.2"],
     )
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
-        [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.16"],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.11.4"],
+        [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.17"],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.12.2"],
         [group: 'org.assertj', name: 'assertj-core', version: "3.27.3"]
     )
 }
@@ -71,6 +73,9 @@ apply from: "gradle/publish.gradle"
 apply from: "gradle/signing.gradle"
 apply from: "gradle/dist.gradle"
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+import com.github.jk1.license.render.InventoryHtmlReportRenderer
+
 // --------------------- shadowJar
 shadowJar {
     exclude("*.yaml") // exclude template.yaml
@@ -100,8 +105,6 @@ tasks.register('shadowJarDemo', ShadowJar) {
 shadowJar.dependsOn(shadowJarDemo)
 
 // --------------------- license-report:
-import com.github.jk1.license.filter.LicenseBundleNormalizer
-import com.github.jk1.license.render.InventoryHtmlReportRenderer
 
 licenseReport {
     renderers = [new InventoryHtmlReportRenderer()]

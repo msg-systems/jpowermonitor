@@ -39,39 +39,6 @@ publishing {
                         distribution = 'repo'
                     }
                 }
-
-                developers {
-                    developer {
-                        id = 'deinerj'
-                        name = 'Jakob Deiner'
-                        email = 'jakob.deiner@msg.group'
-                    }
-                    developer {
-                        id = 'keilhofh'
-                        name = 'Hans-Peter Keilhofer'
-                        email = 'hans-peter.keilhofer@msg.group'
-                    }
-                    developer {
-                        id = 'brandenstein'
-                        name = 'Christian Brandenstein'
-                        email = 'christian.brandenstein@msg.group'
-                    }
-                    developer {
-                        id = 'schmiedgen'
-                        name = 'Lukas Schmiedgen'
-                        email = 'lukas.schmiedgen@msg.group'
-                    }
-                    developer {
-                        id = 'jacksons'
-                        name = 'Sara Jackson'
-                        email = 'sara.jackson@msg.group'
-                    }
-                    developer {
-                        id = 'diehla'
-                        name = 'Andreas Diehl'
-                        email = 'andreas.diehl@msg.group'
-                    }
-                }
             }
         }
     }

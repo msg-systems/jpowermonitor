@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2025-05-12 - release 1.2.2
+- dependency updates:
+    - upgrade com.fasterxml.jackson.datatype:jackson-datatype-jsr310 to 2.19.0
+    - upgrade org.apache.httpcomponents.client5:httpclient5 to 5.4.4
+    - upgrade org.jetbrains:annotations to 26.0.2
+    - upgrade org.junit.jupiter:junit-jupiter to 5.12.2
+    - upgrade org.slf4j:slf4j-api to 2.0.17
+    - upgrade org.slf4j:slf4j-simple to 2.0.17
+    - upgrade org.yaml:snakeyaml to 2.4
+    - upgrade gradle to 8.14
+
 ## 2024-09-26 - release 1.2.1
 - fix StatisticsWriter division by zero problem and remove dependency to demo application with benchmark results.  
 
