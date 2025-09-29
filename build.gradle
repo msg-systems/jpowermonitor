@@ -10,20 +10,20 @@ plugins {
     id 'maven-publish'
     id 'jacoco'
     id 'com.adarshr.test-logger' version "4.0.0"
-    id 'com.github.ben-manes.versions' version "0.52.0"
-    id "io.freefair.lombok" version "8.14"
+    id 'com.github.ben-manes.versions' version "0.53.0"
+    id "io.freefair.lombok" version "9.0.0"
     id "com.github.johnrengelman.shadow" version "8.1.1"
     id 'com.github.jk1.dependency-license-report' version "2.9"
-    id 'org.cyclonedx.bom' version "2.3.1"
-    id "org.jreleaser" version '1.18.0'
+    id 'org.cyclonedx.bom' version "2.4.1"
+    id "org.jreleaser" version '1.20.0'
 }
 
 group = 'io.github.msg-systems'
 version = rootProject.file('version.txt').text.trim()
 description = 'JUnit Extension and Java Agent for energy consumption measurement. See also https://github.com/msg-systems/jpowermonitor'
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
@@ -40,9 +40,9 @@ configurations {
 
 dependencies {
     implementation(
-        [group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.4.4'],
-        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.19.0'],
-        [group: 'org.yaml', name: 'snakeyaml', version: '2.4'],
+        [group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.5.1'],
+        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.20.0'],
+        [group: 'org.yaml', name: 'snakeyaml', version: '2.5'],
         [group: 'io.prometheus', name: 'simpleclient', version: '0.16.0'],
         [group: 'io.prometheus', name: 'simpleclient_common', version: '0.16.0'],
         [group: 'io.prometheus', name: 'simpleclient_hotspot', version: '0.16.0'],
@@ -54,15 +54,15 @@ dependencies {
         [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.17"],
     )
     compileOnly(
-        [group: 'org.jetbrains', name: 'annotations', version: "26.0.2"],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.12.2"],
+        [group: 'org.jetbrains', name: 'annotations', version: "26.0.2-1"],
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.13.4"],
     )
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
         [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.17"],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.12.2"],
-        [group: 'org.assertj', name: 'assertj-core', version: "3.27.3"]
+        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.13.4"],
+        [group: 'org.assertj', name: 'assertj-core', version: "3.27.6"]
     )
 }
 
