@@ -34,8 +34,9 @@ class EstimationReaderTest {
     void testEstimateWattageBasedOnCpuUsage() throws ExecutionException, InterruptedException, TimeoutException {
         JPowerMonitorCfgProvider configProvider = new DefaultCfgProvider();
         configProvider.readConfig("EstimationReaderTest.yaml");
-        
-        try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+
+        ExecutorService executor = Executors.newSingleThreadExecutor(); // cannot use try with resources, since we use JDK17 for compilation, JDK >= 19 needed.
+        try {
             Callable<String> measureThread = createMeasureThread(configProvider);
             Future<String> result = executor.submit(measureThread);
             BigDecimal sum = IntStream.range(0, 100000)
@@ -45,6 +46,8 @@ class EstimationReaderTest {
             threadIsStopped = true;
             String resultString = result.get(30, TimeUnit.SECONDS);
             Assertions.assertEquals("OK", resultString);
+        } finally {
+            executor.shutdown();
         }
     }
 
