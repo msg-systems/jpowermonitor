@@ -177,5 +177,5 @@ This markdown can be converted to html with
 `pandoc --self-contained -t slidy -c docs/slidy.css -o Readme.html README.md` to html and from there to pdf via print function of the browser.
 
 # Copyright & License
-Copyright &copy; 2022-2024 msg for banking ag <br/>
+Copyright &copy; 2022-2025 msg for banking ag <br/>
 Licensed under [Apache License 2.0](./LICENSE.txt)
