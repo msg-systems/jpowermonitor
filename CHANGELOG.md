@@ -10,12 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - upgrade com.fasterxml.jackson.datatype.jackson-datatype-jsr310 to 2.20.0
     - upgrade org.apache.httpcomponents.client5:httpclient5 to 5.5.1
     - upgrade org.jetbrains:annotations to 26.0.2-1
-    - upgrade org.junit.jupiter:junit-jupiter to 5.13.4
+    - upgrade org.junit.jupiter:junit-jupiter to 6.0.0 (JUnit 6 migration)
     - upgrade org.assertj:assertj-core to 3.27.6
     - upgrade org.yaml:snakeyaml to 2.5
     - upgrade gradle to 9.1.0
     - upgrade com.gradleup.shadow plugin to 9.2.2 (for Gradle 9.x compatibility)
     - Require JDK 17 now, as many libraries do require JDK 17 or higher
+    - Migrated to JUnit 6.0.0 (released September 30, 2025)
+    - Note: Projects using jPowerMonitor can continue to use JUnit 5.x due to backward compatibility of the JUnit Jupiter Extension API
 
 ## 2025-05-12 - release 1.2.2
 - dependency updates:
