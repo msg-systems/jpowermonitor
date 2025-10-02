@@ -40,8 +40,8 @@ configurations {
 
 dependencies {
     implementation(
-        ['org.apachehttpcomponents.client5:httpclient5:5.5.1'],
-        ['com.fasterxmljackson.datatype:jackson-datatype-jsr310:2.20.0'],
+        ['org.apache.httpcomponents.client5:httpclient5:5.5.1'],
+        ['com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.0'],
         ['org.yaml:snakeyaml:2.5'],
         ['io.prometheus:simpleclient:0.16.0'],
         ['io.prometheus:simpleclient_common:0.16.0'],
