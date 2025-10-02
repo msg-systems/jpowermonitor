@@ -40,29 +40,29 @@ configurations {
 
 dependencies {
     implementation(
-        [group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.5.1'],
-        [group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.20.0'],
-        [group: 'org.yaml', name: 'snakeyaml', version: '2.5'],
-        [group: 'io.prometheus', name: 'simpleclient', version: '0.16.0'],
-        [group: 'io.prometheus', name: 'simpleclient_common', version: '0.16.0'],
-        [group: 'io.prometheus', name: 'simpleclient_hotspot', version: '0.16.0'],
-        [group: 'io.prometheus', name: 'simpleclient_httpserver', version: '0.16.0'],
-        [group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'],
+        ['org.apachehttpcomponents.client5:httpclient5:5.5.1'],
+        ['com.fasterxmljackson.datatype:jackson-datatype-jsr310:2.20.0'],
+        ['org.yaml:snakeyaml:2.5'],
+        ['io.prometheus:simpleclient:0.16.0'],
+        ['io.prometheus:simpleclient_common:0.16.0'],
+        ['io.prometheus:simpleclient_hotspot:0.16.0'],
+        ['io.prometheus:simpleclient_httpserver:0.16.0'],
+        ['org.slf4j:slf4j-api:2.0.17']
     )
     demo(
-        [group: 'org.slf4j', name: 'slf4j-api', version: '2.0.17'],
-        [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.17"],
+        'org.slf4j:slf4j-api:2.0.17',
+        'org.slf4j:slf4j-simple:2.0.17'
     )
     compileOnly(
-        [group: 'org.jetbrains', name: 'annotations', version: "26.0.2-1"],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.13.4"],
+        'org.jetbrains:annotations:26.0.2-1',
+        'org.junit.jupiter:junit-jupiter:5.13.4'
     )
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
-        [group: 'org.slf4j', name: 'slf4j-simple', version: "2.0.17"],
-        [group: 'org.junit.jupiter', name: 'junit-jupiter', version: "5.13.4"],
-        [group: 'org.assertj', name: 'assertj-core', version: "3.27.6"]
+        'org.slf4j:slf4j-simple:2.0.17',
+        'org.junit.jupiter:junit-jupiter:5.13.4',
+        'org.assertj:assertj-core:3.27.6'
     )
 }
 
