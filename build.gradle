@@ -11,11 +11,11 @@ plugins {
     id 'jacoco'
     id 'com.adarshr.test-logger' version "4.0.0"
     id 'com.github.ben-manes.versions' version "0.53.0"
-    id "io.freefair.lombok" version "9.0.0"
-    id "com.gradleup.shadow" version "9.2.2"
-    id 'com.github.jk1.dependency-license-report' version "2.9"
-    id 'org.cyclonedx.bom' version "2.4.1"
-    id "org.jreleaser" version '1.20.0'
+    id "io.freefair.lombok" version "9.1.0"
+    id "com.gradleup.shadow" version "9.3.0"
+    id 'com.github.jk1.dependency-license-report' version "3.0.1"
+    id 'org.cyclonedx.bom' version "3.1.0"
+    id "org.jreleaser" version '1.21.0'
 }
 
 group = 'io.github.msg-systems'
@@ -40,8 +40,8 @@ configurations {
 
 dependencies {
     implementation(
-        'org.apache.httpcomponents.client5:httpclient5:5.5.1',
-        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.0',
+        'org.apache.httpcomponents.client5:httpclient5:5.6',
+        'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.1',
         'org.yaml:snakeyaml:2.5',
         'io.prometheus:simpleclient:0.16.0',
         'io.prometheus:simpleclient_common:0.16.0',
@@ -55,13 +55,13 @@ dependencies {
     )
     compileOnly(
         'org.jetbrains:annotations:26.0.2-1',
-        'org.junit.jupiter:junit-jupiter:5.13.4'
+        'org.junit.jupiter:junit-jupiter:6.0.1'
     )
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
         'org.slf4j:slf4j-simple:2.0.17',
-        'org.junit.jupiter:junit-jupiter:5.13.4',
+        'org.junit.jupiter:junit-jupiter:6.0.1',
         'org.assertj:assertj-core:3.27.6'
     )
 }
@@ -112,7 +112,7 @@ licenseReport {
 }
 
 // --------------------- SBOM:
-cyclonedxBom {
+tasks.cyclonedxDirectBom {
     // includeConfigs is the list of configuration names to include when generating the BOM
     // (leave empty to include every configuration)
     includeConfigs = []
