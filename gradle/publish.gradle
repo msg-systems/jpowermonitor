@@ -24,6 +24,18 @@ publishing {
                         distribution = 'repo'
                     }
                 }
+                developers {
+                    developer {
+                        id = 'dev1'
+                        name = 'Jakob Deiner'
+                        email = 'jakob.deiner@msg.group'
+                    }
+                    developer {
+                        id = 'dev2'
+                        name = 'Hans-Peter Keilhofer'
+                        email = 'hans-peter.keilhofer@msg.group'
+                    }
+                }
             }
         }
     }
