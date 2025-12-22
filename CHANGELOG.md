@@ -9,10 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - no changes yet
 
 ## 2025-12-22 - release [2.0.0]
+- Require JDK 17 now, as many libraries do require JDK 17 or higher
+- Migrated to JUnit 6.0.1
+  - _Note: Projects using jPowerMonitor can continue to use JUnit 5.x because the JUnit Jupiter Extension API is backward compatible._
 - dependency updates:
-    - Require JDK 17 now, as many libraries do require JDK 17 or higher
-    - Migrated to JUnit 6.0.1
-        - _Note: Projects using jPowerMonitor can continue to use JUnit 5.x because the JUnit Jupiter Extension API is backward compatible._
     - upgrade org.apache.httpcomponents.client5:httpclient5 to 5.5.6
     - upgrade com.fasterxml.jackson.datatype.jackson-datatype-jsr310 to 2.20.1
     - upgrade org.yaml:snakeyaml to 2.5
