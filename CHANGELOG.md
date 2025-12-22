@@ -5,35 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [not yet released]
+## [unreleased]
+- no changes yet
+
+## 2025-12-22 - release [2.0.0]
 - dependency updates:
-    - upgrade com.fasterxml.jackson.datatype.jackson-datatype-jsr310 to 2.20.0
-    - upgrade org.apache.httpcomponents.client5:httpclient5 to 5.5.1
+    - Require JDK 17 now, as many libraries do require JDK 17 or higher
+    - Migrated to JUnit 6.0.1
+        - _Note: Projects using jPowerMonitor can continue to use JUnit 5.x because the JUnit Jupiter Extension API is backward compatible._
+    - upgrade org.apache.httpcomponents.client5:httpclient5 to 5.5.6
+    - upgrade com.fasterxml.jackson.datatype.jackson-datatype-jsr310 to 2.20.1
+    - upgrade org.yaml:snakeyaml to 2.5
+    - upgrade org.assertj:assertj-core to 3.27.6
     - upgrade org.jetbrains:annotations to 26.0.2-1
     - upgrade org.junit.jupiter:junit-jupiter to 6.0.0 (JUnit 6 migration)
-    - upgrade org.assertj:assertj-core to 3.27.6
-    - upgrade org.yaml:snakeyaml to 2.5
-    - upgrade gradle to 9.1.0
+    - upgrade gradle to 9.2.1
     - upgrade com.gradleup.shadow plugin to 9.2.2 (for Gradle 9.x compatibility)
-    - Require JDK 17 now, as many libraries do require JDK 17 or higher
-    - Migrated to JUnit 6.0.0 (released September 30, 2025)
-    - Note: Projects using jPowerMonitor can continue to use JUnit 5.x due to backward compatibility of the JUnit Jupiter Extension API
-
-## 2025-05-12 - release 1.2.2
-- dependency updates:
-    - upgrade com.fasterxml.jackson.datatype:jackson-datatype-jsr310 to 2.19.0
-    - upgrade org.apache.httpcomponents.client5:httpclient5 to 5.4.4
-    - upgrade org.jetbrains:annotations to 26.0.2
-    - upgrade org.junit.jupiter:junit-jupiter to 5.12.2
     - upgrade org.slf4j:slf4j-api to 2.0.17
     - upgrade org.slf4j:slf4j-simple to 2.0.17
-    - upgrade org.yaml:snakeyaml to 2.4
-    - upgrade gradle to 8.14
 
-## 2024-09-26 - release 1.2.1
+## 2024-10-18 - release [1.2.1]
+- __This is the final version to include support for JDK 8.__
 - fix StatisticsWriter division by zero problem and remove dependency to demo application with benchmark results.  
 
-## 2024-09-26 - release 1.2.0
+## 2024-09-26 - release [1.2.0]
 - add prometheus interface and configuration
 - add cloud toolkit estimation method
 - fix calculation of energy for intervals different to 1sec (1 Ws = 1 J)
@@ -51,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - upgrade org.slf4j:slf4j-api to 2.0.16 
   - upgrade gradle to 8.10.1
 
-## 2024-01-17 - release 1.1.2
+## 2024-01-17 - release [1.1.2]
 - upgrade httpclient to 5.3
 - upgrade logback to 1.4.14
 - upgrade ch.qos.logback:logback-classic to 1.4.14
@@ -62,19 +57,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - upgrade org.slf4j:slf4j-api to 2.0.11
 - upgrade gradle to 8.5
 
-## 2023-11-16 - release 1.1.1
+## 2023-11-16 - release [1.1.1]
 - fix mvn central name and description
 - update the carbon dioxide factor in the default configuration to the latest published value for Germany (2022)
 
-## 2023-10-19 - release 1.1.0
+## 2023-10-19 - release [1.1.0]
 - Make JUnit Extension write Joule instead of Wh in the energy column of the results csv.
 - Add CO2 emission output also to JUnit extension results csv.
 
-## 2023-10-19 - release 1.0.2
+## 2023-10-19 - release [1.0.2]
 - replace discontinued Open Hardware Monitor by fork Libre Hardware Monitor
 - add spanish resource bundle for csv export
 
-## 2023-10-18 - release 1.0.1
+## 2023-10-18 - release [1.0.1]
 - some minor fixes:
     - adding constants
     - no infinite loop on misconfigured csv delimiter,
@@ -88,4 +83,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 2022-05-31
 - first alpha version
+
+[unreleased]: https://github.com/msg-systems/jpowermonitor/compare/release-2-0-0...main
+[2.0.0]: https://github.com/msg-systems/jpowermonitor/compare/release-1-2-1...release-2-0-0
+[1.2.1]: https://github.com/msg-systems/jpowermonitor/compare/release-1-2-0...release-1-2-1
+[1.2.0]: https://github.com/msg-systems/jpowermonitor/compare/release-1-1-2...release-1-2-0
+[1.1.2]: https://github.com/msg-systems/jpowermonitor/compare/release-1-1-1...release-1-1-2
+[1.1.1]: https://github.com/msg-systems/jpowermonitor/compare/release-1-1-0...release-1-1-1
+[1.1.0]: https://github.com/msg-systems/jpowermonitor/compare/release-1-0-2...release-1-1-0
+[1.0.2]: https://github.com/msg-systems/jpowermonitor/compare/release-1-0-1...release-1-0-2
+[1.0.1]: https://github.com/msg-systems/jpowermonitor/compare/release-1-0-0...release-1-0-1
 
