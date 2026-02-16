@@ -56,13 +56,13 @@ dependencies {
     )
     compileOnly(
         'org.jetbrains:annotations:26.0.2-1',
-        'org.junit.jupiter:junit-jupiter:6.0.2'
+        'org.junit.jupiter:junit-jupiter:6.0.3'
     )
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(
         // use logger only in test implementation in order to have a minimal set of dependencies in main source
         'org.slf4j:slf4j-simple:2.0.17',
-        'org.junit.jupiter:junit-jupiter:6.0.2',
+        'org.junit.jupiter:junit-jupiter:6.0.3',
         'org.assertj:assertj-core:3.27.7'
     )
 }
