@@ -43,7 +43,7 @@ dependencies {
     implementation(
         'org.apache.httpcomponents.client5:httpclient5:5.6',
         'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.1',
-        'org.yaml:snakeyaml:2.5',
+        'org.yaml:snakeyaml:2.6',
         'io.prometheus:simpleclient:0.16.0',
         'io.prometheus:simpleclient_common:0.16.0',
         'io.prometheus:simpleclient_hotspot:0.16.0',
